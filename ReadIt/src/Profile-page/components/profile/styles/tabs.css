@@ -1,0 +1,29 @@
+/* Profile tabs (Overview, Posts, Comments, etc.) */
+.profile-tabs {
+  display: flex;
+  background: white;
+  border: 1px solid #edc;
+  border-top: none;
+  margin-top: -1px;
+}
+
+.profile-tab {
+  padding: 12px 20px;
+  font-weight: 500;
+  color: #787c7e;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+}
+
+.profile-tab.active {
+  color: #1c1c1c;
+  border-bottom-color: #0079d3;
+}
+
+.tab-underline {
+  height: 3px;
+  background: #0079d3;
+  width: 60px;
+  margin-top: -3px;
+  transition: all 0.2s;
+}
