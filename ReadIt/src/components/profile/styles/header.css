@@ -1,0 +1,65 @@
+/* NEW REDDIT PROFILE HEADER - 100% MATCH */
+.profile-header {
+  background: white;
+  padding: 80px 24px 24px 170px;   /* Space for avatar */
+  border: 1px solid #edc;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+  z-index: 5;
+}
+
+.profile-header h1 {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  color: #1c1c1c;
+}
+
+.profile-header h1::before {
+  content: 'u/';
+  color: #787c7e;
+  font-weight: 400;
+}
+
+.karma-line {
+  font-size: 14px;
+  color: #787c7e;
+  margin: 0;
+}
+
+.profile-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.btn-share,
+.btn-edit {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btn-share {
+  background: #f6f7f8;
+  border: 1px solid #ccc;
+  color: #1c1c1c;
+}
+
+.btn-edit {
+  background: #0079d3;
+  color: white;
+  border: none;
+}
+
+/* Make sure the main content starts right below */
+.profile-content,
+.profile-tabs {
+  margin-top: 0 !important;
+}
