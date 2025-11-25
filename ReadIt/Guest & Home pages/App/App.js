@@ -1,7 +1,7 @@
 import React, { useState, useLayoutEffect } from "react";
-import Navbar from "../Guest & Home pages/components/Navbar/Navbar";
-import GuestHomePage from "../Guest & Home pages/pages/GuestHomePage/GuestHomePage";
-import HomePage from "../Guest & Home pages/pages/HomePage/HomePage";
+import Navbar from "../components/Navbar/Navbar";
+import GuestHomePage from "../pages/GuestHomePage/GuestHomePage";
+import HomePage from "../pages/HomePage/HomePage";
 import "./App.css";
 
 function App() {
