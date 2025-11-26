@@ -1,0 +1,45 @@
+/* src/components/profile/CreatePostButton.css — SMALLER & EXACT REDDIT 2025 STYLE */
+
+.create-post-wrapper {
+  margin: 16px 0;
+  padding: 0 16px;
+}
+
+.create-post-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;     /* ← centers the + and text */
+  gap: 8px;                    /* ← smaller gap */
+  width: 100%;
+  padding: 8px 16px;           /* ← MUCH shorter height */
+  background: white;
+  border: 1px solid #edc;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #1c1c1c;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+/* Smaller + icon */
+.create-post-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.create-post-btn:hover {
+  background: #f6f7f8;
+  border-color: #ccc;
+}
+
+/* DARK MODE — PERFECT */
+.dark-mode .create-post-btn {
+  background: #272729 !important;
+  border-color: #343536 !important;
+  color: #d7dadc !important;
+}
+
+.dark-mode .create-post-btn:hover {
+  background: #343536 !important;
+}
