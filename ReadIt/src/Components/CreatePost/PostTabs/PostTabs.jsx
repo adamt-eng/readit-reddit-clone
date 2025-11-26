@@ -2,28 +2,24 @@ import React from "react";
 import "./PostTabs.css";
 
 export default function PostTabs({ activeTab, setActiveTab }) {
+  const tabs = [
+    { key: "post", label: "Text" },
+    { key: "image", label: "Images & Video" },
+    { key: "link", label: "Link" },
+    // { key: "poll", label: "Poll" },
+  ];
   return (
     <div className="tabs">
-      <button
-        className={activeTab === "post" ? "tab active" : "tab"}
-        onClick={() => setActiveTab("post")}
-      >
-        Post
-      </button>
-
-      <button
-        className={activeTab === "image" ? "tab active" : "tab"}
-        onClick={() => setActiveTab("image")}
-      >
-        Image
-      </button>
-
-      <button
-        className={activeTab === "link" ? "tab active" : "tab"}
-        onClick={() => setActiveTab("link")}
-      >
-        Link
-      </button>
+      {tabs.map((tab) => (
+        <button
+          type="button"
+          className={`tab ${activeTab === tab.key ? "active" : ""}`}
+          key={tab.key}
+          onClick={() => setActiveTab(tab.key)}
+        >
+          {tab.label}
+        </button>
+      ))}
     </div>
   );
 }
