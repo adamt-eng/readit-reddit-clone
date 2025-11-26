@@ -10,7 +10,20 @@ export default function CreatePost() {
 
   return (
     <div className="create-post-container">
-      <h2 className="title">Create a Post</h2>
+      <div className="create-post-header">
+        <div className="create-post-title">Create post</div>
+        <div className="drafts-link">Drafts</div>
+      </div>
+
+      <div className="create-post-controls">
+        <button className="community-selector">
+          <span className="community-avatar" />
+          <span>Select a community</span>
+          <svg width="18" height="18" viewBox="0 0 18 18" className="dropdown-icon">
+            <path d="M5 7l4 4 4-4" stroke="#878A8C" strokeWidth="2" fill="none"/>
+          </svg>
+        </button>
+      </div>
 
       <PostTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
