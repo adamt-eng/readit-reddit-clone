@@ -38,3 +38,16 @@ button {
 button:focus {
   outline: none;
 }
+
+/* GLOBAL DARK MODE — FINAL FIX */
+.dark-mode body,
+.dark-mode #root,
+.dark-mode html {
+  background: #030303 !important;
+}
+
+/* Kill any remaining white */
+.dark-mode * {
+  background-color: transparent !important;
+  border-color: #343536 !important;
+}
