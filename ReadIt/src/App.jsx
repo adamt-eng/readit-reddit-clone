@@ -1,8 +1,8 @@
-import CreatePost from "./Components/CreatePost/CreatePost/CreatePost";
+import Post from "./Components/Post/Post"
 
 
 function App() {
-  return <CreatePost />;
+  return <Post />;
 }
 
 export default App;
