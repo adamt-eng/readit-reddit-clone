@@ -97,3 +97,54 @@
 .dark-mode .nav-item:hover .nav-icon {
   color: #d7dadc;
 }
+/* components/LeftSidebar/LeftSidebar.css - Add these styles */
+
+.start-community-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  color: #878a8c;
+  transition: background-color 0.2s;
+  border-radius: 4px;
+  margin: 4px 0;
+}
+
+.start-community-btn:hover {
+  background: #f6f7f8;
+  color: #1c1c1c;
+}
+
+.start-community-btn .nav-icon {
+  color: #878a8c;
+  transition: color 0.2s;
+}
+
+.start-community-btn:hover .nav-icon {
+  color: #1c1c1c;
+}
+
+/* Ensure the nav-section has proper spacing */
+.nav-section {
+  margin-bottom: 8px;
+}
+
+/* Dark mode */
+.dark-mode .start-community-btn {
+  color: #d7dadc;
+}
+
+.dark-mode .start-community-btn:hover {
+  background: #272729;
+  color: #d7dadc;
+}
+
+.dark-mode .start-community-btn:hover .nav-icon {
+  color: #d7dadc;
+}

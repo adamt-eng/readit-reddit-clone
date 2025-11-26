@@ -1,3 +1,4 @@
+/* components/Navbar/Navbar.css */
 .navbar {
   display: flex;
   align-items: center;
@@ -120,11 +121,42 @@
   cursor: pointer;
   position: relative;
   transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .nav-icon-btn:hover {
   background: #f6f7f8;
   color: #1c1c1c;
+}
+
+/* Create Post Button - No Background */
+.create-post-btn {
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: none;
+  border: 1px solid #ff4500;
+  color: #ff4500;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.create-post-btn:hover {
+  background: none;
+  border-color: #e03c00;
+  color: #e03c00;
+}
+
+.create-text {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.nav-icon {
+  width: 16px;
+  height: 16px;
 }
 
 .notification-badge {
@@ -229,7 +261,7 @@
 
 /* Dark mode styles */
 .dark-mode .navbar {
-  background: black;
+  background: #1a1a1b;
   border-bottom-color: #343536;
 }
 
@@ -250,6 +282,18 @@
 
 .dark-mode .nav-icon-btn:hover {
   background: #272729;
+}
+
+.dark-mode .create-post-btn {
+  background: none;
+  border-color: #ff4500;
+  color: #ff4500;
+}
+
+.dark-mode .create-post-btn:hover {
+  background: none;
+  border-color: #ff8c66;
+  color: #ff8c66;
 }
 
 .dark-mode .profile-btn:hover {
@@ -274,6 +318,10 @@
   background: #343536;
 }
 
+.dark-mode .profile-name {
+  color: #d7dadc;
+}
+
 .dark-mode .login-btn,
 .dark-mode .signup-btn {
   border-color: #ff4500;
@@ -291,4 +339,23 @@
 
 .dark-mode .signup-btn:hover {
   background: #e03c00;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .create-text {
+    display: none;
+  }
+  
+  .create-post-btn {
+    padding: 8px;
+  }
+  
+  .profile-name {
+    display: none;
+  }
+  
+  .nav-right.logged-in {
+    gap: 4px;
+  }
 }

@@ -1,6 +1,6 @@
-// components/Navbar.jsx
+// components/Navbar/Navbar.jsx
 import React, { useState } from "react";
-import { FaSearch, FaPlus, FaBell, FaUser, FaCog, FaSignOutAlt, FaMoon, FaSun } from "react-icons/fa";
+import { FaSearch, FaPlus, FaBell, FaUser, FaCog, FaSignOutAlt, FaMoon, FaSun, FaComment } from "react-icons/fa";
 import "./Navbar.css";
 
 export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleDarkMode }) {
@@ -10,6 +10,24 @@ export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleD
 
   const toggleProfileMenu = () => {
     setShowProfileMenu(prev => !prev);
+  };
+
+  const handleCreatePost = () => {
+    if (isLoggedIn) {
+      console.log("Opening create post modal");
+      // You can implement create post functionality here
+    } else {
+      promptLogin();
+    }
+  };
+
+  const handleOpenMessages = () => {
+    if (isLoggedIn) {
+      console.log("Opening direct messages");
+      // You can implement DM functionality here
+    } else {
+      promptLogin();
+    }
   };
 
   if (isLoggedIn) {
@@ -38,13 +56,32 @@ export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleD
         </div>
 
         <div className="nav-right logged-in">
-          <button className="nav-icon-btn" title="Create">
-            <FaPlus />
+          {/* Create Post Button with Text - No Background */}
+          <button 
+            className="nav-icon-btn create-post-btn"
+            onClick={handleCreatePost}
+            title="Create Post"
+          >
+            <FaPlus className="nav-icon" />
+            <span className="create-text">Create</span>
           </button>
+
+          {/* Chat/Direct Messages Button */}
+          <button 
+            className="nav-icon-btn"
+            onClick={handleOpenMessages}
+            title="Direct Messages"
+          >
+            <FaComment className="nav-icon" />
+          </button>
+
+          {/* Notifications Button */}
           <button className="nav-icon-btn" title="Notifications">
             <FaBell />
             <span className="notification-badge">3</span>
           </button>
+
+          {/* Profile Menu */}
           <div className="profile-menu-container">
             <button className="profile-btn" onClick={toggleProfileMenu}>
               <img 
@@ -85,7 +122,7 @@ export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleD
     );
   }
 
-  // Guest navbar (existing code)
+  // Guest navbar
   return (
     <div className="navbar">
       <div className="nav-left">

@@ -1,22 +1,26 @@
 // pages/HomePage/HomePage.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   FaPlus, FaBell, FaUser, FaCog, FaSignOutAlt, 
-  FaHome, FaFire, FaStar, FaRegBookmark, FaShare, FaEllipsisH 
+  FaHome, FaFire, FaStar, FaRegBookmark, FaShare, FaEllipsisH,
+  FaArrowUp, FaRegCommentAlt 
 } from "react-icons/fa";
 import { HiUserGroup } from "react-icons/hi";
-import { FaRegCommentAlt } from "react-icons/fa";
 import "./HomePage.css";
 import { FaExpand, FaCompress } from "react-icons/fa";
 import Comment from "../../components/Comment/Comment";
+import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 
 const HomePage = ({ user, onLogout, darkMode }) => {
   const [viewMode, setViewMode] = useState('card');
   const [sortBy, setSortBy] = useState('Best');
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [expandedPostId, setExpandedPostId] = useState(null); // Track which post has comments expanded
-  const [commentInputs, setCommentInputs] = useState({}); // Track comment input for each post
+  const [expandedPostId, setExpandedPostId] = useState(null);
+  const [commentInputs, setCommentInputs] = useState({});
+  // Add state for recent posts
+  const [recentPosts, setRecentPosts] = useState([]);
+
   const [posts, setPosts] = useState([
     { 
       id: 1,
@@ -115,100 +119,176 @@ const HomePage = ({ user, onLogout, darkMode }) => {
 
   const sortOptions = ["Best", "Hot", "New", "Top", "Rising"];
 
-  // In HomePage.jsx - Add these functions
+  // Load recent posts from localStorage on component mount
+  useEffect(() => {
+    const savedRecentPosts = localStorage.getItem('recentPosts');
+    if (savedRecentPosts) {
+      setRecentPosts(JSON.parse(savedRecentPosts));
+    }
+  }, []);
 
-// Handle comment voting
-const handleCommentVote = (commentId, voteType) => {
-  setPosts(prevPosts =>
-    prevPosts.map(post => ({
-      ...post,
-      commentsList: updateCommentVote(post.commentsList, commentId, voteType)
-    }))
-  );
-};
+  // Save recent posts to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('recentPosts', JSON.stringify(recentPosts));
+  }, [recentPosts]);
 
-// Helper function to update comment votes (recursive for nested comments)
-const updateCommentVote = (comments, commentId, voteType) => {
-  return comments.map(comment => {
-    if (comment.id === commentId) {
-      let newUpvotes = comment.upvotes;
-      let newUserVote = voteType;
-      
-      // If clicking the same vote again, remove the vote
-      if (comment.userVote === voteType) {
-        newUserVote = 0;
-        newUpvotes -= voteType;
-      } 
-      // If changing vote
-      else if (comment.userVote !== 0) {
-        newUpvotes = newUpvotes - comment.userVote + voteType;
+  // Function to add a post to recent posts
+  const addToRecentPosts = (post) => {
+    const recentPost = {
+      id: post.id,
+      title: post.title,
+      image: post.image,
+      upvotes: post.upvotes,
+      comments: post.comments,
+      community: post.community,
+      user: post.user,
+      userAvatar: "/profile.png", // Default avatar
+      timestamp: Date.now(),
+      time: post.time // Keep the original time string
+    };
+
+    setRecentPosts(prev => {
+      // Remove if already exists (to avoid duplicates)
+      const filtered = prev.filter(p => p.id !== post.id);
+      // Add to beginning and limit to 5 posts
+      return [recentPost, ...filtered].slice(0, 5);
+    });
+  };
+
+  // Function to format relative time
+  const formatRelativeTime = (timeString) => {
+    if (!timeString) return '';
+    
+    let formattedTime = timeString.toLowerCase();
+    
+    // Replace common time patterns with abbreviated versions
+    formattedTime = formattedTime
+      .replace(/(\d+)\s+minutes?\s+ago/, '$1m')
+      .replace(/(\d+)\s+min\s+ago/, '$1m')
+      .replace(/(\d+)\s+hours?\s+ago/, '$1h')
+      .replace(/(\d+)\s+days?\s+ago/, '$1d')
+      .replace(/(\d+)\s+weeks?\s+ago/, '$1w')
+      .replace(/(\d+)\s+months?\s+ago/, '$1mo')
+      .replace(/(\d+)\s+years?\s+ago/, '$1y')
+      .replace(/\s+ago/, '');
+
+    return formattedTime;
+  };
+
+  // Function to clear all recent posts
+  const clearRecentPosts = () => {
+    setRecentPosts([]);
+  };
+
+  // Function to get thumbnail for recent posts
+  const getRecentPostThumbnail = (post) => {
+    if (post.image) {
+      return post.image;
+    }
+    return darkMode ? "/compact-image-dark.png" : "/compact-image.png";
+  };
+
+  // Handle post click - add to recent posts
+  const handlePostClick = (postId) => {
+    const post = posts.find(p => p.id === postId);
+    if (post) {
+      addToRecentPosts(post);
+    }
+    console.log(`Opening post details for post ${postId}`);
+  };
+
+  // Handle comment voting
+  const handleCommentVote = (commentId, voteType) => {
+    setPosts(prevPosts =>
+      prevPosts.map(post => ({
+        ...post,
+        commentsList: updateCommentVote(post.commentsList, commentId, voteType)
+      }))
+    );
+  };
+
+  // Helper function to update comment votes (recursive for nested comments)
+  const updateCommentVote = (comments, commentId, voteType) => {
+    return comments.map(comment => {
+      if (comment.id === commentId) {
+        let newUpvotes = comment.upvotes;
+        let newUserVote = voteType;
+        
+        // If clicking the same vote again, remove the vote
+        if (comment.userVote === voteType) {
+          newUserVote = 0;
+          newUpvotes -= voteType;
+        } 
+        // If changing vote
+        else if (comment.userVote !== 0) {
+          newUpvotes = newUpvotes - comment.userVote + voteType;
+        }
+        // If new vote
+        else {
+          newUpvotes += voteType;
+        }
+        
+        return {
+          ...comment,
+          upvotes: newUpvotes,
+          userVote: newUserVote
+        };
       }
-      // If new vote
-      else {
-        newUpvotes += voteType;
+      
+      // Recursively update replies
+      if (comment.replies && comment.replies.length > 0) {
+        return {
+          ...comment,
+          replies: updateCommentVote(comment.replies, commentId, voteType)
+        };
       }
       
-      return {
-        ...comment,
-        upvotes: newUpvotes,
-        userVote: newUserVote
-      };
-    }
-    
-    // Recursively update replies
-    if (comment.replies && comment.replies.length > 0) {
-      return {
-        ...comment,
-        replies: updateCommentVote(comment.replies, commentId, voteType)
-      };
-    }
-    
-    return comment;
-  });
-};
+      return comment;
+    });
+  };
 
-// Handle comment replies
-const handleCommentReply = (commentId, replyText) => {
-  setPosts(prevPosts =>
-    prevPosts.map(post => ({
-      ...post,
-      commentsList: addCommentReply(post.commentsList, commentId, replyText)
-    }))
-  );
-};
+  // Handle comment replies
+  const handleCommentReply = (commentId, replyText) => {
+    setPosts(prevPosts =>
+      prevPosts.map(post => ({
+        ...post,
+        commentsList: addCommentReply(post.commentsList, commentId, replyText)
+      }))
+    );
+  };
 
-// Helper function to add reply to comment (recursive for nested comments)
-const addCommentReply = (comments, commentId, replyText) => {
-  return comments.map(comment => {
-    if (comment.id === commentId) {
-      const newReply = {
-        id: Date.now(),
-        author: user?.username || "Anonymous",
-        avatar: user?.avatar || "/profile.png",
-        content: replyText,
-        upvotes: 1,
-        userVote: 0,
-        time: "Just now",
-        replies: []
-      };
+  // Helper function to add reply to comment (recursive for nested comments)
+  const addCommentReply = (comments, commentId, replyText) => {
+    return comments.map(comment => {
+      if (comment.id === commentId) {
+        const newReply = {
+          id: Date.now(),
+          author: user?.username || "Anonymous",
+          avatar: user?.avatar || "/profile.png",
+          content: replyText,
+          upvotes: 1,
+          userVote: 0,
+          time: "Just now",
+          replies: []
+        };
+        
+        return {
+          ...comment,
+          replies: [...(comment.replies || []), newReply]
+        };
+      }
       
-      return {
-        ...comment,
-        replies: [...(comment.replies || []), newReply]
-      };
-    }
-    
-    // Recursively search in replies
-    if (comment.replies && comment.replies.length > 0) {
-      return {
-        ...comment,
-        replies: addCommentReply(comment.replies, commentId, replyText)
-      };
-    }
-    
-    return comment;
-  });
-};
+      // Recursively search in replies
+      if (comment.replies && comment.replies.length > 0) {
+        return {
+          ...comment,
+          replies: addCommentReply(comment.replies, commentId, replyText)
+        };
+      }
+      
+      return comment;
+    });
+  };
 
   // Toggle comments visibility
   const toggleComments = (postId) => {
@@ -310,12 +390,12 @@ const addCommentReply = (comments, commentId, replyText) => {
   };
 
   const handleUpvote = (postId, e) => {
-    e.stopPropagation(); // Prevent post click when voting
+    e.stopPropagation();
     handleVote(postId, 1);
   };
 
   const handleDownvote = (postId, e) => {
-    e.stopPropagation(); // Prevent post click when voting
+    e.stopPropagation();
     handleVote(postId, -1);
   };
 
@@ -336,10 +416,6 @@ const addCommentReply = (comments, commentId, replyText) => {
     setShowSortDropdown(false);
   };
 
-  const handlePostClick = (postId) => {
-    console.log(`Opening post details for post ${postId}`);
-  };
-
   const handleCommunityClick = (communityName) => {
     console.log(`Opening community page for r/${communityName}`);
   };
@@ -357,51 +433,8 @@ const addCommentReply = (comments, commentId, replyText) => {
 
   return (
     <div className="page-container">
-      {/* Left Sidebar - User's Communities */}
-      <div className="left-sidebar">
-        <nav className="sidebar-nav">
-          <div className="nav-section">
-            <div className="nav-item active">
-              <FaHome className="nav-icon" />
-              <span>Home</span>
-            </div>
-            <div className="nav-item">
-              <FaFire className="nav-icon" />
-              <span>Popular</span>
-            </div>
-          </div>
-
-          <div className="nav-section">
-            <div className="communities-header">
-              <h4>YOUR COMMUNITIES</h4>
-              <button className="create-community-btn" title="Create Community">
-                <FaPlus />
-              </button>
-            </div>
-            {userCommunities.map((community, index) => (
-              <div 
-                key={index} 
-                className="nav-item community-item"
-                onClick={() => handleCommunityClick(community.name)}
-              >
-                <HiUserGroup className="nav-icon" />
-                <span>r/{community.name}</span>
-              </div>
-            ))}
-            <div className="nav-item view-all-btn">
-              <span>View All</span>
-            </div>
-          </div>
-
-          <div className="nav-section">
-            <h4>FEEDS</h4>
-            <div className="nav-item">
-              <FaStar className="nav-icon" />
-              <span>Recently Visited</span>
-            </div>
-          </div>
-        </nav>
-      </div>
+      {/* Use LeftSidebar component with start community button */}
+      <LeftSidebar darkMode={darkMode} showStartCommunity={true} />
 
       {/* Main Feed */}
       <div className="main-feed">
@@ -548,7 +581,7 @@ const addCommentReply = (comments, commentId, replyText) => {
                     </button>
                   </div>
                   
-                  {/* SINGLE COMMENT BUTTON - Fixed duplicate */}
+                  {/* Comment Button */}
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
@@ -572,7 +605,7 @@ const addCommentReply = (comments, commentId, replyText) => {
                   
                 </div>
 
-                {/* COMMENTS SECTION - Show in both card view and compact view when expanded */}
+                {/* COMMENTS SECTION */}
                 {expandedPostId === post.id && (
                   <div className="post-comments-section">
                     <div className="comments-header">
@@ -629,16 +662,90 @@ const addCommentReply = (comments, commentId, replyText) => {
 
       {/* Right Sidebar */}
       <div className="sidebar">
-        <div className="community-box">
-          <div className="community-header">
-            <h3>PREMIUM</h3>
+        {/* Recent Posts Section */}
+        <div className="recent-posts-box">
+          <div className="recent-posts-header">
+            <h3>RECENT POSTS</h3>
+            {recentPosts.length > 0 && (
+              <button 
+                className="clear-recent-btn"
+                onClick={clearRecentPosts}
+                title="Clear all recent posts"
+              >
+                Clear
+              </button>
+            )}
           </div>
-          <div className="premium-content">
-            <p>Reddit Premium gives you an ad-free experience and other special benefits.</p>
-            <button className="premium-btn">Try Now</button>
+          
+          <div className="recent-posts-list">
+            {recentPosts.length > 0 ? (
+              recentPosts.map((post) => (
+                <div 
+                  key={post.id} 
+                  className="recent-post-item"
+                  onClick={() => handlePostClick(post.id)}
+                >
+                  <div className="recent-post-thumbnail">
+                    {post.image ? (
+                      <img 
+                        src={getRecentPostThumbnail(post)} 
+                        alt={post.title}
+                      />
+                    ) : (
+                      <div className="default-thumbnail">
+                        📝
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="recent-post-content">
+                    {/* New header with user avatar, community, and time */}
+                    <div className="recent-post-header">
+                      <img 
+                        src={post.userAvatar} 
+                        alt={post.user}
+                        className="recent-post-user-avatar"
+                      />
+                      <span 
+                        className="recent-post-community"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCommunityClick(post.community);
+                        }}
+                      >
+                        r/{post.community}
+                      </span>
+                      <span className="recent-post-divider">•</span>
+                      <span className="recent-post-time">
+                        {formatRelativeTime(post.time)}
+                      </span>
+                    </div>
+                    
+                    <div className="recent-post-title">
+                      {post.title}
+                    </div>
+                    <div className="recent-post-stats">
+                      <div className="recent-post-stat">
+                        <FaArrowUp className="icon" />
+                        <span>{formatNumber(post.upvotes)}</span>
+                      </div>
+                      <div className="recent-post-stat">
+                        <FaRegCommentAlt className="icon" />
+                        <span>{formatNumber(post.comments)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="no-recent-posts">
+                No recent posts
+              </div>
+            )}
           </div>
         </div>
 
+        {/* Reddit Recommends Section */}
         <div className="community-box">
           <div className="community-header">
             <h3>REDDIT RECOMMENDS</h3>
