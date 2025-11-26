@@ -1,0 +1,9 @@
+<svg viewBox="0 0 216 216" xmlns="http://www.w3.org/2000/svg">
+  <circle fill="#FF4500" cx="108" cy="108" r="108"/>
+  <circle fill="white" cx="142" cy="98" r="20"/>
+  <circle fill="#FF4500" cx="142" cy="98" r="10"/>
+  <circle fill="white" cx="74" cy="98" r="20"/>
+  <circle fill="#FF4500" cx="74" cy="98" r="10"/>
+  <path fill="white" d="M108 120c-10 0-18 8-18 18s8 18 18 18 18-8 18-18-8-18-18-18z"/>
+  <path fill="white" d="M140 140c-8 8-24 8-32 0l-16 16 16 16c8-8 24-8 32 0l16-16-16-16z"/>
+</svg>
