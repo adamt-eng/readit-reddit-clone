@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { 
   FaPlus, FaBell, FaUser, FaCog, FaSignOutAlt, 
-  FaHome, FaFire, FaStar, FaRegBookmark, FaShare, FaEllipsisH,
-  FaArrowUp, FaRegCommentAlt 
+  FaHome, FaFire, FaStar, FaRegBookmark, FaShare, FaEllipsisH, FaEyeSlash,
+  FaArrowUp, FaRegCommentAlt ,FaFlag
 } from "react-icons/fa";
 import { HiUserGroup } from "react-icons/hi";
 import "./HomePage.css";
@@ -12,127 +12,416 @@ import Comment from "../../components/Comment/Comment";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 
 const HomePage = ({ user, onLogout, darkMode }) => {
-  const [viewMode, setViewMode] = useState('card');
-  const [sortBy, setSortBy] = useState('Best');
+  // Initialize viewMode from localStorage
+  const [viewMode, setViewMode] = useState(() => {
+    try {
+      const savedViewMode = localStorage.getItem('viewMode');
+      return savedViewMode === 'compact' ? 'compact' : 'card';
+    } catch (error) {
+      console.error('Error loading view mode from localStorage:', error);
+      return 'card';
+    }
+  });
+
+  // Initialize sortBy from localStorage
+  const [sortBy, setSortBy] = useState(() => {
+    try {
+      const savedSortBy = localStorage.getItem('sortBy');
+      const sortOptions = ["Best", "Hot", "New", "Top", "Rising"];
+      return sortOptions.includes(savedSortBy) ? savedSortBy : 'Best';
+    } catch (error) {
+      console.error('Error loading sort by from localStorage:', error);
+      return 'Best';
+    }
+  });
+
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [expandedPostId, setExpandedPostId] = useState(null);
   const [commentInputs, setCommentInputs] = useState({});
-  // Add state for recent posts
-  const [recentPosts, setRecentPosts] = useState([]);
+  const [joined, setJoined] = useState(false);
 
-  const [posts, setPosts] = useState([
-    { 
-      id: 1,
-      community: "programming", 
-      user: "dev_guru", 
-      title: "Just launched my new React project - would love feedback!", 
-      content: "After 6 months of development, I've finally launched my React-based project management tool. Built with TypeScript, Redux, and Styled Components.",
-      upvotes: 1242, 
-      comments: 89,
-      time: "2 hours ago",
-      userVote: 0,
-      image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-      isExpanded: false,
-      commentsList: [
-        {
-          id: 1,
-          author: "react_master",
-          avatar: "/profile.png",
-          content: "This looks amazing! Can you share the repo?",
-          upvotes: 234,
-          userVote: 1,
-          time: "1 hour ago",
-          replies: [
-            {
-              id: 2,
-              author: "dev_guru",
-              avatar: "/profile.png",
-              content: "Sure! Here's the GitHub link: github.com/devguru/project",
-              upvotes: 89,
-              userVote: 0,
-              time: "45 min ago",
-              replies: []
-            }
-          ]
-        },
-        {
-          id: 3,
-          author: "css_lover",
-          avatar: "/profile.png",
-          content: "The UI is so clean! What did you use for styling?",
-          upvotes: 156,
-          userVote: 0,
-          time: "30 min ago",
-          replies: []
-        }
-      ]
-    },
-    { 
-      id: 2,
-      community: "reactjs", 
-      user: "react_fan", 
-      title: "React 19 features we're all excited about", 
-      content: "The React team has been teasing some amazing features for the next major release. Here's what we know so far...",
-      upvotes: 856, 
-      comments: 234,
-      time: "5 hours ago",
-      userVote: 0,
-      image: "https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-      isExpanded: false,
-      commentsList: [
-        {
-          id: 4,
-          author: "web_dev",
-          avatar: "/profile.png",
-          content: "The compiler optimizations sound promising! Can't wait to see the performance improvements.",
-          upvotes: 42,
-          userVote: 0,
-          time: "3 hours ago",
-          replies: []
-        }
-      ]
-    },
-    { 
-      id: 3,
-      community: "webdev", 
-      user: "css_wizard", 
-      title: "CSS Grid vs Flexbox: When to use which?", 
-      content: "A comprehensive guide to help you decide when to reach for Grid and when Flexbox is the better choice for your layout needs.",
-      upvotes: 421, 
-      comments: 67,
-      time: "1 day ago",
-      userVote: 0,
-      image: null,
-      isExpanded: false,
-      commentsList: []
+  // Initialize expandedPostId from localStorage
+  const [expandedPostId, setExpandedPostId] = useState(() => {
+    try {
+      const savedExpandedPostId = localStorage.getItem('expandedPostId');
+      if (savedExpandedPostId) {
+        const parsedId = JSON.parse(savedExpandedPostId);
+        console.log('Loaded expandedPostId from localStorage:', parsedId);
+        // Only return if it's a valid number (post ID)
+        return typeof parsedId === 'number' ? parsedId : null;
+      }
+    } catch (error) {
+      console.error('Error loading expanded post from localStorage:', error);
     }
-  ]);
+    return null;
+  });
 
-  const userCommunities = [
-    { name: "programming", members: "4.3M", isMember: true },
-    { name: "reactjs", members: "289K", isMember: true },
-    { name: "webdev", members: "1.2M", isMember: true },
-    { name: "javascript", members: "2.1M", isMember: true },
-    { name: "Design", members: "5.7M", isMember: true }
-  ];
+  // Initialize expandedPosts (for compact view) from localStorage
+  const [expandedPosts, setExpandedPosts] = useState(() => {
+    try {
+      const savedExpandedPosts = localStorage.getItem('expandedPosts');
+      if (savedExpandedPosts) {
+        const parsedPosts = JSON.parse(savedExpandedPosts);
+        return Array.isArray(parsedPosts) ? parsedPosts : [];
+      }
+    } catch (error) {
+      console.error('Error loading expanded posts from localStorage:', error);
+    }
+    return [];
+  });
+
+  // Initialize joinedCommunities from localStorage
+  const [joinedCommunities, setJoinedCommunities] = useState(() => {
+    try {
+      const savedJoinedCommunities = localStorage.getItem('joinedCommunities');
+      if (savedJoinedCommunities) {
+        const parsedCommunities = JSON.parse(savedJoinedCommunities);
+        return typeof parsedCommunities === 'object' ? parsedCommunities : {};
+      }
+    } catch (error) {
+      console.error('Error loading joined communities from localStorage:', error);
+    }
+    return {};
+  });
+
+  // Initialize hiddenPosts from localStorage
+  const [hiddenPosts, setHiddenPosts] = useState(() => {
+    try {
+      const savedHiddenPosts = localStorage.getItem('hiddenPosts');
+      if (savedHiddenPosts) {
+        const parsedHiddenPosts = JSON.parse(savedHiddenPosts);
+        return Array.isArray(parsedHiddenPosts) ? parsedHiddenPosts : [];
+      }
+    } catch (error) {
+      console.error('Error loading hidden posts from localStorage:', error);
+    }
+    return [];
+  });
+
+  // Initialize recentPosts from localStorage with proper error handling
+  const [recentPosts, setRecentPosts] = useState(() => {
+    try {
+      const savedRecentPosts = localStorage.getItem('recentPosts');
+      if (savedRecentPosts) {
+        const parsedPosts = JSON.parse(savedRecentPosts);
+        // Ensure we have valid posts with required properties
+        return Array.isArray(parsedPosts) ? parsedPosts : [];
+      }
+    } catch (error) {
+      console.error('Error loading recent posts from localStorage:', error);
+    }
+    return [];
+  });
+
+  // Helper function to apply comment votes recursively
+  const applyCommentVotes = (comments, commentVotes) => {
+    return comments.map(comment => {
+      const savedVote = commentVotes[comment.id];
+      const updatedComment = {
+        ...comment,
+        userVote: savedVote !== undefined ? savedVote : comment.userVote,
+        upvotes: savedVote !== undefined ? comment.upvotes + savedVote : comment.upvotes
+      };
+
+      // Apply to replies recursively
+      if (comment.replies && comment.replies.length > 0) {
+        updatedComment.replies = applyCommentVotes(comment.replies, commentVotes);
+      }
+
+      return updatedComment;
+    });
+  };
+
+  const [posts, setPosts] = useState(() => {
+    const defaultPosts = [
+      { 
+        id: 1,
+        community: "programming", 
+        user: "dev_guru", 
+        userAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+        title: "Just launched my new React project - would love feedback!", 
+        content: "After 6 months of development, I've finally launched my React-based project management tool. Built with TypeScript, Redux, and Styled Components.",
+        upvotes: 1242, 
+        comments: 89,
+        time: "2 hours ago",
+        userVote: 0,
+        image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+        isExpanded: false, // This will be overridden by expandedPosts
+        commentsList: [
+          {
+            id: 1,
+            author: "react_master",
+            avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+            content: "This looks amazing! Can you share the repo?",
+            upvotes: 234,
+            userVote: 0,
+            time: "1 hour ago",
+            replies: [
+              {
+                id: 2,
+                author: "dev_guru",
+                avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+                content: "Sure! Here's the GitHub link: github.com/devguru/project",
+                upvotes: 89,
+                userVote: 0,
+                time: "45 min ago",
+                replies: []
+              }
+            ]
+          },
+          {
+            id: 3,
+            author: "css_lover",
+            avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+            content: "The UI is so clean! What did you use for styling?",
+            upvotes: 156,
+            userVote: 0,
+            time: "30 min ago",
+            replies: []
+          }
+        ]
+      },
+      { 
+        id: 2,
+        community: "reactjs", 
+        user: "react_fan", 
+        userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+        title: "React 19 features we're all excited about", 
+        content: "The React team has been teasing some amazing features for the next major release. Here's what we know so far...",
+        upvotes: 856, 
+        comments: 234,
+        time: "5 hours ago",
+        userVote: 0,
+        image: "https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+        isExpanded: false, // This will be overridden by expandedPosts
+        commentsList: [
+          {
+            id: 4,
+            author: "web_dev",
+            avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+            content: "The compiler optimizations sound promising! Can't wait to see the performance improvements.",
+            upvotes: 42,
+            userVote: 0,
+            time: "3 hours ago",
+            replies: []
+          }
+        ]
+      },
+      { 
+        id: 3,
+        community: "webdev", 
+        user: "css_wizard", 
+        userAvatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+        title: "CSS Grid vs Flexbox: When to use which?", 
+        content: "A comprehensive guide to help you decide when to reach for Grid and when Flexbox is the better choice for your layout needs.",
+        upvotes: 421, 
+        comments: 67,
+        time: "1 day ago",
+        userVote: 0,
+        image: null,
+        isExpanded: false, // This will be overridden by expandedPosts
+        commentsList: []
+      },
+      // User's own post
+      { 
+        id: 4,
+        community: null, 
+        user: user?.username || "current_user", 
+        userAvatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+        title: "My first React component - looking for code review!", 
+        content: "I've been learning React for a few weeks and just built my first custom component. It's a reusable modal that handles animations and accessibility. Would appreciate any feedback on the code structure and best practices!",
+        upvotes: 42, 
+        comments: 8,
+        time: "30 minutes ago",
+        userVote: 0, // Changed from 1 to 0 to allow loading from localStorage
+        image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+        isExpanded: false, // This will be overridden by expandedPosts
+        isUserPost: true,
+        commentsList: [
+          {
+            id: 5,
+            author: "senior_dev",
+            avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+            content: "Great start! The component structure looks clean. One suggestion: consider using React Portals for the modal to avoid z-index issues.",
+            upvotes: 15,
+            userVote: 0,
+            time: "15 minutes ago",
+            replies: [
+              {
+                id: 6,
+                author: user?.username || "current_user",
+                avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+                content: "Thanks for the tip! I'll look into React Portals - that sounds like a better approach.",
+                upvotes: 3,
+                userVote: 0,
+                time: "5 minutes ago",
+                replies: []
+              }
+            ]
+          }
+        ]
+      }
+    ];
+
+    try {
+      const savedPostVotes = localStorage.getItem('postVotes');
+      const savedCommentVotes = localStorage.getItem('commentVotes');
+      const savedExpandedPosts = localStorage.getItem('expandedPosts');
+      
+      // Apply saved expanded posts state
+      let postsWithExpandedState = defaultPosts;
+      if (savedExpandedPosts) {
+        const expandedPostIds = JSON.parse(savedExpandedPosts);
+        postsWithExpandedState = defaultPosts.map(post => ({
+          ...post,
+          isExpanded: expandedPostIds.includes(post.id)
+        }));
+      }
+
+      if (savedPostVotes || savedCommentVotes) {
+        const postVotes = savedPostVotes ? JSON.parse(savedPostVotes) : {};
+        const commentVotes = savedCommentVotes ? JSON.parse(savedCommentVotes) : {};
+
+        // Apply saved post votes
+        const updatedPosts = postsWithExpandedState.map(post => {
+          const savedVote = postVotes[post.id];
+          if (savedVote !== undefined) {
+            return {
+              ...post,
+              userVote: savedVote,
+              upvotes: post.upvotes + savedVote // Adjust upvotes based on saved vote
+            };
+          }
+          return post;
+        });
+
+        // Apply saved comment votes recursively
+        return updatedPosts.map(post => ({
+          ...post,
+          commentsList: applyCommentVotes(post.commentsList, commentVotes)
+        }));
+      }
+
+      return postsWithExpandedState;
+    } catch (error) {
+      console.error('Error loading votes from localStorage:', error);
+    }
+
+    return defaultPosts;
+  });
 
   const sortOptions = ["Best", "Hot", "New", "Top", "Rising"];
 
-  // Load recent posts from localStorage on component mount
+  // Save viewMode to localStorage whenever it changes
   useEffect(() => {
-    const savedRecentPosts = localStorage.getItem('recentPosts');
-    if (savedRecentPosts) {
-      setRecentPosts(JSON.parse(savedRecentPosts));
+    try {
+      localStorage.setItem('viewMode', viewMode);
+      console.log('Saved viewMode to localStorage:', viewMode);
+    } catch (error) {
+      console.error('Error saving view mode to localStorage:', error);
     }
-  }, []);
+  }, [viewMode]);
+
+  // Save sortBy to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('sortBy', sortBy);
+      console.log('Saved sortBy to localStorage:', sortBy);
+    } catch (error) {
+      console.error('Error saving sort by to localStorage:', error);
+    }
+  }, [sortBy]);
+
+  // Save expandedPostId to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      if (expandedPostId) {
+        localStorage.setItem('expandedPostId', JSON.stringify(expandedPostId));
+        console.log('Saved expandedPostId to localStorage:', expandedPostId);
+      } else {
+        // If no post is expanded, remove it from localStorage
+        localStorage.removeItem('expandedPostId');
+        console.log('Removed expandedPostId from localStorage');
+      }
+    } catch (error) {
+      console.error('Error saving expanded post to localStorage:', error);
+    }
+  }, [expandedPostId]);
+
+  // Save expandedPosts to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('expandedPosts', JSON.stringify(expandedPosts));
+      console.log('Saved expandedPosts to localStorage:', expandedPosts);
+    } catch (error) {
+      console.error('Error saving expanded posts to localStorage:', error);
+    }
+  }, [expandedPosts]);
+  
+  // Save post votes to localStorage whenever posts change
+  useEffect(() => {
+    try {
+      const postVotes = {};
+      const commentVotes = {};
+
+      // Extract post votes
+      posts.forEach(post => {
+        if (post.userVote !== 0) {
+          postVotes[post.id] = post.userVote;
+        }
+      });
+
+      // Extract comment votes recursively
+      const extractCommentVotes = (comments) => {
+        comments.forEach(comment => {
+          if (comment.userVote !== 0) {
+            commentVotes[comment.id] = comment.userVote;
+          }
+          if (comment.replies && comment.replies.length > 0) {
+            extractCommentVotes(comment.replies);
+          }
+        });
+      };
+
+      posts.forEach(post => {
+        extractCommentVotes(post.commentsList);
+      });
+
+      localStorage.setItem('postVotes', JSON.stringify(postVotes));
+      localStorage.setItem('commentVotes', JSON.stringify(commentVotes));
+    } catch (error) {
+      console.error('Error saving votes to localStorage:', error);
+    }
+  }, [posts]);
 
   // Save recent posts to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem('recentPosts', JSON.stringify(recentPosts));
+    try {
+      localStorage.setItem('recentPosts', JSON.stringify(recentPosts));
+    } catch (error) {
+      console.error('Error saving recent posts to localStorage:', error);
+    }
   }, [recentPosts]);
 
-  // Function to add a post to recent posts
+  // Save hiddenPosts to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('hiddenPosts', JSON.stringify(hiddenPosts));
+    } catch (error) {
+      console.error('Error saving hidden posts to localStorage:', error);
+    }
+  }, [hiddenPosts]);
+
+  // Save joinedCommunities to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('joinedCommunities', JSON.stringify(joinedCommunities));
+    } catch (error) {
+      console.error('Error saving joined communities to localStorage:', error);
+    }
+  }, [joinedCommunities]);
+
+  // Function to add a post to recent posts with proper structure
   const addToRecentPosts = (post) => {
     const recentPost = {
       id: post.id,
@@ -142,17 +431,34 @@ const HomePage = ({ user, onLogout, darkMode }) => {
       comments: post.comments,
       community: post.community,
       user: post.user,
-      userAvatar: "/profile.png", // Default avatar
-      timestamp: Date.now(),
-      time: post.time // Keep the original time string
+      userAvatar: post.userAvatar || "/profile.png",
+      timestamp: Date.now(), // Add timestamp for sorting
+      time: post.time
     };
 
     setRecentPosts(prev => {
       // Remove if already exists (to avoid duplicates)
       const filtered = prev.filter(p => p.id !== post.id);
       // Add to beginning and limit to 5 posts
-      return [recentPost, ...filtered].slice(0, 5);
+      const updated = [recentPost, ...filtered].slice(0, 5);
+      return updated;
     });
+  };
+
+  // Function to clear all recent posts
+  const clearRecentPosts = () => {
+    setRecentPosts([]);
+    // Also clear from localStorage
+    localStorage.removeItem('recentPosts');
+  };
+
+  // Handle post click - add to recent posts
+  const handlePostClick = (postId) => {
+    const post = posts.find(p => p.id === postId);
+    if (post) {
+      addToRecentPosts(post);
+    }
+    console.log(`Opening post details for post ${postId}`);
   };
 
   // Function to format relative time
@@ -175,9 +481,28 @@ const HomePage = ({ user, onLogout, darkMode }) => {
     return formattedTime;
   };
 
-  // Function to clear all recent posts
-  const clearRecentPosts = () => {
-    setRecentPosts([]);
+  // Handle hiding a post
+  const handleHidePost = (postId, e) => {
+    e?.stopPropagation();
+    setHiddenPosts(prev => {
+      const updated = [...prev, postId];
+      return updated;
+    });
+  };
+
+  // Handle unhiding a post
+  const handleUnhidePost = (postId, e) => {
+    e?.stopPropagation();
+    setHiddenPosts(prev => prev.filter(id => id !== postId));
+  };
+
+  // Handle community join toggle
+  const handleJoinCommunity = (communityName, e) => {
+    e?.stopPropagation();
+    setJoinedCommunities(prev => ({
+      ...prev,
+      [communityName]: !prev[communityName]
+    }));
   };
 
   // Function to get thumbnail for recent posts
@@ -186,15 +511,6 @@ const HomePage = ({ user, onLogout, darkMode }) => {
       return post.image;
     }
     return darkMode ? "/compact-image-dark.png" : "/compact-image.png";
-  };
-
-  // Handle post click - add to recent posts
-  const handlePostClick = (postId) => {
-    const post = posts.find(p => p.id === postId);
-    if (post) {
-      addToRecentPosts(post);
-    }
-    console.log(`Opening post details for post ${postId}`);
   };
 
   // Handle comment voting
@@ -292,7 +608,9 @@ const HomePage = ({ user, onLogout, darkMode }) => {
 
   // Toggle comments visibility
   const toggleComments = (postId) => {
-    setExpandedPostId(expandedPostId === postId ? null : postId);
+    const newExpandedPostId = expandedPostId === postId ? null : postId;
+    console.log('Toggling comments for post:', postId, 'New expandedPostId:', newExpandedPostId);
+    setExpandedPostId(newExpandedPostId);
   };
 
   // Handle comment input change
@@ -338,7 +656,7 @@ const HomePage = ({ user, onLogout, darkMode }) => {
     }));
   };
 
-  // Add toggleExpand function
+  // Add toggleExpand function for compact view
   const toggleExpand = (postId) => {
     setPosts(prevPosts => 
       prevPosts.map(post => 
@@ -347,8 +665,20 @@ const HomePage = ({ user, onLogout, darkMode }) => {
           : post
       )
     );
+
+    // Update the expandedPosts state for persistence
+    setExpandedPosts(prev => {
+      if (prev.includes(postId)) {
+        // Remove from expanded posts if it's already there (collapsing)
+        return prev.filter(id => id !== postId);
+      } else {
+        // Add to expanded posts (expanding)
+        return [...prev, postId];
+      }
+    });
   };
-  
+
+  // Handle post voting
   const handleVote = (postId, voteType) => {
     setPosts(prevPosts => 
       prevPosts.map(post => {
@@ -400,7 +730,11 @@ const HomePage = ({ user, onLogout, darkMode }) => {
   };
 
   const toggleViewMode = () => {
-    setViewMode(prev => prev === 'card' ? 'compact' : 'card');
+    setViewMode(prev => {
+      const newViewMode = prev === 'card' ? 'compact' : 'card';
+      console.log('Toggling view mode to:', newViewMode);
+      return newViewMode;
+    });
   };
 
   const toggleSortDropdown = () => {
@@ -412,6 +746,7 @@ const HomePage = ({ user, onLogout, darkMode }) => {
   };
 
   const handleSortSelect = (option) => {
+    console.log('Selected sort option:', option);
     setSortBy(option);
     setShowSortDropdown(false);
   };
@@ -430,7 +765,7 @@ const HomePage = ({ user, onLogout, darkMode }) => {
     }
     return num.toString();
   };
-
+  
   return (
     <div className="page-container">
       {/* Use LeftSidebar component with start community button */}
@@ -471,202 +806,280 @@ const HomePage = ({ user, onLogout, darkMode }) => {
               {viewMode === 'card' ? '☐' : '≡'}
             </button>
           </div>
-
-          {/* Create Post Button */}
-          <button className="create-post-btn" onClick={handleCreatePost}>
-            Create Post
-          </button>
         </div>
 
         {/* Posts */}
         <div className={`posts-container ${viewMode}-view`}>
-          {posts.map((post) => (
-            <div 
-              key={post.id} 
-              className={`post-card ${viewMode}-view`}
-              onClick={() => handlePostClick(post.id)}
-            >
-              {/* Thumbnail for compact view */}
-              {viewMode === 'compact' && (
-                <div className="post-thumbnail">
-                  <img 
-                    src={getThumbnailImage(post)} 
-                    alt={post.image ? post.title : "Default post thumbnail"}
-                    className={`thumbnail-image ${!post.image ? 'default-thumbnail' : ''}`}
-                  />
-                </div>
-              )}
-
-              <div className="post-content">
-                {/* EXPAND BUTTON for compact view */}
-                {viewMode === 'compact' && (post.image || post.content) && (
+          {posts.map((post) => {
+            // Skip rendering if post is hidden
+            if (hiddenPosts.includes(post.id)) {
+              return (
+                <div key={post.id} className="post-hidden-message">
+                  <span>Post hidden</span>
                   <button 
-                    className="expand-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleExpand(post.id);
-                    }}
-                    title={post.isExpanded ? "Collapse" : "Expand"}
+                    className="undo-btn"
+                    onClick={(e) => handleUnhidePost(post.id, e)}
                   >
-                    {post.isExpanded ? <FaCompress /> : <FaExpand />}
+                    Undo
                   </button>
+                </div>
+              );
+            }
+
+            const isCommentsExpanded = expandedPostId === post.id;
+
+            return (
+              <div 
+                key={post.id} 
+                className={`post-card ${viewMode}-view`}
+                onClick={() => handlePostClick(post.id)}
+              >
+                {/* Thumbnail for compact view */}
+                {viewMode === 'compact' && (
+                  <div className="post-thumbnail">
+                    <img 
+                      src={getThumbnailImage(post)} 
+                      alt={post.image ? post.title : "Default post thumbnail"}
+                      className={`thumbnail-image ${!post.image ? 'default-thumbnail' : ''}`}
+                    />
+                  </div>
                 )}
 
-                <div className="post-meta">
-                  <span 
-                    className="community" 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleCommunityClick(post.community);
-                    }}
-                  >
-                    r/{post.community}
-                  </span>
-                  <span className="divider">•</span>
-                  <span className="user">Posted by u/{post.user}</span>
-                  <span className="divider">•</span>
-                  <span className="time">{post.time}</span>
-                </div>
+                <div className="post-content">
+                  {/* EXPAND BUTTON for compact view */}
+                  {viewMode === 'compact' && (post.image || post.content) && (
+                    <button 
+                      className="expand-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleExpand(post.id);
+                      }}
+                      title={post.isExpanded ? "Collapse" : "Expand"}
+                    >
+                      {post.isExpanded ? <FaCompress /> : <FaExpand />}
+                    </button>
+                  )}
 
-                <h3 className="post-title">{post.title}</h3>
-                
-                {/* EXPANDED CONTENT for compact view */}
-                {viewMode === 'compact' && post.isExpanded && (
-                  <div className="expanded-content">
-                    {post.image && (
+                  <div className="post-meta">
+                    <div className="post-meta-left">
                       <img 
-                        src={post.image} 
-                        alt={post.title}
-                        className="expanded-image"
+                        src={post.userAvatar} 
+                        alt={post.user}
+                        className="user-avatar"
                       />
-                    )}
-                    {post.content && (
-                      <div className="expanded-text">
-                        {post.content}
-                      </div>
-                    )}
-                  </div>
-                )}
-                
-                {/* Full content and image for card view */}
-                {viewMode === 'card' && (
-                  <>
-                    {post.content && (
-                      <div className="post-body">{post.content}</div>
-                    )}
-                    {post.image && (
-                      <div className="post-image-container">
-                        <img src={post.image} alt={post.title} className="post-image" />
-                      </div>
-                    )}
-                  </>
-                )}
-
-                <div className="post-actions-bar" onClick={(e) => e.stopPropagation()}>
-                  <div className={`vote-section ${post.userVote === 1 ? 'upvoted' : ''} ${post.userVote === -1 ? 'downvoted' : ''}`}>
-                    <button 
-                      onClick={(e) => handleUpvote(post.id, e)}
-                      className="vote-btn upvote"
-                      title="Upvote"
-                    >
-                      ⇧
-                    </button>
-                    <span className="vote-count">{formatNumber(post.upvotes)}</span>
-                    <button 
-                      onClick={(e) => handleDownvote(post.id, e)}
-                      className="vote-btn downvote"
-                      title="Downvote"
-                    >
-                      ⇩
-                    </button>
-                  </div>
-                  
-                  {/* Comment Button */}
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleComments(post.id);
-                    }} 
-                    className="post-action-btn comment-btn"
-                  >
-                    <FaRegCommentAlt className="action-icon" />
-                    <span className="action-text">{formatNumber(post.comments)} Comments</span>
-                  </button>
-                  
-                  <button className="post-action-btn">
-                    <FaShare className="action-icon" />
-                    <span className="action-text">Share</span>
-                  </button>
-                  
-                  <button className="post-action-btn">
-                    <FaRegBookmark className="action-icon" />
-                    <span className="action-text">Save</span>
-                  </button>
-                  
-                </div>
-
-                {/* COMMENTS SECTION */}
-                {expandedPostId === post.id && (
-                  <div className="post-comments-section">
-                    <div className="comments-header">
-                      <h4>{post.commentsList.length} Comment{post.commentsList.length !== 1 ? 's' : ''}</h4>
-                    </div>
-                    
-                    {/* Comments List */}
-                    <div className="comments-list">
-                      {post.commentsList.length > 0 ? (
-                        post.commentsList.map(comment => (
-                          <Comment 
-                            key={comment.id} 
-                            comment={comment} 
-                            darkMode={darkMode}
-                            onVote={handleCommentVote}
-                            onReply={handleCommentReply}
-                            postId={post.id}
-                          />
-                        ))
+                      {post.community ? (
+                        <>
+                          <span className="community">r/{post.community}</span>
+                          <span className="divider">•</span>
+                        </>
                       ) : (
-                        <div className="no-comments">
-                          No comments yet. Be the first to share your thoughts!
+                        <>
+                          <span className="community">u/{post.user}</span>
+                          <span className="divider">•</span>
+                        </>
+                      )}
+                      <span className="user">Posted by u/{post.user}</span>
+                      <span className="divider">•</span>
+                      <span className="time">{post.time}</span>
+                    </div>
+
+                    <div className="post-meta-right">
+                      {/* Join button only shows if post has a community AND is NOT user's own post */}
+                      {post.community && !post.isUserPost && (
+                        <button
+                          className={`join-btn ${joinedCommunities[post.community] ? 'joined' : ''}`}
+                          onClick={(e) => handleJoinCommunity(post.community, e)}
+                        >
+                          {joinedCommunities[post.community] ? 'Joined' : 'Join'}
+                        </button>
+                      )}
+
+                      <div className="post-menu-wrapper" onClick={(e) => e.stopPropagation()}>
+                        <button className="post-menu-btn">
+                          <FaEllipsisH />
+                        </button>
+
+                        <div className="post-menu-dropdown">
+                          {/* Show full menu for community posts */}
+                          {post.community ? (
+                            <>
+                              <button className="menu-item">
+                                <FaBell className="menu-icon" /> 
+                                Follow Post
+                              </button>
+                              <button className="menu-item">
+                                <FaRegBookmark className="menu-icon" /> 
+                                Save
+                              </button>
+                              <button 
+                                className="menu-item"
+                                onClick={(e) => handleHidePost(post.id, e)}
+                              >
+                                <FaEyeSlash className="menu-icon" />
+                                Hide
+                              </button>
+                              <hr className="menu-divider" />
+                              <button className="menu-item flag-item">
+                                <FaFlag className="menu-icon" />
+                                Report
+                              </button>
+                            </>
+                          ) : (
+                            /* Show minimal menu for user posts (no community) */
+                            <>
+                              <button 
+                                className="menu-item"
+                                onClick={(e) => handleHidePost(post.id, e)}
+                              >
+                                <FaEyeSlash className="menu-icon" />
+                                Hide
+                              </button>
+                              <button className="menu-item flag-item">
+                                <FaFlag className="menu-icon" />
+                                Report
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <h3 className="post-title">{post.title}</h3>
+                  
+                  {/* EXPANDED CONTENT for compact view */}
+                  {viewMode === 'compact' && post.isExpanded && (
+                    <div className="expanded-content">
+                      {post.image && (
+                        <img 
+                          src={post.image} 
+                          alt={post.title}
+                          className="expanded-image"
+                        />
+                      )}
+                      {post.content && (
+                        <div className="expanded-text">
+                          {post.content}
                         </div>
                       )}
                     </div>
+                  )}
+                  
+                  {/* Full content and image for card view */}
+                  {viewMode === 'card' && (
+                    <>
+                      {post.content && (
+                        <div className="post-body">{post.content}</div>
+                      )}
+                      {post.image && (
+                        <div className="post-image-container">
+                          <img src={post.image} alt={post.title} className="post-image" />
+                        </div>
+                      )}
+                    </>
+                  )}
 
-                    {/* Add Comment Section */}
-                    <div className="add-comment">
-                      <textarea 
-                        placeholder="What are your thoughts?" 
-                        className="comment-input"
-                        rows="3"
-                        value={commentInputs[post.id] || ""}
-                        onChange={(e) => handleCommentInputChange(post.id, e.target.value)}
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                      <div className="comment-actions-footer">
-                        <button 
-                          className="comment-btn"
-                          onClick={() => handleAddComment(post.id)}
-                          disabled={!commentInputs[post.id]?.trim()}
-                        >
-                          Comment
-                        </button>
+                  <div className="post-actions-bar" onClick={(e) => e.stopPropagation()}>
+                    <div className={`vote-section ${post.userVote === 1 ? 'upvoted' : ''} ${post.userVote === -1 ? 'downvoted' : ''}`}>
+                      <button 
+                        onClick={(e) => handleUpvote(post.id, e)}
+                        className="vote-btn upvote"
+                        title="Upvote"
+                      >
+                        ⇧
+                      </button>
+                      <span className="vote-count">{formatNumber(post.upvotes)}</span>
+                      <button 
+                        onClick={(e) => handleDownvote(post.id, e)}
+                        className="vote-btn downvote"
+                        title="Downvote"
+                      >
+                        ⇩
+                      </button>
+                    </div>
+                    
+                    {/* Comment Button */}
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleComments(post.id);
+                      }} 
+                      className="post-action-btn comment-btn"
+                    >
+                      <FaRegCommentAlt className="action-icon" />
+                      <span className="action-text">{formatNumber(post.comments)} Comments</span>
+                    </button>
+                    
+                    <button className="post-action-btn">
+                      <FaShare className="action-icon" />
+                      <span className="action-text">Share</span>
+                    </button>
+                    
+                  </div>
+
+                  {/* COMMENTS SECTION */}
+                  {isCommentsExpanded && (
+                    <div className="post-comments-section">
+                      <div className="comments-header">
+                        <h4>{post.commentsList.length} Comment{post.commentsList.length !== 1 ? 's' : ''}</h4>
+                      </div>
+                      
+                      {/* Comments List */}
+                      <div className="comments-list">
+                        {post.commentsList.length > 0 ? (
+                          post.commentsList.map(comment => (
+                            <Comment 
+                              key={comment.id} 
+                              comment={comment} 
+                              darkMode={darkMode}
+                              onVote={handleCommentVote}
+                              onReply={handleCommentReply}
+                              postId={post.id}
+                            />
+                          ))
+                        ) : (
+                          <div className="no-comments">
+                            No comments yet. Be the first to share your thoughts!
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Add Comment Section */}
+                      <div className="add-comment">
+                        <textarea 
+                          placeholder="What are your thoughts?" 
+                          className="comment-input"
+                          rows="3"
+                          value={commentInputs[post.id] || ""}
+                          onChange={(e) => handleCommentInputChange(post.id, e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <div className="comment-actions-footer">
+                          <button 
+                            className="comment-btn"
+                            onClick={() => handleAddComment(post.id)}
+                            disabled={!commentInputs[post.id]?.trim()}
+                          >
+                            Comment
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
       {/* Right Sidebar */}
       <div className="sidebar">
-        {/* Recent Posts Section */}
-        <div className="recent-posts-box">
-          <div className="recent-posts-header">
-            <h3>RECENT POSTS</h3>
-            {recentPosts.length > 0 && (
+        {/* Recent Posts Section - Only show if there are recent posts */}
+        {recentPosts.length > 0 && (
+          <div className="recent-posts-box">
+            <div className="recent-posts-header">
+              <h3>RECENT POSTS</h3>
               <button 
                 className="clear-recent-btn"
                 onClick={clearRecentPosts}
@@ -674,12 +1087,10 @@ const HomePage = ({ user, onLogout, darkMode }) => {
               >
                 Clear
               </button>
-            )}
-          </div>
-          
-          <div className="recent-posts-list">
-            {recentPosts.length > 0 ? (
-              recentPosts.map((post) => (
+            </div>
+            
+            <div className="recent-posts-list">
+              {recentPosts.map((post) => (
                 <div 
                   key={post.id} 
                   className="recent-post-item"
@@ -736,37 +1147,16 @@ const HomePage = ({ user, onLogout, darkMode }) => {
                     </div>
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="no-recent-posts">
-                No recent posts
-              </div>
-            )}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+      </div>
 
-        {/* Reddit Recommends Section */}
-        <div className="community-box">
-          <div className="community-header">
-            <h3>REDDIT RECOMMENDS</h3>
-          </div>
-          <div className="community-list">
-            {userCommunities.slice(0, 3).map((community, i) => (
-              <div 
-                key={i} 
-                className="community-item"
-                onClick={() => handleCommunityClick(community.name)}
-              >
-                <HiUserGroup className="community-icon" />
-                <div className="community-info">
-                  <span className="community-name">r/{community.name}</span>
-                  <small className="community-members">{community.members} members</small>
-                </div>
-                <button className="join-btn">Join</button>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* Footer Text */}
+      <div className="footer-text">
+        <p className="footer-line">Reddit Rules    Privacy Policy    User Agreement</p>
+        <p className="footer-copyright">Reddit, Inc. © 2025. All rights reserved.</p>
       </div>
     </div>
   );

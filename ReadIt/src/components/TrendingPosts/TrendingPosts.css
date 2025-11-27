@@ -1,3 +1,4 @@
+/* components/TrendingPosts/TrendingPosts.css */
 .trending-posts {
   width: 100%;
 }
@@ -6,12 +7,20 @@
   width: 100%;
 }
 
+/* Ensure proper post card styling */
 .posts-container.card-view .post-card,
 .posts-container.compact-view .post-card {
   background: white;
   border: 1px solid #ccc;
   border-top: none;
   margin: 0;
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+
+.posts-container.card-view .post-card:hover,
+.posts-container.compact-view .post-card:hover {
+  background: #fafafa;
 }
 
 .posts-container.card-view .post-card:first-child,
@@ -26,17 +35,13 @@
 }
 
 /* Dark mode */
-.dark-mode .posts-container {
-  background: transparent;
-}
-
 .dark-mode .posts-container.card-view .post-card,
 .dark-mode .posts-container.compact-view .post-card {
   background: #1a1a1b;
   border-color: #343536;
 }
 
-.dark-mode .posts-container.card-view .post-card:first-child,
-.dark-mode .posts-container.compact-view .post-card:first-child {
-  border-top-color: #343536;
+.dark-mode .posts-container.card-view .post-card:hover,
+.dark-mode .posts-container.compact-view .post-card:hover {
+  background: #272729;
 }

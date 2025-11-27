@@ -1,33 +1,53 @@
-import React from "react";
+// components/PopularCommunities/PopularCommunities.jsx
+import React, { useState } from "react";
 import "./PopularCommunities.css";
 
-export default function PopularCommunities({ communities, darkMode }) {
-  const promptLogin = () => alert("Login to continue");
+const PopularCommunities = ({ communities, darkMode }) => {
+  const [showAll, setShowAll] = useState(false);
+  
+  // Show only first 3 communities by default, show all when "See More" is clicked
+  const displayedCommunities = showAll ? communities : communities.slice(0, 3);
+
+  const toggleShowAll = () => {
+    setShowAll(!showAll);
+  };
 
   return (
-    <div className="community-box">
-      <div className="community-header">
-        <h3>POPULAR COMMUNITIES</h3>
+    <div className={`popular-communities ${darkMode ? 'dark-mode' : ''}`}>
+      <div className="communities-header">
+        <h3>Popular Communities</h3>
       </div>
-      
-      <div className="community-list">
-        {communities.map((com, i) => (
-          <div className="community-item" key={i}>
-            <div className="community-icon">🌟</div>
-            
+      <div className="communities-list">
+        {displayedCommunities.map((community, index) => (
+          <div key={index} className="community-item">
+            <div className="community-avatar">
+              <img 
+                src={community.avatar} 
+                alt={community.name}
+                className="community-avatar-img"
+              />
+            </div>
             <div className="community-info">
-              <span className="community-name">r/{com.name}</span>
-              <small className="community-members">{com.members} members</small>
+              <span className="community-name">r/{community.name}</span>
+              <span className="community-members">{community.members} members</span>
             </div>
           </div>
         ))}
       </div>
       
-      <div className="community-footer">
-        <button onClick={promptLogin} className="see-more-btn">
-          See more
-        </button>
-      </div>
+      {/* See More Button */}
+      {communities.length > 3 && (
+        <div className="communities-footer">
+          <button 
+            className="see-more-btn"
+            onClick={toggleShowAll}
+          >
+            {showAll ? 'See Less' : 'See More'}
+          </button>
+        </div>
+      )}
     </div>
   );
-}
+};
+
+export default PopularCommunities;

@@ -70,20 +70,16 @@
   color: #878a8c;
 }
 
-.nav-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
 
 .login-btn, .signup-btn {
-  padding: 8px 20px;
+  padding: 8px 25px;
   border-radius: 20px;
   font-weight: bold;
   cursor: pointer;
   font-size: 14px;
   border: 1px solid #ff4500;
   transition: all 0.2s;
+  margin-left: 10px;
 }
 
 .login-btn {
@@ -107,9 +103,8 @@
 
 /* Logged-in navbar styles */
 .nav-right.logged-in {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  display:flex;
+  gap: 4px;
 }
 
 .nav-icon-btn {
@@ -128,16 +123,15 @@
 
 .nav-icon-btn:hover {
   background: #f6f7f8;
-  color: #1c1c1c;
+  
 }
 
 /* Create Post Button - No Background */
 .create-post-btn {
-  padding: 6px 12px;
+  padding: 16px 12px;
   border-radius: 20px;
-  background: none;
-  border: 1px solid #ff4500;
-  color: #ff4500;
+  background-color: white;
+  border-color: white;
   font-weight: 600;
   font-size: 14px;
   transition: all 0.2s;
@@ -145,18 +139,20 @@
 
 .create-post-btn:hover {
   background: none;
-  border-color: #e03c00;
-  color: #e03c00;
+ 
 }
 
+
 .create-text {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 580;
+  padding: 5px;
 }
 
 .nav-icon {
   width: 16px;
   height: 16px;
+  color: #878a8c; /* Default color for light mode */
 }
 
 .notification-badge {
@@ -211,10 +207,21 @@
   width: 14px;
   height: 14px;
   transition: transform 0.2s ease;
+  color: #1c1c1c; /* Default color for light mode */
 }
 
 .dropdown-icon.open {
   transform: rotate(180deg);
+}
+
+/* Dark mode specific styles for all icons */
+.dark-mode .dropdown-icon {
+  color: #ffffff !important; /* Force white color in dark mode */
+}
+
+.dark-mode .nav-icon,
+.dark-mode .dark-mode-icon {
+  color: #ffffff !important; /* Force white color for all nav icons in dark mode */
 }
 
 .profile-dropdown {
@@ -286,14 +293,11 @@
 
 .dark-mode .create-post-btn {
   background: none;
-  border-color: #ff4500;
-  color: #ff4500;
+  
 }
 
 .dark-mode .create-post-btn:hover {
   background: none;
-  border-color: #ff8c66;
-  color: #ff8c66;
 }
 
 .dark-mode .profile-btn:hover {

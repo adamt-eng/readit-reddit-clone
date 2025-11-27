@@ -1,24 +1,63 @@
 // pages/GuestHomePage/GuestHomePage.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
-import TrendingPosts from "../../components/TrendingPosts/TrendingPosts";
 import PopularCommunities from "../../components/PopularCommunities/PopularCommunities";
-import { FaRegCommentAlt, FaShare, FaBookmark, FaEllipsisH } from "react-icons/fa";
+import { FaRegCommentAlt, FaShare, FaBookmark, FaEllipsisH, FaFlag  } from "react-icons/fa";
 import "./GuestHomePage.css";
 import { FaExpand, FaCompress } from "react-icons/fa";
 import Comment from "../../components/Comment/Comment";
 
 export default function GuestHomePage({ darkMode, onLogin }) {
-  const [viewMode, setViewMode] = useState('card');
-  const [sortBy, setSortBy] = useState('Best');
+  // Initialize viewMode from localStorage
+  const [viewMode, setViewMode] = useState(() => {
+    try {
+      const savedViewMode = localStorage.getItem('viewMode');
+      return savedViewMode === 'compact' ? 'compact' : 'card';
+    } catch (error) {
+      console.error('Error loading view mode from localStorage:', error);
+      return 'card';
+    }
+  });
+
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
-  const [showSortDropdown, setShowSortDropdown] = useState(false);
-  const [expandedPostId, setExpandedPostId] = useState(null); // Track which post has comments expanded
+  const [joinedCommunities, setJoinedCommunities] = useState({});
+  
+  // Initialize expandedPostId from localStorage
+  const [expandedPostId, setExpandedPostId] = useState(() => {
+    try {
+      const savedExpandedPostId = localStorage.getItem('expandedPostId');
+      if (savedExpandedPostId) {
+        const parsedId = JSON.parse(savedExpandedPostId);
+        console.log('Loaded expandedPostId from localStorage:', parsedId);
+        return typeof parsedId === 'number' ? parsedId : null;
+      }
+    } catch (error) {
+      console.error('Error loading expanded post from localStorage:', error);
+    }
+    return null;
+  });
+
+  // Initialize expanded posts state from localStorage
+  const [expandedPosts, setExpandedPosts] = useState(() => {
+    try {
+      const savedExpandedPosts = localStorage.getItem('expandedPosts');
+      if (savedExpandedPosts) {
+        const parsed = JSON.parse(savedExpandedPosts);
+        console.log('Loaded expandedPosts from localStorage:', parsed);
+        return Array.isArray(parsed) ? parsed : [];
+      }
+    } catch (error) {
+      console.error('Error loading expanded posts from localStorage:', error);
+    }
+    return [];
+  });
+
   const [posts, setPosts] = useState([
     { 
       id: 1,
       community: "news", 
       user: "newsbot", 
+      userAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
       title: "Ukraine faces losing dignity or US-large peace deal considerations", 
       content: "Despite ongoing negotiations, Ukraine faces difficult choices in the peace deal discussions with international mediators.",
       upvotes: 452, 
@@ -31,7 +70,7 @@ export default function GuestHomePage({ darkMode, onLogin }) {
         {
           id: 1,
           author: "world_traveler",
-          avatar: "/profile.png",
+          avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
           content: "This is such an important development. Hope they reach a peaceful resolution soon.",
           upvotes: 45,
           userVote: 0,
@@ -40,7 +79,7 @@ export default function GuestHomePage({ darkMode, onLogin }) {
             {
               id: 2,
               author: "politics_nerd",
-              avatar: "/profile.png",
+              avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
               content: "Agreed! The international community needs to support diplomatic solutions.",
               upvotes: 23,
               userVote: 0,
@@ -52,7 +91,7 @@ export default function GuestHomePage({ darkMode, onLogin }) {
         {
           id: 3,
           author: "history_buff",
-          avatar: "/profile.png",
+          avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
           content: "Historical context is important here. Similar situations have occurred in the past.",
           upvotes: 31,
           userVote: 0,
@@ -65,6 +104,7 @@ export default function GuestHomePage({ darkMode, onLogin }) {
       id: 2,
       community: "worldnews", 
       user: "wildlifenews", 
+      userAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
       title: "Grizzly attacks hiker on remote Canadian beach trail", 
       content: "A hiker was unexpectedly attacked by a grizzly bear while exploring remote trails in British Columbia. Rescue operations are underway.",
       upvotes: 321, 
@@ -77,7 +117,7 @@ export default function GuestHomePage({ darkMode, onLogin }) {
         {
           id: 4,
           author: "outdoor_enthusiast",
-          avatar: "/profile.png",
+          avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
           content: "Always carry bear spray when hiking in grizzly country! Stay safe out there.",
           upvotes: 67,
           userVote: 0,
@@ -90,6 +130,7 @@ export default function GuestHomePage({ darkMode, onLogin }) {
       id: 3,
       community: "movies", 
       user: "movieupdates",
+      userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
       title: "Wicked Part 2 box office projections exceed expectations", 
       content: "Early box office projections for Wicked Part 2 are surpassing industry expectations, with pre-sales breaking records.",
       upvotes: 200, 
@@ -99,29 +140,129 @@ export default function GuestHomePage({ darkMode, onLogin }) {
       image: null,
       isExpanded: false,
       commentsList: []
+    },
+    // User profile post (without community)
+    { 
+      id: 4,
+      community: null,
+      user: "react_learner",
+      userAvatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+      title: "Just built my first React todo app - any feedback welcome!", 
+      content: "After learning React for a month, I finally built a todo app with local storage persistence. It has add, delete, and toggle complete functionality. Would love any suggestions for improvement!",
+      upvotes: 78, 
+      comments: 12,
+      time: "2 hours ago",
+      userVote: 0,
+      image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      isExpanded: false,
+      isUserPost: true,
+      commentsList: [
+        {
+          id: 5,
+          author: "senior_dev",
+          avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+          content: "Great job! The code structure looks clean. One suggestion: consider adding drag-and-drop functionality for reordering tasks.",
+          upvotes: 24,
+          userVote: 0,
+          time: "1 hour ago",
+          replies: [
+            {
+              id: 6,
+              author: "react_learner",
+              avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+              content: "Thanks! I'll look into react-beautiful-dnd for that feature.",
+              upvotes: 8,
+              userVote: 0,
+              time: "30 minutes ago",
+              replies: []
+            }
+          ]
+        }
+      ]
     }
   ]);
 
   const popularCommunities = [
-    { name: "AskMen", members: "888,675" },
-    { name: "AskWomen", members: "5,360,108" },
-    { name: "PS4", members: "5,507,926" },
-    { name: "apple", members: "6,263,518" },
-    { name: "NBA2k", members: "78,031" }
+    { 
+      name: "AskMen", 
+      members: "888,675",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80"
+    },
+    { 
+      name: "AskWomen", 
+      members: "5,360,108",
+      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80"
+    },
+    { 
+      name: "PS4", 
+      members: "5,507,926",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80"
+    },
+    { 
+      name: "apple", 
+      members: "6,263,518",
+      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80"
+    },
+    { 
+      name: "NBA2k", 
+      members: "78,031",
+      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80"
+    }
   ];
 
 
-  const sortOptions = [
-    "Best",
-    "Hot",
-    "New",
-    "Top",
-    "Rising"
-  ];
+  // Save viewMode to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('viewMode', viewMode);
+      console.log('Saved viewMode to localStorage:', viewMode);
+    } catch (error) {
+      console.error('Error saving view mode to localStorage:', error);
+    }
+  }, [viewMode]);
+
+  // Save expandedPostId to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      if (expandedPostId) {
+        localStorage.setItem('expandedPostId', JSON.stringify(expandedPostId));
+        console.log('Saved expandedPostId to localStorage:', expandedPostId);
+      } else {
+        localStorage.removeItem('expandedPostId');
+        console.log('Removed expandedPostId from localStorage');
+      }
+    } catch (error) {
+      console.error('Error saving expanded post to localStorage:', error);
+    }
+  }, [expandedPostId]);
+
+  // Save expandedPosts to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('expandedPosts', JSON.stringify(expandedPosts));
+      console.log('Saved expandedPosts to localStorage:', expandedPosts);
+    } catch (error) {
+      console.error('Error saving expanded posts to localStorage:', error);
+    }
+  }, [expandedPosts]);
+
+  // Initialize posts with expanded state from localStorage on component mount
+  useEffect(() => {
+    if (expandedPosts.length > 0) {
+      setPosts(prevPosts => 
+        prevPosts.map(post => ({
+          ...post,
+          isExpanded: expandedPosts.includes(post.id)
+        }))
+      );
+    }
+  }, [expandedPosts]);
 
   // Toggle comments visibility - ALLOWED for guests
   const toggleComments = (postId) => {
-    setExpandedPostId(expandedPostId === postId ? null : postId);
+    const newExpandedPostId = expandedPostId === postId ? null : postId;
+    console.log('Toggling comments for post:', postId, 'New expandedPostId:', newExpandedPostId);
+    setExpandedPostId(newExpandedPostId);
   };
 
   // Handle comment voting - REQUIRES LOGIN
@@ -155,22 +296,13 @@ export default function GuestHomePage({ darkMode, onLogin }) {
   };
 
   const toggleViewMode = () => {
-    setViewMode(prevMode => prevMode === 'card' ? 'compact' : 'card');
+    setViewMode(prev => {
+      const newViewMode = prev === 'card' ? 'compact' : 'card';
+      console.log('Toggling view mode to:', newViewMode);
+      return newViewMode;
+    });
   };
 
-  const toggleLocationDropdown = () => {
-    setShowLocationDropdown(prev => !prev);
-    setShowSortDropdown(false);
-  };
-
-  const toggleSortDropdown = () => {
-    setShowSortDropdown(prev => !prev);
-  };
-
-  const handleSortSelect = (sortOption) => {
-    setSortBy(sortOption);
-    setShowSortDropdown(false);
-  };
 
   const formatNumber = (num) => {
     if (num >= 1000) {
@@ -187,14 +319,28 @@ export default function GuestHomePage({ darkMode, onLogin }) {
     return darkMode ? "/compact-image-dark.png" : "/compact-image.png";
   };
 
-  // Add toggleExpand function
+  // Add toggleExpand function with localStorage persistence
   const toggleExpand = (postId) => {
     setPosts(prevPosts => 
-      prevPosts.map(post => 
-        post.id === postId 
-          ? { ...post, isExpanded: !post.isExpanded }
-          : post
-      )
+      prevPosts.map(post => {
+        if (post.id === postId) {
+          const newExpandedState = !post.isExpanded;
+          
+          // Update expandedPosts array in state
+          setExpandedPosts(prev => {
+            if (newExpandedState) {
+              // Add to expanded posts if not already there
+              return prev.includes(postId) ? prev : [...prev, postId];
+            } else {
+              // Remove from expanded posts
+              return prev.filter(id => id !== postId);
+            }
+          });
+          
+          return { ...post, isExpanded: newExpandedState };
+        }
+        return post;
+      })
     );
   };
 
@@ -213,8 +359,10 @@ export default function GuestHomePage({ darkMode, onLogin }) {
     console.log(`Guest viewing post ${postId}`);
   };
 
-  const handleCommunityClick = (communityName) => {
-    console.log(`Guest viewing community r/${communityName}`);
+  // Handle hide post (for guest - will prompt login)
+  const handleHidePost = (postId, e) => {
+    e?.stopPropagation();
+    promptLogin();
   };
 
   return (
@@ -223,36 +371,6 @@ export default function GuestHomePage({ darkMode, onLogin }) {
       
       <div className="main-feed">
         <div className="feed-controls">
-          <div className="sort-options">
-            {/* Sort Dropdown */}
-            <div className="sort-dropdown-container">
-              <button 
-                className="sort-btn active"
-                onClick={toggleSortDropdown}
-              >
-                <span>{sortBy}</span>
-                <svg className={`dropdown-icon ${showSortDropdown ? 'open' : ''}`} fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-              
-              {showSortDropdown && (
-                <div className="sort-dropdown">
-                  <div className="dropdown-list">
-                    {sortOptions.map((option, index) => (
-                      <button
-                        key={index}
-                        className={`dropdown-item ${sortBy === option ? 'active' : ''}`}
-                        onClick={() => handleSortSelect(option)}
-                      >
-                        {option}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-            
             <button 
               className="view-toggle-btn" 
               onClick={toggleViewMode}
@@ -260,29 +378,32 @@ export default function GuestHomePage({ darkMode, onLogin }) {
             >
               {viewMode === 'card' ? '☐' : '≡'}
             </button>
-          </div>
         </div>
+        {/*post */}
         <div className={`posts-container ${viewMode}-view`}>
-          {posts.map((post) => (
-            <div 
-              key={post.id} 
-              className={`post-card ${viewMode}-view`}
-              onClick={() => handlePostClick(post.id)}
-            >
-              {/* Thumbnail for compact view - always show, with default image if needed */}
-              {viewMode === 'compact' && (
-                <div className="post-thumbnail">
-                  <img 
-                    src={getThumbnailImage(post)} 
-                    alt={post.image ? post.title : "Default post thumbnail"}
-                    className={`thumbnail-image ${!post.image ? 'default-thumbnail' : ''}`}
-                  />
-                </div>
-              )}
+          {posts.map((post) => {
+            const isCommentsExpanded = expandedPostId === post.id;
+            
+            return (
+              <div 
+                key={post.id} 
+                className={`post-card ${viewMode}-view`}
+                onClick={() => handlePostClick(post.id)}
+              >
+                {/* Thumbnail for compact view - always show, with default image if needed */}
+                {viewMode === 'compact' && (
+                  <div className="post-thumbnail">
+                    <img 
+                      src={getThumbnailImage(post)} 
+                      alt={post.image ? post.title : "Default post thumbnail"}
+                      className={`thumbnail-image ${!post.image ? 'default-thumbnail' : ''}`}
+                    />
+                  </div>
+                )}
               
 
-              <div className="post-content">
-                 {/* EXPAND BUTTON - Put this here */}
+                <div className="post-content">
+                  {/* EXPAND BUTTON - Put this here */}
                   {viewMode === 'compact' && (post.image || post.content) && (
                     <button 
                       className="expand-btn"
@@ -296,16 +417,61 @@ export default function GuestHomePage({ darkMode, onLogin }) {
                     </button>
                   )}
 
-                <div className="post-meta">
-                  <span className="community">r/{post.community}</span>
-                  <span className="divider">•</span>
-                  <span className="user">Posted by u/{post.user}</span>
-                  <span className="divider">•</span>
-                  <span className="time">{post.time}</span>
-                </div>
+                  <div className="post-meta">
+                    <div className="post-meta-left">
+                      <img 
+                        src={post.userAvatar} 
+                        alt={post.user}
+                        className="user-avatar"
+                      />
+                      {post.community ? (
+                        <>
+                          <span className="community">r/{post.community}</span>
+                          <span className="divider">•</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="community">u/{post.user}</span>
+                          <span className="divider">•</span>
+                        </>
+                      )}
+                      <span className="user">Posted by u/{post.user}</span>
+                      <span className="divider">•</span>
+                      <span className="time">{post.time}</span>
+                    </div>
 
-                <h3 className="post-title">{post.title}</h3>
-                 {/* EXPANDED CONTENT - Put this here */}
+                    <div className="post-meta-right">
+                      {/* Only show Join button for community posts */}
+                      {post.community && (
+                        <button 
+                          className={`join-btn ${joinedCommunities[post.community] ? 'joined' : ''}`}
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            promptLogin();
+                          }}
+                        >
+                          {joinedCommunities[post.community] ? 'Joined' : 'Join'}
+                        </button>
+                      )}
+
+                      <div className="post-menu-wrapper" onClick={(e)=>e.stopPropagation()}>
+                        <button className="post-menu-btn">
+                          <FaEllipsisH />
+                        </button>
+
+                        <div className="post-menu-dropdown">
+                          {/* Only show Report button with flag icon for all posts */}
+                          <button className="menu-item flag-item" onClick={promptLogin}>
+                            <FaFlag className="menu-icon" />
+                            Report
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <h3 className="post-title">{post.title}</h3>
+                  {/* EXPANDED CONTENT - Put this here */}
                   {viewMode === 'compact' && post.isExpanded && (
                     <div className="expanded-content">
                       {post.image && (
@@ -323,133 +489,135 @@ export default function GuestHomePage({ darkMode, onLogin }) {
                     </div>
                   )}
                 
-                {/* Full content and image for card view */}
-                {viewMode === 'card' && (
-                  <>
-                    {post.content && (
-                      <div className="post-body">
-                        {post.content}
-                      </div>
-                    )}
-                    {post.image && (
-                      <div className="post-image-container">
-                        <img 
-                          src={post.image} 
-                          alt={post.title}
-                          className="post-image"
-                        />
-                      </div>
-                    )}
-                  </>
-                )}
-
-                <div className="post-actions-bar" onClick={(e) => e.stopPropagation()}>
-                  <div className={`vote-section ${post.userVote === 1 ? 'upvoted' : ''} ${post.userVote === -1 ? 'downvoted' : ''}`}>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleUpvote(post.id, e);
-                      }}
-                      className="vote-btn upvote"
-                      title="Upvote"
-                    >
-                      ⇧
-                    </button>
-                    <span className="vote-count">{formatNumber(post.upvotes)}</span>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDownvote(post.id, e);
-                      }}
-                      className="vote-btn downvote"
-                      title="Downvote"
-                    >
-                      ⇩
-                    </button>
-                  </div>
-                  
-                  {/* Comments Button - ALLOWED for guests to view comments */}
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleComments(post.id);
-                    }} 
-                    className="post-action-btn comment-btn"
-                  >
-                    <FaRegCommentAlt className="action-icon" />
-                    <span className="action-text">{formatNumber(post.comments)} Comments</span>
-                  </button>
-                  
-                  <button onClick={promptLogin} className="post-action-btn">
-                    <FaShare className="action-icon" />
-                    <span className="action-text">Share</span>
-                  </button>
-                  
-                  <button onClick={promptLogin} className="post-action-btn">
-                    <FaBookmark className="action-icon" />
-                    <span className="action-text">Save</span>
-                  </button>
-                  
-                </div>
-
-                {/* COMMENTS SECTION - Guests can VIEW comments but not interact */}
-                {expandedPostId === post.id && (
-                  <div className="post-comments-section">
-                    <div className="comments-header">
-                      <h4>{post.commentsList.length} Comment{post.commentsList.length !== 1 ? 's' : ''}</h4>
-                      <div className="guest-notice">
-                        <small>💡 Log in to vote and comment</small>
-                      </div>
-                    </div>
-                    
-                    {/* Comments List - READ ONLY for guests */}
-                    <div className="comments-list">
-                      {post.commentsList.length > 0 ? (
-                        post.commentsList.map(comment => (
-                          <Comment 
-                            key={comment.id} 
-                            comment={comment} 
-                            darkMode={darkMode}
-                            onVote={handleCommentVote} // Will prompt login
-                            onReply={handleCommentReply} // Will prompt login
-                            postId={post.id}
-                          />
-                        ))
-                      ) : (
-                        <div className="no-comments">
-                          No comments yet. <button onClick={promptLogin} className="login-prompt-btn">Log in</button> to be the first to share your thoughts!
+                  {/* Full content and image for card view */}
+                  {viewMode === 'card' && (
+                    <>
+                      {post.content && (
+                        <div className="post-body">
+                          {post.content}
                         </div>
                       )}
-                    </div>
+                      {post.image && (
+                        <div className="post-image-container">
+                          <img 
+                            src={post.image} 
+                            alt={post.title}
+                            className="post-image"
+                          />
+                        </div>
+                      )}
+                    </>
+                  )}
 
-                    {/* Add Comment Section - Disabled for guests */}
-                    <div className="add-comment guest-disabled">
-                      <textarea 
-                        placeholder="Log in to add a comment..." 
-                        className="comment-input"
-                        rows="3"
-                        onClick={promptLogin}
-                        readOnly
-                      />
-                      <div className="comment-actions-footer">
-                        <button 
-                          className="comment-btn guest-disabled-btn"
+                  <div className="post-actions-bar" onClick={(e) => e.stopPropagation()}>
+                    <div className={`vote-section ${post.userVote === 1 ? 'upvoted' : ''} ${post.userVote === -1 ? 'downvoted' : ''}`}>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUpvote(post.id, e);
+                        }}
+                        className="vote-btn upvote"
+                        title="Upvote"
+                      >
+                        ⇧
+                      </button>
+                      <span className="vote-count">{formatNumber(post.upvotes)}</span>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDownvote(post.id, e);
+                        }}
+                        className="vote-btn downvote"
+                        title="Downvote"
+                      >
+                        ⇩
+                      </button>
+                    </div>
+                    
+                    {/* Comments Button - ALLOWED for guests to view comments */}
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleComments(post.id);
+                      }} 
+                      className="post-action-btn comment-btn"
+                    >
+                      <FaRegCommentAlt className="action-icon" />
+                      <span className="action-text">{formatNumber(post.comments)} Comments</span>
+                    </button>
+                    
+                    <button onClick={promptLogin} className="post-action-btn">
+                      <FaShare className="action-icon" />
+                      <span className="action-text">Share</span>
+                    </button>
+                    
+                  </div>
+
+                  {/* COMMENTS SECTION - Guests can VIEW comments but not interact */}
+                  {isCommentsExpanded && (
+                    <div className="post-comments-section">
+                      <div className="comments-header">
+                        <h4>{post.commentsList.length} Comment{post.commentsList.length !== 1 ? 's' : ''}</h4>
+                        <div className="guest-notice">
+                          <small>💡 Log in to vote and comment</small>
+                        </div>
+                      </div>
+                      
+                      {/* Comments List - READ ONLY for guests */}
+                      <div className="comments-list">
+                        {post.commentsList.length > 0 ? (
+                          post.commentsList.map(comment => (
+                            <Comment 
+                              key={comment.id} 
+                              comment={comment} 
+                              darkMode={darkMode}
+                              onVote={handleCommentVote} // Will prompt login
+                              onReply={handleCommentReply} // Will prompt login
+                              postId={post.id}
+                            />
+                          ))
+                        ) : (
+                          <div className="no-comments">
+                            No comments yet. <button onClick={promptLogin} className="login-prompt-btn">Log in</button> to be the first to share your thoughts!
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Add Comment Section - Disabled for guests */}
+                      <div className="add-comment guest-disabled">
+                        <textarea 
+                          placeholder="Log in to add a comment..." 
+                          className="comment-input"
+                          rows="3"
                           onClick={promptLogin}
-                        >
-                          Log in to Comment
-                        </button>
+                          readOnly
+                        />
+                        <div className="comment-actions-footer">
+                          <button 
+                            className="comment-btn guest-disabled-btn"
+                            onClick={promptLogin}
+                          >
+                            Log in to Comment
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
       <div className="sidebar">
         <PopularCommunities communities={popularCommunities} darkMode={darkMode} />
+      </div>
+
+      {/* Footer Text */}
+      <div className="footer-text">
+        <p className="footer-line">Reddit Rules    Privacy Policy    User Agreement</p>
+        <p className="footer-copyright">Reddit, Inc. © 2025. All rights reserved.</p>
       </div>
     </div>
   );
