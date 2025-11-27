@@ -1,4 +1,5 @@
 // src/components/profile/ProfileSidebar.jsx
+import { Link } from 'react-router-dom';   // ← ADD THIS
 import './styles/sidebar.css';
 
 export default function ProfileSidebar() {
@@ -17,6 +18,11 @@ export default function ProfileSidebar() {
         <p className="profile-sidebar-handle">u/Moist_Barber_9724</p>
 
         <button>Share</button>
+
+        {/* ← NEW: EDIT PROFILE BUTTON */}
+        <Link to="/edit">
+          <button className="edit-profile-sidebar-btn">Edit Profile</button>
+        </Link>
 
         <div className="profile-stats-grid">
           <div className="stat-item">

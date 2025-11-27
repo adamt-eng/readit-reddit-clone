@@ -150,3 +150,32 @@
 .view-all-link:hover {
   text-decoration: underline;
 }
+
+/* Edit Profile button in right sidebar */
+.edit-profile-sidebar-btn {
+  width: 100%;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  background: #0079d3;
+  border: 1px solid #0079d3;
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.edit-profile-sidebar-btn:hover {
+  background: #0061a8;
+}
+
+/* DARK MODE */
+.dark-mode .edit-profile-sidebar-btn {
+  background: #d7dadc !important;
+  color: #000 !important;
+}
+
+.dark-mode .edit-profile-sidebar-btn:hover {
+  background: #c7cacd !important;
+}

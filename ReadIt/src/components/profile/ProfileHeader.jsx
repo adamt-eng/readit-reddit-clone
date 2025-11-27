@@ -27,10 +27,6 @@ export default function ProfileHeader() {
         <h1>u/Moist_Barber_9724</h1>
         <p className="karma-line">Karma: 1 • Cake day: November 2024</p>
       </div>
-      <div className="profile-buttons">
-        <button className="btn-share">Share</button>
-        <button className="btn-edit">Edit Profile</button>
-      </div>
     </div>
   );
 }
