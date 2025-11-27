@@ -1,4 +1,4 @@
-/* src/components/LeftSidebar.css */
+/* src/components/LeftSidebar.css — FINAL & FLAWLESS (2025 Reddit clone) */
 
 .left-sidebar {
   width: 256px;
@@ -14,7 +14,6 @@
 
 .sidebar-logo {
   padding: 8px 12px 12px;
-  margin: 0;
   background: #f6f7f8;
 }
 
@@ -51,18 +50,26 @@
   font-weight: 500;
   margin-bottom: 4px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, color 0.2s;
   text-decoration: none;
 }
 
+/* Hover — light gray */
 .sidebar-item:hover {
   background: #e9ebed;
 }
 
+/* Active — blue (only when actually active) */
 .sidebar-item.active {
   background: #0079d3;
   color: white;
   font-weight: 700;
+}
+
+/* Special: Start a community */
+.create-community {
+  color: #0079d3;
+  font-weight: 600;
 }
 
 .sidebar-icon {
@@ -88,10 +95,6 @@
   margin: 12px 0;
 }
 
-.create-community {
-  color: #0079d3;
-}
-
 .section-title {
   font-size: 10px;
   font-weight: 700;
@@ -101,9 +104,7 @@
   padding: 8px 12px 4px;
 }
 
-.games-section {
-  padding-top: 8px;
-}
+.games-section { padding-top: 8px; }
 
 .game-card {
   display: flex;
@@ -117,9 +118,7 @@
   transition: border-color 0.2s;
 }
 
-.game-card:hover {
-  border-color: #898989;
-}
+.game-card:hover { border-color: #898989; }
 
 .game-icon {
   width: 48px;
@@ -164,4 +163,27 @@
 .game-players {
   font-size: 11px;
   color: #7c7c7c;
+}
+
+/* DARK MODE — PERFECT */
+.dark-mode .left-sidebar {
+  background: #1a1a1b;
+  border-right-color: #343536;
+}
+
+.dark-mode .sidebar-item {
+  color: #d7dadc;
+}
+
+.dark-mode .sidebar-item:hover {
+  background: #272729;
+}
+
+.dark-mode .sidebar-item.active {
+  background: #0079d3;
+  color: white;
+}
+
+.dark-mode .create-community {
+  color: #4fbcff;
 }
