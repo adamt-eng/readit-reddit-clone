@@ -3,59 +3,85 @@ import React from "react";
 import PostCard from "../PostCard/PostCard";
 import "./TrendingPosts.css";
 
-export default function TrendingPosts({ 
-  posts, 
-  viewMode, 
-  onVote, 
-  formatNumber, 
+export default function TrendingPosts({
+  // Common props
+  posts,
+  viewMode,
   darkMode,
+  onVote,
+  formatNumber,
   onToggleComments,
-  onUpvote,
-  onDownvote,
-  onHidePost,
+  onPostClick,
   onJoinCommunity,
-  expandedPostId,
   joinedCommunities,
+  expandedPostId,
   commentInputs,
   onCommentInputChange,
   onAddComment,
+  onHidePost,
+  onUnhidePost,
+  hiddenPosts = [],
+  onUpvote,
+  onDownvote,
+  onCommentVote,
+  onCommentReply,
+  getThumbnailImage,
+  toggleExpand,
+  
+  // Guest-specific props
   isGuest = false,
   onPromptLogin
 }) {
   
-  const getThumbnailImage = (post) => {
-    if (post.image) {
-      return post.image;
-    }
-    return darkMode ? "/compact-image-dark.png" : "/compact-image.png";
-  };
-
   return (
     <div className="trending-posts">
+      {/* Main Posts Container - ONLY this part */}
       <div className={`posts-container ${viewMode}-view`}>
-        {posts.map((post) => (
-          <PostCard 
-            key={post.id}
-            post={post}
-            viewMode={viewMode}
-            onVote={onVote}
-            formatNumber={formatNumber}
-            darkMode={darkMode}
-            onToggleComments={onToggleComments}
-            onUpvote={onUpvote}
-            onDownvote={onDownvote}
-            onHidePost={onHidePost}
-            onJoinCommunity={onJoinCommunity}
-            expandedPostId={expandedPostId}
-            joinedCommunities={joinedCommunities}
-            commentInputs={commentInputs}
-            onCommentInputChange={onCommentInputChange}
-            onAddComment={onAddComment}
-            isGuest={isGuest}
-            onPromptLogin={onPromptLogin}
-            getThumbnailImage={getThumbnailImage}
-          />
-        ))}
+        {posts.map((post) => {
+          // Skip rendering if post is hidden
+          if (hiddenPosts.includes(post.id)) {
+            return (
+              <div key={post.id} className="post-hidden-message">
+                <span>Post hidden</span>
+                <button 
+                  className="undo-btn"
+                  onClick={(e) => onUnhidePost?.(post.id, e)}
+                >
+                  Undo
+                </button>
+              </div>
+            );
+          }
+
+          return (
+            <PostCard
+              key={post.id}
+              post={post}
+              viewMode={viewMode}
+              darkMode={darkMode}
+              // Pass all functionality props
+              onVote={onVote}
+              formatNumber={formatNumber}
+              onToggleComments={onToggleComments}
+              onPostClick={onPostClick}
+              onJoinCommunity={onJoinCommunity}
+              joinedCommunities={joinedCommunities}
+              expandedPostId={expandedPostId}
+              commentInputs={commentInputs}
+              onCommentInputChange={onCommentInputChange}
+              onAddComment={onAddComment}
+              onHidePost={onHidePost}
+              onUpvote={onUpvote}
+              onDownvote={onDownvote}
+              onCommentVote={onCommentVote}
+              onCommentReply={onCommentReply}
+              getThumbnailImage={getThumbnailImage}
+              toggleExpand={toggleExpand}
+              isGuest={isGuest}
+              onPromptLogin={onPromptLogin}
+            />
+          );
+        })}
       </div>
     </div>
   );

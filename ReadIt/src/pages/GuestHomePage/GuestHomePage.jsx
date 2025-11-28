@@ -6,6 +6,7 @@ import { FaRegCommentAlt, FaShare, FaBookmark, FaEllipsisH, FaFlag  } from "reac
 import "./GuestHomePage.css";
 import { FaExpand, FaCompress } from "react-icons/fa";
 import Comment from "../../components/Comment/Comment";
+import TrendingPosts from "../../components/TrendingPosts/TrendingPosts";
 
 export default function GuestHomePage({ darkMode, onLogin }) {
   // Initialize viewMode from localStorage
@@ -380,234 +381,32 @@ export default function GuestHomePage({ darkMode, onLogin }) {
             </button>
         </div>
         {/*post */}
-        <div className={`posts-container ${viewMode}-view`}>
-          {posts.map((post) => {
-            const isCommentsExpanded = expandedPostId === post.id;
-            
-            return (
-              <div 
-                key={post.id} 
-                className={`post-card ${viewMode}-view`}
-                onClick={() => handlePostClick(post.id)}
-              >
-                {/* Thumbnail for compact view - always show, with default image if needed */}
-                {viewMode === 'compact' && (
-                  <div className="post-thumbnail">
-                    <img 
-                      src={getThumbnailImage(post)} 
-                      alt={post.image ? post.title : "Default post thumbnail"}
-                      className={`thumbnail-image ${!post.image ? 'default-thumbnail' : ''}`}
-                    />
-                  </div>
-                )}
-              
-
-                <div className="post-content">
-                  {/* EXPAND BUTTON - Put this here */}
-                  {viewMode === 'compact' && (post.image || post.content) && (
-                    <button 
-                      className="expand-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleExpand(post.id);
-                      }}
-                      title={post.isExpanded ? "Collapse" : "Expand"}
-                    >
-                      {post.isExpanded ? <FaCompress /> : <FaExpand />}
-                    </button>
-                  )}
-
-                  <div className="post-meta">
-                    <div className="post-meta-left">
-                      <img 
-                        src={post.userAvatar} 
-                        alt={post.user}
-                        className="user-avatar"
-                      />
-                      {post.community ? (
-                        <>
-                          <span className="community">r/{post.community}</span>
-                          <span className="divider">•</span>
-                        </>
-                      ) : (
-                        <>
-                          <span className="community">u/{post.user}</span>
-                          <span className="divider">•</span>
-                        </>
-                      )}
-                      <span className="user">Posted by u/{post.user}</span>
-                      <span className="divider">•</span>
-                      <span className="time">{post.time}</span>
-                    </div>
-
-                    <div className="post-meta-right">
-                      {/* Only show Join button for community posts */}
-                      {post.community && (
-                        <button 
-                          className={`join-btn ${joinedCommunities[post.community] ? 'joined' : ''}`}
-                          onClick={(e) => { 
-                            e.stopPropagation(); 
-                            promptLogin();
-                          }}
-                        >
-                          {joinedCommunities[post.community] ? 'Joined' : 'Join'}
-                        </button>
-                      )}
-
-                      <div className="post-menu-wrapper" onClick={(e)=>e.stopPropagation()}>
-                        <button className="post-menu-btn">
-                          <FaEllipsisH />
-                        </button>
-
-                        <div className="post-menu-dropdown">
-                          {/* Only show Report button with flag icon for all posts */}
-                          <button className="menu-item flag-item" onClick={promptLogin}>
-                            <FaFlag className="menu-icon" />
-                            Report
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <h3 className="post-title">{post.title}</h3>
-                  {/* EXPANDED CONTENT - Put this here */}
-                  {viewMode === 'compact' && post.isExpanded && (
-                    <div className="expanded-content">
-                      {post.image && (
-                        <img 
-                          src={post.image} 
-                          alt={post.title}
-                          className="expanded-image"
-                        />
-                      )}
-                      {post.content && (
-                        <div className="expanded-text">
-                          {post.content}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                
-                  {/* Full content and image for card view */}
-                  {viewMode === 'card' && (
-                    <>
-                      {post.content && (
-                        <div className="post-body">
-                          {post.content}
-                        </div>
-                      )}
-                      {post.image && (
-                        <div className="post-image-container">
-                          <img 
-                            src={post.image} 
-                            alt={post.title}
-                            className="post-image"
-                          />
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  <div className="post-actions-bar" onClick={(e) => e.stopPropagation()}>
-                    <div className={`vote-section ${post.userVote === 1 ? 'upvoted' : ''} ${post.userVote === -1 ? 'downvoted' : ''}`}>
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleUpvote(post.id, e);
-                        }}
-                        className="vote-btn upvote"
-                        title="Upvote"
-                      >
-                        ⇧
-                      </button>
-                      <span className="vote-count">{formatNumber(post.upvotes)}</span>
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDownvote(post.id, e);
-                        }}
-                        className="vote-btn downvote"
-                        title="Downvote"
-                      >
-                        ⇩
-                      </button>
-                    </div>
-                    
-                    {/* Comments Button - ALLOWED for guests to view comments */}
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleComments(post.id);
-                      }} 
-                      className="post-action-btn comment-btn"
-                    >
-                      <FaRegCommentAlt className="action-icon" />
-                      <span className="action-text">{formatNumber(post.comments)} Comments</span>
-                    </button>
-                    
-                    <button onClick={promptLogin} className="post-action-btn">
-                      <FaShare className="action-icon" />
-                      <span className="action-text">Share</span>
-                    </button>
-                    
-                  </div>
-
-                  {/* COMMENTS SECTION - Guests can VIEW comments but not interact */}
-                  {isCommentsExpanded && (
-                    <div className="post-comments-section">
-                      <div className="comments-header">
-                        <h4>{post.commentsList.length} Comment{post.commentsList.length !== 1 ? 's' : ''}</h4>
-                        <div className="guest-notice">
-                          <small>💡 Log in to vote and comment</small>
-                        </div>
-                      </div>
-                      
-                      {/* Comments List - READ ONLY for guests */}
-                      <div className="comments-list">
-                        {post.commentsList.length > 0 ? (
-                          post.commentsList.map(comment => (
-                            <Comment 
-                              key={comment.id} 
-                              comment={comment} 
-                              darkMode={darkMode}
-                              onVote={handleCommentVote} // Will prompt login
-                              onReply={handleCommentReply} // Will prompt login
-                              postId={post.id}
-                            />
-                          ))
-                        ) : (
-                          <div className="no-comments">
-                            No comments yet. <button onClick={promptLogin} className="login-prompt-btn">Log in</button> to be the first to share your thoughts!
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Add Comment Section - Disabled for guests */}
-                      <div className="add-comment guest-disabled">
-                        <textarea 
-                          placeholder="Log in to add a comment..." 
-                          className="comment-input"
-                          rows="3"
-                          onClick={promptLogin}
-                          readOnly
-                        />
-                        <div className="comment-actions-footer">
-                          <button 
-                            className="comment-btn guest-disabled-btn"
-                            onClick={promptLogin}
-                          >
-                            Log in to Comment
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+          <TrendingPosts
+            posts={posts}
+            viewMode={viewMode}
+            darkMode={darkMode}
+            onVote={handleVote}
+            formatNumber={formatNumber}
+            onToggleComments={toggleComments}
+            onPostClick={handlePostClick}
+            onJoinCommunity={() => {}}
+            joinedCommunities={{}}
+            expandedPostId={expandedPostId}
+            commentInputs={{}}
+            onCommentInputChange={handleCommentInputChange}
+            onAddComment={handleAddComment}
+            onHidePost={handleHidePost}
+            onUnhidePost={() => {}}
+            hiddenPosts={[]}
+            onUpvote={handleUpvote}
+            onDownvote={handleDownvote}
+            onCommentVote={handleCommentVote}
+            onCommentReply={handleCommentReply}
+            getThumbnailImage={getThumbnailImage}
+            toggleExpand={toggleExpand}
+            isGuest={true}
+            onPromptLogin={promptLogin}
+          />
       </div>
 
       <div className="sidebar">

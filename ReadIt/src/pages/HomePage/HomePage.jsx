@@ -5,10 +5,11 @@ import {
   FaHome, FaFire, FaStar, FaRegBookmark, FaShare, FaEllipsisH, FaEyeSlash,
   FaArrowUp, FaRegCommentAlt ,FaFlag
 } from "react-icons/fa";
-import { HiUserGroup } from "react-icons/hi";
 import "./HomePage.css";
+import "../../components/PostCard/PostCard.css";
 import { FaExpand, FaCompress } from "react-icons/fa";
 import Comment from "../../components/Comment/Comment";
+import TrendingPosts from "../../components/TrendingPosts/TrendingPosts";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 
 const HomePage = ({ user, onLogout, darkMode }) => {
@@ -809,268 +810,34 @@ const HomePage = ({ user, onLogout, darkMode }) => {
         </div>
 
         {/* Posts */}
-        <div className={`posts-container ${viewMode}-view`}>
-          {posts.map((post) => {
-            // Skip rendering if post is hidden
-            if (hiddenPosts.includes(post.id)) {
-              return (
-                <div key={post.id} className="post-hidden-message">
-                  <span>Post hidden</span>
-                  <button 
-                    className="undo-btn"
-                    onClick={(e) => handleUnhidePost(post.id, e)}
-                  >
-                    Undo
-                  </button>
-                </div>
-              );
-            }
-
-            const isCommentsExpanded = expandedPostId === post.id;
-
-            return (
-              <div 
-                key={post.id} 
-                className={`post-card ${viewMode}-view`}
-                onClick={() => handlePostClick(post.id)}
-              >
-                {/* Thumbnail for compact view */}
-                {viewMode === 'compact' && (
-                  <div className="post-thumbnail">
-                    <img 
-                      src={getThumbnailImage(post)} 
-                      alt={post.image ? post.title : "Default post thumbnail"}
-                      className={`thumbnail-image ${!post.image ? 'default-thumbnail' : ''}`}
-                    />
-                  </div>
-                )}
-
-                <div className="post-content">
-                  {/* EXPAND BUTTON for compact view */}
-                  {viewMode === 'compact' && (post.image || post.content) && (
-                    <button 
-                      className="expand-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleExpand(post.id);
-                      }}
-                      title={post.isExpanded ? "Collapse" : "Expand"}
-                    >
-                      {post.isExpanded ? <FaCompress /> : <FaExpand />}
-                    </button>
-                  )}
-
-                  <div className="post-meta">
-                    <div className="post-meta-left">
-                      <img 
-                        src={post.userAvatar} 
-                        alt={post.user}
-                        className="user-avatar"
-                      />
-                      {post.community ? (
-                        <>
-                          <span className="community">r/{post.community}</span>
-                          <span className="divider">•</span>
-                        </>
-                      ) : (
-                        <>
-                          <span className="community">u/{post.user}</span>
-                          <span className="divider">•</span>
-                        </>
-                      )}
-                      <span className="user">Posted by u/{post.user}</span>
-                      <span className="divider">•</span>
-                      <span className="time">{post.time}</span>
-                    </div>
-
-                    <div className="post-meta-right">
-                      {/* Join button only shows if post has a community AND is NOT user's own post */}
-                      {post.community && !post.isUserPost && (
-                        <button
-                          className={`join-btn ${joinedCommunities[post.community] ? 'joined' : ''}`}
-                          onClick={(e) => handleJoinCommunity(post.community, e)}
-                        >
-                          {joinedCommunities[post.community] ? 'Joined' : 'Join'}
-                        </button>
-                      )}
-
-                      <div className="post-menu-wrapper" onClick={(e) => e.stopPropagation()}>
-                        <button className="post-menu-btn">
-                          <FaEllipsisH />
-                        </button>
-
-                        <div className="post-menu-dropdown">
-                          {/* Show full menu for community posts */}
-                          {post.community ? (
-                            <>
-                              <button className="menu-item">
-                                <FaBell className="menu-icon" /> 
-                                Follow Post
-                              </button>
-                              <button className="menu-item">
-                                <FaRegBookmark className="menu-icon" /> 
-                                Save
-                              </button>
-                              <button 
-                                className="menu-item"
-                                onClick={(e) => handleHidePost(post.id, e)}
-                              >
-                                <FaEyeSlash className="menu-icon" />
-                                Hide
-                              </button>
-                              <hr className="menu-divider" />
-                              <button className="menu-item flag-item">
-                                <FaFlag className="menu-icon" />
-                                Report
-                              </button>
-                            </>
-                          ) : (
-                            /* Show minimal menu for user posts (no community) */
-                            <>
-                              <button 
-                                className="menu-item"
-                                onClick={(e) => handleHidePost(post.id, e)}
-                              >
-                                <FaEyeSlash className="menu-icon" />
-                                Hide
-                              </button>
-                              <button className="menu-item flag-item">
-                                <FaFlag className="menu-icon" />
-                                Report
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <h3 className="post-title">{post.title}</h3>
-                  
-                  {/* EXPANDED CONTENT for compact view */}
-                  {viewMode === 'compact' && post.isExpanded && (
-                    <div className="expanded-content">
-                      {post.image && (
-                        <img 
-                          src={post.image} 
-                          alt={post.title}
-                          className="expanded-image"
-                        />
-                      )}
-                      {post.content && (
-                        <div className="expanded-text">
-                          {post.content}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  
-                  {/* Full content and image for card view */}
-                  {viewMode === 'card' && (
-                    <>
-                      {post.content && (
-                        <div className="post-body">{post.content}</div>
-                      )}
-                      {post.image && (
-                        <div className="post-image-container">
-                          <img src={post.image} alt={post.title} className="post-image" />
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  <div className="post-actions-bar" onClick={(e) => e.stopPropagation()}>
-                    <div className={`vote-section ${post.userVote === 1 ? 'upvoted' : ''} ${post.userVote === -1 ? 'downvoted' : ''}`}>
-                      <button 
-                        onClick={(e) => handleUpvote(post.id, e)}
-                        className="vote-btn upvote"
-                        title="Upvote"
-                      >
-                        ⇧
-                      </button>
-                      <span className="vote-count">{formatNumber(post.upvotes)}</span>
-                      <button 
-                        onClick={(e) => handleDownvote(post.id, e)}
-                        className="vote-btn downvote"
-                        title="Downvote"
-                      >
-                        ⇩
-                      </button>
-                    </div>
-                    
-                    {/* Comment Button */}
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleComments(post.id);
-                      }} 
-                      className="post-action-btn comment-btn"
-                    >
-                      <FaRegCommentAlt className="action-icon" />
-                      <span className="action-text">{formatNumber(post.comments)} Comments</span>
-                    </button>
-                    
-                    <button className="post-action-btn">
-                      <FaShare className="action-icon" />
-                      <span className="action-text">Share</span>
-                    </button>
-                    
-                  </div>
-
-                  {/* COMMENTS SECTION */}
-                  {isCommentsExpanded && (
-                    <div className="post-comments-section">
-                      <div className="comments-header">
-                        <h4>{post.commentsList.length} Comment{post.commentsList.length !== 1 ? 's' : ''}</h4>
-                      </div>
-                      
-                      {/* Comments List */}
-                      <div className="comments-list">
-                        {post.commentsList.length > 0 ? (
-                          post.commentsList.map(comment => (
-                            <Comment 
-                              key={comment.id} 
-                              comment={comment} 
-                              darkMode={darkMode}
-                              onVote={handleCommentVote}
-                              onReply={handleCommentReply}
-                              postId={post.id}
-                            />
-                          ))
-                        ) : (
-                          <div className="no-comments">
-                            No comments yet. Be the first to share your thoughts!
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Add Comment Section */}
-                      <div className="add-comment">
-                        <textarea 
-                          placeholder="What are your thoughts?" 
-                          className="comment-input"
-                          rows="3"
-                          value={commentInputs[post.id] || ""}
-                          onChange={(e) => handleCommentInputChange(post.id, e.target.value)}
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                        <div className="comment-actions-footer">
-                          <button 
-                            className="comment-btn"
-                            onClick={() => handleAddComment(post.id)}
-                            disabled={!commentInputs[post.id]?.trim()}
-                          >
-                            Comment
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+          <TrendingPosts
+            posts={posts}
+            viewMode={viewMode}
+            darkMode={darkMode}
+            onVote={handleVote}
+            formatNumber={formatNumber}
+            onToggleComments={toggleComments}
+            onPostClick={handlePostClick}
+            onJoinCommunity={handleJoinCommunity}
+            joinedCommunities={joinedCommunities}
+            expandedPostId={expandedPostId}
+            commentInputs={commentInputs}
+            onCommentInputChange={handleCommentInputChange}
+            onAddComment={handleAddComment}
+            onHidePost={handleHidePost}
+            onUnhidePost={handleUnhidePost}
+            hiddenPosts={hiddenPosts}
+            onUpvote={handleUpvote}
+            onDownvote={handleDownvote}
+            onCommentVote={handleCommentVote}
+            onCommentReply={handleCommentReply}
+            getThumbnailImage={getThumbnailImage}
+            toggleExpand={toggleExpand}
+            isGuest={false}
+            recentPosts={recentPosts}
+            onClearRecentPosts={clearRecentPosts}
+            showRecentPosts={true}
+          />
       </div>
 
       {/* Right Sidebar */}

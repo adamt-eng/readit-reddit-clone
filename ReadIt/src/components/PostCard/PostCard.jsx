@@ -1,95 +1,248 @@
 // components/PostCard/PostCard.jsx
-import React, { useState } from "react";
-import { FaRegCommentAlt, FaShare, FaBookmark, FaEllipsisH, FaExpand, FaCompress } from "react-icons/fa";
+import React from "react";
+import { FaRegCommentAlt, FaShare, FaBookmark, FaEllipsisH, FaExpand, FaCompress, FaBell, FaRegBookmark, FaEyeSlash, FaFlag } from "react-icons/fa";
+import Comment from "../Comment/Comment";
 import "./PostCard.css";
 
-export default function PostCard({ post, viewMode, onVote, formatNumber, darkMode }) {
-  const promptLogin = () => alert("Login to continue");
-  const [isExpanded, setIsExpanded] = useState(false);
+export default function PostCard({
+  // Post data
+  post,
+  viewMode,
+  darkMode,
   
-  const handleUpvote = () => {
-    onVote(post.id, 1);
-  };
+  // Functionality props
+  onVote,
+  formatNumber,
+  onToggleComments,
+  onPostClick,
+  onJoinCommunity,
+  joinedCommunities = {},
+  expandedPostId,
+  commentInputs = {},
+  onCommentInputChange,
+  onAddComment,
+  onHidePost,
+  onUpvote,
+  onDownvote,
+  onCommentVote,
+  onCommentReply,
+  getThumbnailImage,
+  toggleExpand,
+  
+  // Guest-specific
+  isGuest = false,
+  onPromptLogin
+}) {
+  
+  const isCommentsExpanded = expandedPostId === post.id;
 
-  const handleDownvote = () => {
-    onVote(post.id, -1);
-  };
-
-  const toggleExpand = () => {
-    setIsExpanded(!isExpanded);
-  };
-
-  const getVoteButtonClass = (buttonType) => {
-    const baseClass = "vote-btn";
-    if (buttonType === 'up' && post.userVote === 1) return `${baseClass} upvote active`;
-    if (buttonType === 'down' && post.userVote === -1) return `${baseClass} downvote active`;
-    return `${baseClass} ${buttonType}vote`;
-  };
-
-  // Function to get the appropriate thumbnail image
-  const getThumbnailImage = () => {
-    if (post.image) {
-      return post.image;
-    }
+  // Use the provided function or create a default
+  const getThumbnail = getThumbnailImage || ((post) => {
+    if (post.image) return post.image;
     return darkMode ? "/compact-image-dark.png" : "/compact-image.png";
-  };
+  });
 
-  // Function to get alt text for the thumbnail
-  const getThumbnailAlt = () => {
-    if (post.image) {
-      return post.title;
+  // Handler functions
+  const handleUpvote = (e) => {
+    e.stopPropagation();
+    if (isGuest) {
+      onPromptLogin?.();
+    } else {
+      onUpvote?.(post.id, e) || onVote?.(post.id, 1);
     }
-    return "Default post thumbnail";
   };
 
-  // Check if post has content to expand (image or text content)
-  const hasExpandableContent = post.image || post.content;
+  const handleDownvote = (e) => {
+    e.stopPropagation();
+    if (isGuest) {
+      onPromptLogin?.();
+    } else {
+      onDownvote?.(post.id, e) || onVote?.(post.id, -1);
+    }
+  };
+
+  const handleJoinCommunity = (e) => {
+    e.stopPropagation();
+    if (isGuest) {
+      onPromptLogin?.();
+    } else {
+      onJoinCommunity?.(post.community, e);
+    }
+  };
+
+  const handleHidePost = (e) => {
+    e.stopPropagation();
+    if (isGuest) {
+      onPromptLogin?.();
+    } else {
+      onHidePost?.(post.id, e);
+    }
+  };
+
+  const handleToggleComments = (e) => {
+    e.stopPropagation();
+    onToggleComments?.(post.id);
+  };
+
+  const handleAddComment = () => {
+    if (isGuest) {
+      onPromptLogin?.();
+    } else {
+      onAddComment?.(post.id);
+    }
+  };
+
+  const handleCommentVote = (commentId, voteType) => {
+    if (isGuest) {
+      onPromptLogin?.();
+    } else {
+      onCommentVote?.(commentId, voteType);
+    }
+  };
+
+  const handleCommentReply = (commentId, replyText) => {
+    if (isGuest) {
+      onPromptLogin?.();
+    } else {
+      onCommentReply?.(commentId, replyText);
+    }
+  };
 
   return (
-    <div className={`post-card ${viewMode}-view`}>
-      {/* Thumbnail for compact view - always show, with default image if needed */}
+    <div 
+      className={`post-card ${viewMode}-view`}
+      onClick={() => onPostClick?.(post.id)}
+    >
+      {/* Thumbnail for compact view */}
       {viewMode === 'compact' && (
         <div className="post-thumbnail">
           <img 
-            src={getThumbnailImage()} 
-            alt={getThumbnailAlt()}
+            src={getThumbnail(post)} 
+            alt={post.image ? post.title : "Default post thumbnail"}
             className={`thumbnail-image ${!post.image ? 'default-thumbnail' : ''}`}
-            onClick={promptLogin}
           />
         </div>
       )}
 
       <div className="post-content">
-        {/* Expand button for compact view */}
-        {viewMode === 'compact' && hasExpandableContent && (
+        {/* EXPAND BUTTON for compact view */}
+        {viewMode === 'compact' && (post.image || post.content) && (
           <button 
             className="expand-btn"
-            onClick={toggleExpand}
-            title={isExpanded ? "Collapse" : "Expand"}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleExpand?.(post.id);
+            }}
+            title={post.isExpanded ? "Collapse" : "Expand"}
           >
-            {isExpanded ? <FaCompress /> : <FaExpand />}
+            {post.isExpanded ? <FaCompress /> : <FaExpand />}
           </button>
         )}
 
         <div className="post-meta">
-          <span className="community">r/{post.community}</span>
-          <span className="divider">•</span>
-          <span className="user">Posted by u/{post.user}</span>
-          <span className="divider">•</span>
-          <span className="time">{post.time}</span>
+          <div className="post-meta-left">
+            <img 
+              src={post.userAvatar} 
+              alt={post.user}
+              className="user-avatar"
+            />
+            {post.community ? (
+              <>
+                <span className="community">r/{post.community}</span>
+                <span className="divider">•</span>
+              </>
+            ) : (
+              <>
+                <span className="community">u/{post.user}</span>
+                <span className="divider">•</span>
+              </>
+            )}
+            <span className="user">Posted by u/{post.user}</span>
+            <span className="divider">•</span>
+            <span className="time">{post.time}</span>
+          </div>
+
+          <div className="post-meta-right">
+            {/* Join button only shows if post has a community AND is NOT user's own post */}
+            {post.community && !post.isUserPost && (
+              <button
+                className={`join-btn ${joinedCommunities[post.community] ? 'joined' : ''}`}
+                onClick={handleJoinCommunity}
+              >
+                {joinedCommunities[post.community] ? 'Joined' : 'Join'}
+              </button>
+            )}
+
+            <div className="post-menu-wrapper" onClick={(e) => e.stopPropagation()}>
+              <button className="post-menu-btn">
+                <FaEllipsisH />
+              </button>
+
+              <div className="post-menu-dropdown">
+                {/* Different menu for guests vs logged-in users */}
+                {isGuest ? (
+                  // Guest menu - only Report button
+                  <button className="menu-item flag-item" onClick={onPromptLogin}>
+                    <FaFlag className="menu-icon" />
+                    Report
+                  </button>
+                ) : (
+                  // Logged-in user menu
+                  post.community ? (
+                    <>
+                      <button className="menu-item">
+                        <FaBell className="menu-icon" /> 
+                        Follow Post
+                      </button>
+                      <button className="menu-item">
+                        <FaRegBookmark className="menu-icon" /> 
+                        Save
+                      </button>
+                      <button 
+                        className="menu-item"
+                        onClick={handleHidePost}
+                      >
+                        <FaEyeSlash className="menu-icon" />
+                        Hide
+                      </button>
+                      <hr className="menu-divider" />
+                      <button className="menu-item flag-item">
+                        <FaFlag className="menu-icon" />
+                        Report
+                      </button>
+                    </>
+                  ) : (
+                    /* Minimal menu for user posts (no community) */
+                    <>
+                      <button 
+                        className="menu-item"
+                        onClick={handleHidePost}
+                      >
+                        <FaEyeSlash className="menu-icon" />
+                        Hide
+                      </button>
+                      <button className="menu-item flag-item">
+                        <FaFlag className="menu-icon" />
+                        Report
+                      </button>
+                    </>
+                  )
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         <h3 className="post-title">{post.title}</h3>
         
-        {/* Expanded content in compact view */}
-        {viewMode === 'compact' && isExpanded && (
+        {/* EXPANDED CONTENT for compact view */}
+        {viewMode === 'compact' && post.isExpanded && (
           <div className="expanded-content">
             {post.image && (
               <img 
                 src={post.image} 
                 alt={post.title}
                 className="expanded-image"
-                onClick={promptLogin}
               />
             )}
             {post.content && (
@@ -104,35 +257,28 @@ export default function PostCard({ post, viewMode, onVote, formatNumber, darkMod
         {viewMode === 'card' && (
           <>
             {post.content && (
-              <div className="post-body">
-                {post.content}
-              </div>
+              <div className="post-body">{post.content}</div>
             )}
             {post.image && (
               <div className="post-image-container">
-                <img 
-                  src={post.image} 
-                  alt={post.title}
-                  className="post-image"
-                  onClick={promptLogin}
-                />
+                <img src={post.image} alt={post.title} className="post-image" />
               </div>
             )}
           </>
         )}
 
-        <div className="post-actions-bar">
+        <div className="post-actions-bar" onClick={(e) => e.stopPropagation()}>
           <div className={`vote-section ${post.userVote === 1 ? 'upvoted' : ''} ${post.userVote === -1 ? 'downvoted' : ''}`}>
             <button 
-              onClick={handleUpvote} 
+              onClick={handleUpvote}
               className="vote-btn upvote"
               title="Upvote"
             >
               ⇧
             </button>
-            <span className="vote-count">{formatNumber(post.upvotes)}</span>
+            <span className="vote-count">{formatNumber?.(post.upvotes) || post.upvotes}</span>
             <button 
-              onClick={handleDownvote} 
+              onClick={handleDownvote}
               className="vote-btn downvote"
               title="Downvote"
             >
@@ -140,22 +286,90 @@ export default function PostCard({ post, viewMode, onVote, formatNumber, darkMod
             </button>
           </div>
           
-          <button onClick={promptLogin} className="post-action-btn comment-btn">
+          {/* Comment Button */}
+          <button 
+            onClick={handleToggleComments}
+            className="post-action-btn comment-btn"
+          >
             <FaRegCommentAlt className="action-icon" />
-            <span className="action-text">{formatNumber(post.comments)} Comments</span>
+            <span className="action-text">{formatNumber?.(post.comments) || post.comments} Comments</span>
           </button>
           
-          <button onClick={promptLogin} className="post-action-btn">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              if (isGuest) onPromptLogin?.();
+            }}
+            className="post-action-btn"
+          >
             <FaShare className="action-icon" />
             <span className="action-text">Share</span>
           </button>
           
-          <button onClick={promptLogin} className="post-action-btn">
-            <FaBookmark className="action-icon" />
-            <span className="action-text">Save</span>
-          </button>
-          
         </div>
+
+        {/* COMMENTS SECTION */}
+        {isCommentsExpanded && (
+          <div className="post-comments-section">
+            <div className="comments-header">
+              <h4>{post.commentsList.length} Comment{post.commentsList.length !== 1 ? 's' : ''}</h4>
+              {isGuest && (
+                <div className="guest-notice">
+                  <small>💡 Log in to vote and comment</small>
+                </div>
+              )}
+            </div>
+            
+            {/* Comments List */}
+            <div className="comments-list">
+              {post.commentsList.length > 0 ? (
+                post.commentsList.map(comment => (
+                  <Comment 
+                    key={comment.id} 
+                    comment={comment} 
+                    darkMode={darkMode}
+                    onVote={handleCommentVote}
+                    onReply={handleCommentReply}
+                    postId={post.id}
+                  />
+                ))
+              ) : (
+                <div className="no-comments">
+                  {isGuest ? (
+                    <>No comments yet. <button onClick={onPromptLogin} className="login-prompt-btn">Log in</button> to be the first to share your thoughts!</>
+                  ) : (
+                    "No comments yet. Be the first to share your thoughts!"
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Add Comment Section */}
+            <div className={`add-comment ${isGuest ? 'guest-disabled' : ''}`}>
+              <textarea 
+                placeholder={isGuest ? "Log in to add a comment..." : "What are your thoughts?"} 
+                className="comment-input"
+                rows="3"
+                value={commentInputs[post.id] || ""}
+                onChange={(e) => onCommentInputChange?.(post.id, e.target.value)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (isGuest) onPromptLogin?.();
+                }}
+                readOnly={isGuest}
+              />
+              <div className="comment-actions-footer">
+                <button 
+                  className={`comment-btn ${isGuest ? 'guest-disabled-btn' : ''}`}
+                  onClick={handleAddComment}
+                  disabled={isGuest ? false : !commentInputs[post.id]?.trim()}
+                >
+                  {isGuest ? 'Log in to Comment' : 'Comment'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
