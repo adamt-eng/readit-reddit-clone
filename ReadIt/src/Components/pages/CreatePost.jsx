@@ -1,5 +1,5 @@
-import React from "react";
-import { CreatePost } from "../components/CreatePost";
+
+import CreatePost  from "../CreatePost/CreatePost/CreatePost";
 
 export default function CreatePostPage() {
   return (
