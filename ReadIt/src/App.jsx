@@ -1,8 +1,13 @@
-import Post from "./Components/Post/Post"
+import Post from "./Components/pages/PostPage"
+//import CreatePost from "./Components/pages/CreatePost"
 
 
 function App() {
-  return <Post />;
+  return (
+    <>
+      <Post />
+    </>
+  );
 }
 
 export default App;
