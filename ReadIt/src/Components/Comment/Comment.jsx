@@ -1,4 +1,4 @@
-// components/Comment/Comment.jsx
+
 import React, { useState } from "react";
 import { FaArrowUp, FaArrowDown, FaReply } from "react-icons/fa";
 import "./Comment.css";
