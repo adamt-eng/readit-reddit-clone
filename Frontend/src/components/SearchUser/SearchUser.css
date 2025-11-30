@@ -1,23 +1,21 @@
-.sr-user {
+.su-container {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid #eee;
 }
 
-.sr-user-avatar {
-  width: 42px;
-  height: 42px;
+.su-avatar {
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
 }
 
-.sr-user-name {
-  font-size: 16px;
-  font-weight: 500;
+.su-name {
+  font-size: 15px;
+  font-weight: 600;
 }
 
-.sr-user-handle {
-  color: #777;
-  font-size: 14px;
+.su-handle {
+  font-size: 13px;
+  color: #7c7c7c;
 }
