@@ -3,16 +3,15 @@ import "./SearchUser.css";
 
 export default function SearchUser({ user }) {
   return (
-    <div className="sr-user">
+    <div className="su-container">
       <img
-        className="sr-user-avatar"
+        className="su-avatar"
         src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${user.username}`}
-        alt=""
       />
 
       <div>
-        <div className="sr-user-name">{user.displayName}</div>
-        <div className="sr-user-handle">@{user.username}</div>
+        <div className="su-name">{user.displayName}</div>
+        <div className="su-handle">@{user.username}</div>
       </div>
     </div>
   );

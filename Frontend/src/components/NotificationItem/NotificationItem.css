@@ -1,12 +1,24 @@
+/* ----------------------------------------------
+   NOTIFICATION ITEM (LIGHT MODE ONLY)
+---------------------------------------------- */
+
 .notif-card {
   display: flex;
   align-items: flex-start;
   gap: 14px;
+
   background: #ffffff;
+  border: 1px solid #e5e5e5;
+
   padding: 14px 16px;
   border-radius: 8px;
-  border: 1px solid #e5e5e5;
+
   cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.notif-card:hover {
+  background: #f8f9fa;
 }
 
 .notif-unread {
@@ -31,6 +43,8 @@
 .notif-title {
   font-size: 15px;
   margin-bottom: 3px;
+  color: #1a1a1b;
+  font-weight: 500;
 }
 
 .notif-preview {

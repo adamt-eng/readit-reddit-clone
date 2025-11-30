@@ -1,29 +1,16 @@
-.sr-post {
+.sc-container {
   display: flex;
-  justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid #eee;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.sr-post-meta {
-  color: #777;
-  font-size: 14px;
+.sc-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1b;
 }
 
-.sr-post-title {
-  font-size: 18px;
-  font-weight: 500;
-  margin: 4px 0;
-}
-
-.sr-post-sub {
-  color: #555;
+.sc-members {
+  color: #7c7c7c;
   font-size: 13px;
-}
-
-.sr-post-thumb {
-  width: 110px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 6px;
 }

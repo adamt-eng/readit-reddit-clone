@@ -1,124 +1,209 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import "./SearchResults.css";
-import dummyData from "../../data/dummyData";
 
-export default function SearchResults() {
+import SearchPost from "../../components/SearchPost/SearchPost";
+import SearchCommunity from "../../components/SearchCommunity/SearchCommunity";
+import SearchUser from "../../components/SearchUser/SearchUser";
+
+import dummyData from "../../data/dummydata";
+
+// parse "3y ago", "7mo ago", "22m", "1h", etc -> timestamp (ms)
+function parseTimeAgo(s) {
+  if (!s) return 0;
+  const str = s.toLowerCase().replace("ago", "").trim();
+  const num = parseInt(str, 10);
+  if (Number.isNaN(num)) return 0;
+
+  if (str.includes("m") && !str.includes("mo")) return Date.now() - num * 60 * 1000;
+  if (str.includes("h")) return Date.now() - num * 60 * 60 * 1000;
+  if (str.includes("d")) return Date.now() - num * 24 * 60 * 60 * 1000;
+  if (str.includes("mo")) return Date.now() - num * 30 * 24 * 60 * 60 * 1000;
+  if (str.includes("y")) return Date.now() - num * 365 * 24 * 60 * 60 * 1000;
+  return 0;
+}
+
+export default function SearchResults({ query = "" }) {
   const [activeTab, setActiveTab] = useState("Posts");
+  const [sortBy, setSortBy] = useState("relevance"); // "relevance" | "newest" | "oldest"
+  const [timeFilter, setTimeFilter] = useState("all"); // "all" | "24h" | "7d" | "30d"
+
+  const q = (query || "").trim().toLowerCase();
+  const now = Date.now();
+
+  const isWithinTime = (timeAgo) => {
+    if (timeFilter === "all") return true;
+    const ts = parseTimeAgo(timeAgo);
+    const diff = now - ts;
+    if (timeFilter === "24h") return diff <= 24 * 60 * 60 * 1000;
+    if (timeFilter === "7d") return diff <= 7 * 24 * 60 * 60 * 1000;
+    if (timeFilter === "30d") return diff <= 30 * 24 * 60 * 60 * 1000;
+    return true;
+  };
+
+  const filtered = useMemo(() => {
+    const posts = dummyData.posts || [];
+    const communities = dummyData.communities || [];
+    const users = dummyData.users || [];
+
+    if (!q) {
+      return {
+        posts: [...posts].filter((p) => isWithinTime(p.timeAgo)),
+        communities: [...communities],
+        users: [...users],
+      };
+    }
+
+    return {
+      posts: posts.filter(
+        (p) =>
+          ((p.title && p.title.toLowerCase().includes(q)) ||
+            (p.communityName && p.communityName.toLowerCase().includes(q))) &&
+          isWithinTime(p.timeAgo)
+      ),
+      communities: communities.filter((c) => c.name && c.name.toLowerCase().includes(q)),
+      users: users.filter(
+        (u) =>
+          (u.username && u.username.toLowerCase().includes(q)) ||
+          (u.displayName && u.displayName.toLowerCase().includes(q))
+      ),
+    };
+  }, [q, timeFilter]);
+
+  // --- FIXED sorting logic ---
+  const sortedList = useMemo(() => {
+    const key = activeTab === "People" ? "users" : activeTab.toLowerCase();
+    const list = filtered[key] || [];
+
+    if (key !== "posts") return [...list];
+
+    // For posts we sort by parsed timestamp (higher = newer)
+    if (sortBy === "newest") {
+      // newest first => larger timestamp first => b - a
+      return [...list].sort((a, b) => parseTimeAgo(b.timeAgo) - parseTimeAgo(a.timeAgo));
+    }
+
+    if (sortBy === "oldest") {
+      // oldest first => smaller timestamp first => a - b
+      return [...list].sort((a, b) => parseTimeAgo(a.timeAgo) - parseTimeAgo(b.timeAgo));
+    }
+
+    // relevance -> keep original order (but return a copy)
+    return [...list];
+  }, [filtered, activeTab, sortBy]);
+
+  const tabKey = (tab) => (tab === "People" ? "users" : tab.toLowerCase());
 
   return (
     <div className="sr-wrapper">
-
-      {/* Tabs */}
       <div className="sr-tabs">
-        {["Posts", "Communities", "Comments", "Media", "People"].map(t => (
+        {["Posts", "Communities", "People"].map((tab) => (
           <button
-            key={t}
-            className={`sr-tab ${activeTab === t ? "active" : ""}`}
-            onClick={() => setActiveTab(t)}
+            key={tab}
+            className={`sr-tab ${activeTab === tab ? "active" : ""}`}
+            onClick={() => setActiveTab(tab)}
           >
-            {t}
+            {tab}
+            <span className="sr-tab-count">{filtered[tabKey(tab)]?.length ?? 0}</span>
           </button>
         ))}
-      </div>
 
-      {/* Filters */}
-      <div className="sr-filters">
-        <div className="filter-dropdown">Relevance ▾</div>
-        <div className="filter-dropdown">All time ▾</div>
+        <div className="sr-flex-spacer" />
+
+        {/* Clear labels so the user sees the active label */}
+        <select
+          className="sr-sort-box"
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          aria-label="Sort posts"
+        >
+          <option value="relevance">Relevance</option>
+          <option value="newest">Newest</option>
+          <option value="oldest">Oldest</option>
+        </select>
+
+        <select
+          className="sr-sort-box"
+          value={timeFilter}
+          onChange={(e) => setTimeFilter(e.target.value)}
+          aria-label="Filter by time"
+        >
+          <option value="all">All time</option>
+          <option value="24h">Past 24h</option>
+          <option value="7d">Past week</option>
+          <option value="30d">Past month</option>
+        </select>
       </div>
 
       <div className="sr-content-container">
-        
         <div className="sr-left-column">
-          {activeTab === "Posts" &&
-            dummyData.posts.map(p => (
-              <SearchPost key={p.id} post={p} />
-            ))
-          }
+          <div className="sr-results-scroll">
+            {sortedList.length ? (
+              sortedList.map((item) => {
+                if (activeTab === "Posts")
+                  return (
+                    <div className="sr-result-card" key={item.id}>
+                      <SearchPost post={item} />
+                    </div>
+                  );
 
-          {activeTab === "Communities" &&
-            dummyData.communities.map(c => (
-              <SearchCommunity key={c.id} comm={c} />
-            ))
-          }
+                if (activeTab === "Communities")
+                  return (
+                    <div className="sr-result-card" key={item.id}>
+                      <SearchCommunity comm={item} />
+                    </div>
+                  );
 
-          {activeTab === "People" &&
-            dummyData.users.map(u => (
-              <SearchUser key={u.id} user={u} />
-            ))
-          }
+                if (activeTab === "People")
+                  return (
+                    <div className="sr-result-card" key={item.id}>
+                      <SearchUser user={item} />
+                    </div>
+                  );
+
+                return null;
+              })
+            ) : (
+              <div className="sr-empty">No results found.</div>
+            )}
+          </div>
         </div>
 
         <div className="sr-right-column">
           <div className="sr-card">
             <h3>Communities</h3>
-            {dummyData.communities.slice(0, 5).map(c => (
-              <div key={c.id} className="sr-side-item">
+            {dummyData.communities.slice(0, 5).map((c) => (
+              <div
+                key={c.id}
+                className="sr-side-item no-router-click"
+                onClick={() => console.log("clicked community:", c.name)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") console.log("clicked community:", c.name);
+                }}
+              >
                 <img
                   className="sr-side-icon"
-                  src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${c.name}`}
+                  src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(c.name)}`}
+                  alt={`${c.name} avatar`}
                 />
-                <div className="sr-side-info">
+                <div>
                   <div className="sr-side-title">r/{c.name}</div>
-                  <div className="sr-side-count">{c.membersCount.toLocaleString()} members</div>
+                  <div className="sr-side-count">{Number(c.membersCount).toLocaleString()} members</div>
                 </div>
               </div>
             ))}
           </div>
+
+          <div className="sr-card">
+            <h3>Search tips</h3>
+            <ul className="sr-help-list">
+              <li>Try shorter or broader terms</li>
+              <li>Search by r/communityName or u/username</li>
+              <li>Use filters to narrow by time</li>
+            </ul>
+          </div>
         </div>
-
-      </div>
-    </div>
-  );
-}
-
-function SearchPost({ post }) {
-  return (
-    <div className="sr-post">
-      <div className="sr-post-left">
-        <div className="sr-post-meta">
-          <span className="sr-community">r/{post.communityName}</span>
-          • {post.timeAgo || "3y ago"}
-        </div>
-
-        <div className="sr-post-title">{post.title}</div>
-
-        <div className="sr-post-sub">
-          {post.upvotes} votes • {post.commentsCount} comments
-        </div>
-      </div>
-
-      {post.thumbnail && (
-        <img className="sr-post-thumb" src={post.thumbnail} alt="" />
-      )}
-    </div>
-  );
-}
-
-function SearchCommunity({ comm }) {
-  return (
-    <div className="sr-post">
-      <div className="sr-post-left">
-        <div className="sr-post-title">r/{comm.name}</div>
-        <div className="sr-post-sub">
-          {comm.membersCount.toLocaleString()} members
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function SearchUser({ user }) {
-  return (
-    <div className="sr-user">
-      <img
-        className="sr-user-avatar"
-        src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${user.username}`}
-      />
-
-      <div>
-        <div className="sr-user-name">{user.displayName}</div>
-        <div className="sr-user-handle">@{user.username}</div>
       </div>
     </div>
   );

@@ -1,34 +1,111 @@
 import React, { useState } from "react";
 import "./Notifications.css";
-import dummyData from "../../data/dummyData";
-import { FiMoreHorizontal } from "react-icons/fi";
-import { IoIosArrowForward } from "react-icons/io";
+import dummyData from "../../data/dummydata";
+import NotificationItem from "../../components/NotificationItem/NotificationItem";
+
+// Convert Date → "22m", "1h", "3d", etc
+function formatTimeAgo(date) {
+  const diff = Date.now() - new Date(date).getTime();
+
+  const m = Math.floor(diff / (60 * 1000));
+  if (m < 60) return `${m}m`;
+
+  const h = Math.floor(diff / (60 * 60 * 1000));
+  if (h < 24) return `${h}h`;
+
+  const d = Math.floor(diff / (24 * 60 * 60 * 1000));
+  if (d < 30) return `${d}d`;
+
+  const mo = Math.floor(d / 30);
+  if (mo < 12) return `${mo}mo`;
+
+  return `${Math.floor(mo / 12)}y`;
+}
 
 export default function Notifications() {
-  const [notifications, setNotifications] = useState(dummyData.notifications);
+  const [notifications, setNotifications] = useState(
+    dummyData.notifications.map((n) => ({
+      ...n,
+      timeAgoFormatted: formatTimeAgo(n.createdAt),
+    }))
+  );
+
+  const [showEarlier, setShowEarlier] = useState(false);
+
+  const unread = notifications.filter((n) => !n.isRead);
+  const read = notifications.filter((n) => n.isRead);
 
   const markAll = () => {
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
+    setNotifications(
+      notifications.map((n) => ({ ...n, isRead: true }))
+    );
+  };
+
+  const markOne = (id) => {
+    setNotifications(
+      notifications.map((n) =>
+        n._id === id ? { ...n, isRead: true } : n
+      )
+    );
   };
 
   return (
     <div className="notifs-page">
       <div className="notifs-header">
         <h2>Notifications</h2>
-        <button className="header-btn" onClick={markAll}>Mark all as read</button>
+        {unread.length > 0 && (
+          <button className="header-btn" onClick={markAll}>
+            Mark all as read
+          </button>
+        )}
       </div>
 
-      <div className="notifs-list">
-        {notifications.map(n => (
-          <NotificationItem
-            key={n.id}
-            data={n}
-            onRead={() =>
-              setNotifications(notifications.map(x => x.id === n.id ? { ...x, read: true } : x))
-            }
-          />
-        ))}
-      </div>
+      {/* UNREAD SECTION */}
+      {unread.length > 0 ? (
+        <>
+          <h3 className="section-title">New</h3>
+          <div className="notifs-list">
+            {unread.map((n) => (
+              <NotificationItem
+                key={n._id}
+                data={n}
+                onRead={() => markOne(n._id)}
+              />
+            ))}
+          </div>
+        </>
+      ) : (
+        <div className="no-new-message">
+          You’re all caught up 🎉  
+        </div>
+      )}
+
+      {/* EARLIER SECTION */}
+      {read.length > 0 && (
+        <>
+          <button
+            className="expand-earlier-btn"
+            onClick={() => setShowEarlier(!showEarlier)}
+          >
+            {showEarlier ? "Hide earlier notifications ▲" : "Show earlier notifications ▼"}
+          </button>
+
+          {showEarlier && (
+            <>
+              <h3 className="section-title">Earlier</h3>
+              <div className="notifs-list">
+                {read.map((n) => (
+                  <NotificationItem
+                    key={n._id}
+                    data={n}
+                    onRead={() => markOne(n._id)}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </>
+      )}
     </div>
   );
 }

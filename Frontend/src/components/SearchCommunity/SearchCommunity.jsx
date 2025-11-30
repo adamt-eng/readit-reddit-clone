@@ -1,25 +1,13 @@
- import React from "react";
-import "./SearchPost.css";
+import React from "react";
+import "./SearchCommunity.css";
 
-export default function SearchPost({ post }) {
+export default function SearchCommunity({ comm }) {
   return (
-    <div className="sr-post">
-      <div className="sr-post-left">
-        <div className="sr-post-meta">
-          <span className="sr-post-community">r/{post.communityName}</span>
-          • {post.timeAgo}
-        </div>
-
-        <div className="sr-post-title">{post.title}</div>
-
-        <div className="sr-post-sub">
-          {post.upvotes} votes • {post.commentsCount} comments
-        </div>
+    <div className="sc-container">
+      <div className="sc-title">r/{comm.name}</div>
+      <div className="sc-members">
+        {comm.membersCount.toLocaleString()} members
       </div>
-
-      {post.thumbnail && (
-        <img src={post.thumbnail} alt="" className="sr-post-thumb" />
-      )}
     </div>
   );
 }
