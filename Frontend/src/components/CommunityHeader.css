@@ -1,0 +1,105 @@
+.communityHeader {
+  background: white;
+  border-bottom: 1px solid #edeff1;
+  margin-bottom: 0; /* No margin - posts start right after */
+  font-family: "IBM Plex Sans", sans-serif;
+  position: relative;
+}
+
+.bannerContainer {
+  height: 104px; /* Shorter banner like screenshot */
+  overflow: hidden;
+  background: #d32f2f; /* Maroon color */
+}
+
+.banner {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.8;
+}
+
+.info {
+  max-width: 1312px; /* Wider for left sidebar */
+  margin: 0 auto;
+  padding: 0 16px 16px;
+  display: flex;
+  align-items: flex-start; /* Align top */
+  justify-content: space-between;
+  position: relative;
+  gap: 16px;
+}
+
+.communityIcon {
+  width: 56px; /* Smaller icon */
+  height: 56px;
+  border-radius: 50%;
+  border: 3px solid white;
+  position: absolute;
+  left: 16px;
+  top: -20px; /* Overlaps banner exactly */
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  object-fit: contain;
+  z-index: 10;
+}
+
+.textInfo {
+  margin-left: 80px; /* Space for icon */
+  flex: 1;
+  padding-top: 12px;
+}
+
+.name {
+  font-size: 24px; /* Smaller title */
+  font-weight: 700;
+  margin: 0 0 2px 0;
+  color: #1a1a1b;
+}
+
+.description {
+  font-size: 14px;
+  color: #787c7e;
+  margin: 0;
+  font-weight: 400;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.createPostBtn {
+  background: #0079d3 !important;
+  color: white !important;
+  border: 1px solid #0079d3 !important;
+  padding: 6px 16px !important;
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  white-space: nowrap;
+  transition: all 0.2s;
+  margin-top: 12px;
+  
+}
+
+.createPostBtn:hover {
+  background: #0061a8 !important;
+}
+
+.joinBtn {
+  background: #0079d3 !important;
+  color: white !important;
+  border: none !important;
+  padding: 7px 24px !important;
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  white-space: nowrap;
+  margin-top: 12px;
+}
+
+.joinBtn:hover {
+  background: #0061a8 !important;
+}
