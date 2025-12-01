@@ -197,19 +197,24 @@
 }
 
 .join-btn {
-  border: 1px solid #ff4500;
-  color: #ff4500;
-  padding: 4px 16px;
+  background: #0079d3;
+  color: white;
+  border: none;
   border-radius: 20px;
-  background: none;
+  padding: 4px 16px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.2s;
+  white-space: nowrap;
 }
 
 .join-btn:hover {
-  background: #fff0e6;
+  background: #0061a8;
+}
+
+.join-btn.joined {
+  background: #24a0ed;
 }
 
 /* Premium Section */
@@ -316,26 +321,27 @@
 }
 
 .dark-mode .join-btn {
-  border-color: #d7dadc;
-  color: #d7dadc;
+  background: #0079d3;
+  color: white;
+  border: none;
 }
 
 .dark-mode .join-btn:hover {
-  background: #272729;
+  background: #0061a8;
+}
+
+.dark-mode .join-btn.joined {
+  background: #24a0ed;
 }
 
 .dark-mode .premium-content p {
   color: #818384;
 }
 
-/* pages/HomePage/HomePage.css */
-
-/* ... existing styles ... */
-
 /* Compact View Expand Button */
 .compact-view .post-content {
   position: relative;
-  padding-right: 40px; /* Make space for expand button */
+  padding-right: 40px;
 }
 
 .expand-btn {
@@ -413,7 +419,6 @@
   }
 }
 
-/* ... rest of existing styles ... */
 .dark-mode .vote-section.upvoted {
   background: rgba(255, 69, 0, 0.2) !important;
   border-color: #ff4500 !important;
@@ -433,10 +438,6 @@
 .dark-mode .vote-section.downvoted .vote-btn {
   color: #7193ff !important;
 }
-
-/* pages/HomePage/HomePage.css */
-
-/* ... existing styles ... */
 
 /* Recent Posts Section */
 .recent-posts-box {
@@ -605,7 +606,7 @@
   font-style: italic;
 }
 
-/* Dark mode styles */
+/* Dark mode styles for recent posts */
 .dark-mode .recent-posts-box {
   background: #1a1a1b;
   border-color: #343536;
@@ -663,8 +664,7 @@
   color: #818384;
 }
 
-/* ... rest of existing HomePage.css styles ... */
-/* CRITICAL FIX - Makes Join button + 3-dot menu visible */
+/* FIXED POST META LAYOUT */
 .post-meta {
   display: flex;
   justify-content: space-between;
@@ -673,42 +673,56 @@
   margin-bottom: 8px;
 }
 
+.post-meta-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #787c7e;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
 .post-meta-right {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
-/* Keep only the main join button */
-.join-btn {
-  background: #0079d3;
-  color: white;
-  border: none;
-  border-radius: 999px;
-  padding: 4px 16px;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  white-space: nowrap;
+.community {
+  font-weight: 600;
+  color: #1c1c1c;
 }
 
-.join-btn:hover { 
-  background: #0061a8; 
+.user, .time {
+  color: #787c7e;
 }
 
-.join-btn.joined {
-  background: #24a0ed;
+.divider {
+  margin: 0 4px;
+  color: #787c7e;
 }
 
-/* 3-dot menu - no background, just the dots */
+/* User avatar */
+.user-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #edeff1;
+  flex-shrink: 0;
+}
+
+/* Menu button */
 .post-menu-wrapper {
   position: relative;
   flex-shrink: 0;
 }
 
 .post-menu-btn {
-  background: none !important;
+  background: none;
   border: none;
   padding: 6px 8px;
   border-radius: 4px;
@@ -719,10 +733,11 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  flex-shrink: 0;
 }
 
 .post-menu-btn:hover {
-  background: rgba(0, 0, 0, 0.05) !important;
+  background: rgba(0, 0, 0, 0.05);
   color: #1c1c1c;
 }
 
@@ -792,6 +807,18 @@
   background: #ffebe6;
 }
 
+.menu-item.flag-item {
+  color: #ff4500;
+}
+
+.menu-item.flag-item .menu-icon {
+  color: #ff4500;
+}
+
+.menu-item.flag-item:hover {
+  background: #ffebe6;
+}
+
 /* Add eye icon styling for hide menu item */
 .menu-item .eye-icon {
   width: 16px;
@@ -814,56 +841,6 @@
 
 .menu-item .eye-icon::after {
   transform: translateY(-50%) rotate(45deg);
-}
-
-/* Dark mode */
-.dark-mode .menu-item .eye-icon {
-  color: #818384;
-}
-
-/* Dark mode fixes */
-.dark-mode .post-menu-btn:hover { 
-  background: rgba(255,255,255,0.1) !important; 
-  color: #d7dadc;
-}
-
-.dark-mode .post-menu-dropdown {
-  background: #1a1a1b;
-  border-color: #343536;
-  color: #d7dadc;
-}
-
-.dark-mode .menu-item {
-  color: #d7dadc;
-}
-
-.dark-mode .menu-item:hover {
-  background: #272729;
-}
-
-.dark-mode .menu-icon {
-  color: #818384;
-}
-
-.dark-mode .menu-divider {
-  border-color: #343536;
-}
-
-.dark-mode .text-danger:hover {
-  background: rgba(255, 69, 0, 0.1);
-}
-
-.dark-mode .join-btn {
-  background: #0079d3;
-  color: white;
-}
-
-.dark-mode .join-btn:hover {
-  background: #0061a8;
-}
-
-.dark-mode .join-btn.joined {
-  background: #24a0ed;
 }
 
 /* Hide Post Functionality */
@@ -896,7 +873,60 @@
   background: #e8f0fe;
 }
 
-/* Dark mode for hidden post message */
+/* Dark mode */
+.dark-mode .community {
+  color: #d7dadc;
+}
+
+.dark-mode .user, 
+.dark-mode .time,
+.dark-mode .divider {
+  color: #818384;
+}
+
+.dark-mode .user-avatar {
+  border-color: #343536;
+}
+
+.dark-mode .post-menu-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #d7dadc;
+}
+
+.dark-mode .post-menu-dropdown {
+  background: #1a1a1b;
+  border-color: #343536;
+  color: #d7dadc;
+}
+
+.dark-mode .menu-item {
+  color: #d7dadc;
+}
+
+.dark-mode .menu-item:hover {
+  background: #272729;
+}
+
+.dark-mode .menu-icon {
+  color: #818384;
+}
+
+.dark-mode .menu-item .eye-icon {
+  color: #818384;
+}
+
+.dark-mode .menu-divider {
+  border-color: #343536;
+}
+
+.dark-mode .text-danger:hover {
+  background: rgba(255, 69, 0, 0.1);
+}
+
+.dark-mode .menu-item.flag-item:hover {
+  background: rgba(255, 69, 0, 0.1);
+}
+
 .dark-mode .post-hidden-message {
   background: #1a1a1b;
   border-color: #343536;
@@ -932,49 +962,52 @@
   margin-right: 6px;
 }
 
-/* Hide community name when it's user's own post */
 .post-meta-left .community + .divider,
 .post-meta-left .user:not(.you-posted) {
   display: none;
 }
 
-/* Update menu item styling for flag icon */
-.menu-item.flag-item {
-  color: #ff4500;
+/* HomePage.css - FIXED POSTS CONTAINER */
+.posts-container {
+  width: 100%;
 }
 
-.menu-item.flag-item .menu-icon {
-  color: #ff4500;
+.posts-container.card-view .post-card,
+.posts-container.compact-view .post-card {
+  background: white;
+  border: 1px solid #ccc;
+  border-top: none;
+  margin: 0;
 }
 
-.menu-item.flag-item:hover {
-  background: #ffebe6;
+.posts-container.card-view .post-card:hover,
+.posts-container.compact-view .post-card:hover {
+  background: #fafafa;
 }
 
-.dark-mode .menu-item.flag-item:hover {
-  background: rgba(255, 69, 0, 0.1);
+.posts-container.card-view .post-card:first-child,
+.posts-container.compact-view .post-card:first-child {
+  border-top: 1px solid #ccc;
+  border-radius: 8px 8px 0 0;
 }
 
-/* User Avatar in Post Meta */
-.post-meta-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #787c7e;
+.posts-container.card-view .post-card:last-child,
+.posts-container.compact-view .post-card:last-child {
+  border-radius: 0 0 8px 8px;
 }
 
-.user-avatar {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 1px solid #edeff1;
-}
-
-.dark-mode .user-avatar {
+/* Dark mode for posts container */
+.dark-mode .posts-container.card-view .post-card,
+.dark-mode .posts-container.compact-view .post-card {
+  background: #1a1a1b;
   border-color: #343536;
 }
+
+.dark-mode .posts-container.card-view .post-card:hover,
+.dark-mode .posts-container.compact-view .post-card:hover {
+  background: #272729;
+}
+
 /* Footer Text */
 .footer-text {
   position: fixed;
@@ -1020,166 +1053,3 @@
     padding: 0 16px;
   }
 }
-/* FIXED POST META LAYOUT */
-.post-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  margin-bottom: 8px;
-  border: none; /* Remove the test border */
-}
-
-.post-meta-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #787c7e;
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.post-meta-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-/* Ensure text elements don't wrap */
-.post-meta-left span {
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.community {
-  font-weight: 600;
-  color: #1c1c1c;
-}
-
-.user, .time {
-  color: #787c7e;
-}
-
-.divider {
-  margin: 0 4px;
-  color: #787c7e;
-}
-
-/* User avatar */
-.user-avatar {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 1px solid #edeff1;
-  flex-shrink: 0;
-}
-
-/* Join button */
-.join-btn {
-  background: #0079d3;
-  color: white;
-  border: none;
-  border-radius: 20px;
-  padding: 4px 16px;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.join-btn:hover {
-  background: #0061a8;
-}
-
-.join-btn.joined {
-  background: #24a0ed;
-}
-
-/* Menu button */
-.post-menu-btn {
-  background: none;
-  border: none;
-  padding: 6px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  color: #878a8c;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  flex-shrink: 0;
-}
-
-.post-menu-btn:hover {
-  background: rgba(0, 0, 0, 0.05);
-  color: #1c1c1c;
-}
-
-/* Dark mode */
-.dark-mode .community {
-  color: #d7dadc;
-}
-
-.dark-mode .user, 
-.dark-mode .time,
-.dark-mode .divider {
-  color: #818384;
-}
-
-.dark-mode .user-avatar {
-  border-color: #343536;
-}
-
-.dark-mode .post-menu-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #d7dadc;
-}
-
-/* HomePage.css - FIXED POSTS CONTAINER */
-.posts-container {
-  width: 100%;
-}
-
-.posts-container.card-view .post-card,
-.posts-container.compact-view .post-card {
-  background: white;
-  border: 1px solid #ccc;
-  border-top: none;
-  margin: 0;
-}
-
-.posts-container.card-view .post-card:hover,
-.posts-container.compact-view .post-card:hover {
-  background: #fafafa;
-}
-
-.posts-container.card-view .post-card:first-child,
-.posts-container.compact-view .post-card:first-child {
-  border-top: 1px solid #ccc;
-  border-radius: 8px 8px 0 0;
-}
-
-.posts-container.card-view .post-card:last-child,
-.posts-container.compact-view .post-card:last-child {
-  border-radius: 0 0 8px 8px;
-}
-
-/* Dark mode */
-.dark-mode .posts-container.card-view .post-card,
-.dark-mode .posts-container.compact-view .post-card {
-  background: #1a1a1b;
-  border-color: #343536;
-}
-
-.dark-mode .posts-container.card-view .post-card:hover,
-.dark-mode .posts-container.compact-view .post-card:hover {
-  background: #272729;
-}
-

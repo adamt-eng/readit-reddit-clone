@@ -1,16 +1,14 @@
 // components/LeftSidebar/LeftSidebar.jsx
 import React from "react";
 import { 
-  HiHome, HiFire, HiSearch, HiClock, HiUserGroup,
+  HiHome, HiFire, HiSearch, HiUserGroup,
   HiInformationCircle, HiSpeakerphone, HiCode,
   HiQuestionMarkCircle, HiNewspaper, HiBriefcase, HiBookOpen,
   HiPlus 
 } from "react-icons/hi";
 import "./LeftSidebar.css";
 
-export default function LeftSidebar({ darkMode, showStartCommunity = false }) {
-  const promptLogin = () => alert("Login to continue");
-
+export default function LeftSidebar({ showStartCommunity = false }) {
   const handleStartCommunity = () => {
     alert("Starting a new community feature would go here!");
   };
@@ -33,7 +31,6 @@ export default function LeftSidebar({ darkMode, showStartCommunity = false }) {
           </div>
         </div>
 
-        {/* Start Community Button - Only shown when prop is true */}
         {showStartCommunity && (
           <div className="nav-section">
             <h4>CREATE</h4>

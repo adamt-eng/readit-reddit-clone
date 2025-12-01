@@ -2,58 +2,40 @@
 import React, { useState, useEffect } from "react";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 import PopularCommunities from "../../components/PopularCommunities/PopularCommunities";
-import { FaRegCommentAlt, FaShare, FaBookmark, FaEllipsisH, FaFlag  } from "react-icons/fa";
-import "./GuestHomePage.css";
-import { FaExpand, FaCompress } from "react-icons/fa";
-import Comment from "../../components/Comment/Comment";
 import TrendingPosts from "../../components/TrendingPosts/TrendingPosts";
+import "./GuestHomePage.css";
 
 export default function GuestHomePage({ darkMode, onLogin }) {
-  // Initialize viewMode from localStorage
   const [viewMode, setViewMode] = useState(() => {
     try {
       const savedViewMode = localStorage.getItem('viewMode');
       return savedViewMode === 'compact' ? 'compact' : 'card';
-    } catch (error) {
-      console.error('Error loading view mode from localStorage:', error);
+    } catch {
       return 'card';
     }
   });
 
-  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
-  const [joinedCommunities, setJoinedCommunities] = useState({});
-  
-  // Initialize expandedPostId from localStorage
   const [expandedPostId, setExpandedPostId] = useState(() => {
     try {
-      const savedExpandedPostId = localStorage.getItem('expandedPostId');
-      if (savedExpandedPostId) {
-        const parsedId = JSON.parse(savedExpandedPostId);
-        console.log('Loaded expandedPostId from localStorage:', parsedId);
-        return typeof parsedId === 'number' ? parsedId : null;
-      }
-    } catch (error) {
-      console.error('Error loading expanded post from localStorage:', error);
+      const saved = localStorage.getItem('expandedPostId');
+      const parsed = saved ? JSON.parse(saved) : null;
+      return typeof parsed === 'number' ? parsed : null;
+    } catch {
+      return null;
     }
-    return null;
   });
 
-  // Initialize expanded posts state from localStorage
   const [expandedPosts, setExpandedPosts] = useState(() => {
     try {
-      const savedExpandedPosts = localStorage.getItem('expandedPosts');
-      if (savedExpandedPosts) {
-        const parsed = JSON.parse(savedExpandedPosts);
-        console.log('Loaded expandedPosts from localStorage:', parsed);
-        return Array.isArray(parsed) ? parsed : [];
-      }
-    } catch (error) {
-      console.error('Error loading expanded posts from localStorage:', error);
+      const saved = localStorage.getItem('expandedPosts');
+      const parsed = saved ? JSON.parse(saved) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
     }
-    return [];
   });
 
-  const [posts, setPosts] = useState([
+  const [posts] = useState([
     { 
       id: 1,
       community: "news", 
@@ -65,7 +47,7 @@ export default function GuestHomePage({ darkMode, onLogin }) {
       comments: 120,
       time: "4 hours ago",
       userVote: 0,
-      image: "https://images.unsplash.com/photo-1593115057322-e94b77572f20?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+      image: "https://images.unsplash.com/photo-1593115057322-e94b77572f20?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
       isExpanded: false,
       commentsList: [
         {
@@ -112,7 +94,7 @@ export default function GuestHomePage({ darkMode, onLogin }) {
       comments: 45,
       time: "6 hours ago",
       userVote: 0,
-      image: "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+      image: "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
       isExpanded: false,
       commentsList: [
         {
@@ -142,7 +124,6 @@ export default function GuestHomePage({ darkMode, onLogin }) {
       isExpanded: false,
       commentsList: []
     },
-    // User profile post (without community)
     { 
       id: 4,
       community: null,
@@ -185,69 +166,59 @@ export default function GuestHomePage({ darkMode, onLogin }) {
 
   const popularCommunities = [
     { 
+      id: 1,
       name: "AskMen", 
       members: "888,675",
       avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80"
     },
     { 
+      id: 2,
       name: "AskWomen", 
       members: "5,360,108",
       avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80"
     },
     { 
+      id: 3,
       name: "PS4", 
       members: "5,507,926",
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80"
     },
     { 
+      id: 4,
       name: "apple", 
       members: "6,263,518",
       avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80"
     },
     { 
+      id: 5,
       name: "NBA2k", 
       members: "78,031",
       avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80"
     }
   ];
 
-
-  // Save viewMode to localStorage whenever it changes
   useEffect(() => {
     try {
       localStorage.setItem('viewMode', viewMode);
-      console.log('Saved viewMode to localStorage:', viewMode);
-    } catch (error) {
-      console.error('Error saving view mode to localStorage:', error);
-    }
+    } catch {}
   }, [viewMode]);
 
-  // Save expandedPostId to localStorage whenever it changes
   useEffect(() => {
     try {
       if (expandedPostId) {
         localStorage.setItem('expandedPostId', JSON.stringify(expandedPostId));
-        console.log('Saved expandedPostId to localStorage:', expandedPostId);
       } else {
         localStorage.removeItem('expandedPostId');
-        console.log('Removed expandedPostId from localStorage');
       }
-    } catch (error) {
-      console.error('Error saving expanded post to localStorage:', error);
-    }
+    } catch {}
   }, [expandedPostId]);
 
-  // Save expandedPosts to localStorage whenever it changes
   useEffect(() => {
     try {
       localStorage.setItem('expandedPosts', JSON.stringify(expandedPosts));
-      console.log('Saved expandedPosts to localStorage:', expandedPosts);
-    } catch (error) {
-      console.error('Error saving expanded posts to localStorage:', error);
-    }
+    } catch {}
   }, [expandedPosts]);
 
-  // Initialize posts with expanded state from localStorage on component mount
   useEffect(() => {
     if (expandedPosts.length > 0) {
       setPosts(prevPosts => 
@@ -259,92 +230,21 @@ export default function GuestHomePage({ darkMode, onLogin }) {
     }
   }, [expandedPosts]);
 
-  // Toggle comments visibility - ALLOWED for guests
-  const toggleComments = (postId) => {
-    const newExpandedPostId = expandedPostId === postId ? null : postId;
-    console.log('Toggling comments for post:', postId, 'New expandedPostId:', newExpandedPostId);
-    setExpandedPostId(newExpandedPostId);
-  };
-
-  // Handle comment voting - REQUIRES LOGIN
-  const handleCommentVote = (commentId, voteType) => {
-    promptLogin();
-  };
-
-  // Handle comment replies - REQUIRES LOGIN
-  const handleCommentReply = (commentId, replyText) => {
-    promptLogin();
-  };
-
-  // Handle post voting - REQUIRES LOGIN
-  const handleVote = (postId, voteType) => {
-    promptLogin();
-  };
-
-  // Handle adding comment - REQUIRES LOGIN
-  const handleAddComment = (postId) => {
-    promptLogin();
-  };
-
-  // Handle comment input change - ALLOWED but will require login to submit
-  const handleCommentInputChange = (postId, value) => {
-    // Allow typing but will prompt login on submit
-  };
-
   const promptLogin = () => {
     alert("Please log in to continue");
-    // You can also use: onLogin(); if you have a login function prop
+    onLogin?.();
   };
 
-  const toggleViewMode = () => {
-    setViewMode(prev => {
-      const newViewMode = prev === 'card' ? 'compact' : 'card';
-      console.log('Toggling view mode to:', newViewMode);
-      return newViewMode;
-    });
+  const toggleComments = (postId) => {
+    setExpandedPostId(expandedPostId === postId ? null : postId);
   };
 
-
-  const formatNumber = (num) => {
-    if (num >= 1000) {
-      return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
-    }
-    return num.toString();
-  };
-
-  // Function to get the appropriate thumbnail image for posts
-  const getThumbnailImage = (post) => {
-    if (post.image) {
-      return post.image;
-    }
-    return darkMode ? "/compact-image-dark.png" : "/compact-image.png";
-  };
-
-  // Add toggleExpand function with localStorage persistence
-  const toggleExpand = (postId) => {
-    setPosts(prevPosts => 
-      prevPosts.map(post => {
-        if (post.id === postId) {
-          const newExpandedState = !post.isExpanded;
-          
-          // Update expandedPosts array in state
-          setExpandedPosts(prev => {
-            if (newExpandedState) {
-              // Add to expanded posts if not already there
-              return prev.includes(postId) ? prev : [...prev, postId];
-            } else {
-              // Remove from expanded posts
-              return prev.filter(id => id !== postId);
-            }
-          });
-          
-          return { ...post, isExpanded: newExpandedState };
-        }
-        return post;
-      })
-    );
-  };
-
+  const handleVote = () => promptLogin();
+  const handleCommentVote = () => promptLogin();
+  const handleCommentReply = () => promptLogin();
+  const handleAddComment = () => promptLogin();
+  const handleCommentInputChange = () => {};
+  
   const handleUpvote = (postId, e) => {
     e.stopPropagation();
     promptLogin();
@@ -355,65 +255,108 @@ export default function GuestHomePage({ darkMode, onLogin }) {
     promptLogin();
   };
 
-  const handlePostClick = (postId) => {
-    // Guests can view posts but might need login for full features
-    console.log(`Guest viewing post ${postId}`);
+  const handlePostClick = () => {
+    // Guest post viewing logic could go here
   };
 
-  // Handle hide post (for guest - will prompt login)
-  const handleHidePost = (postId, e) => {
-    e?.stopPropagation();
+  const handleHidePost = () => promptLogin();
+
+  const toggleViewMode = () => {
+    setViewMode(prev => prev === 'card' ? 'compact' : 'card');
+  };
+
+  const formatNumber = (num) => {
+    if (num >= 1000) {
+      return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+    }
+    return num.toString();
+  };
+
+  const getThumbnailImage = (post) => {
+    if (post.image) return post.image;
+    return darkMode ? "/compact-image-dark.png" : "/compact-image.png";
+  };
+
+  const toggleExpand = (postId) => {
+    setPosts(prevPosts => 
+      prevPosts.map(post => {
+        if (post.id === postId) {
+          const newExpandedState = !post.isExpanded;
+          setExpandedPosts(prev => 
+            newExpandedState 
+              ? (prev.includes(postId) ? prev : [...prev, postId])
+              : prev.filter(id => id !== postId)
+          );
+          return { ...post, isExpanded: newExpandedState };
+        }
+        return post;
+      })
+    );
+  };
+
+  const handleCommunityClick = (community) => {
+    console.log(`Guest clicked on r/${community.name}`);
     promptLogin();
   };
 
   return (
     <div className="page-container">
-      <LeftSidebar darkMode={darkMode} />
+      <LeftSidebar 
+        darkMode={darkMode} 
+        recentCommunity="news"
+        onCommunityClick={(communityName) => {
+          console.log(`Guest clicked on r/${communityName}`);
+          promptLogin();
+        }}
+      />
       
       <div className="main-feed">
         <div className="feed-controls">
-            <button 
-              className="view-toggle-btn" 
-              onClick={toggleViewMode}
-              title={`Current: ${viewMode} view`}
-            >
-              {viewMode === 'card' ? '☐' : '≡'}
-            </button>
+          <button 
+            className="view-toggle-btn" 
+            onClick={toggleViewMode}
+            title={`Current: ${viewMode} view`}
+          >
+            {viewMode === 'card' ? '☐' : '≡'}
+          </button>
         </div>
-        {/*post */}
-          <TrendingPosts
-            posts={posts}
-            viewMode={viewMode}
-            darkMode={darkMode}
-            onVote={handleVote}
-            formatNumber={formatNumber}
-            onToggleComments={toggleComments}
-            onPostClick={handlePostClick}
-            onJoinCommunity={() => {}}
-            joinedCommunities={{}}
-            expandedPostId={expandedPostId}
-            commentInputs={{}}
-            onCommentInputChange={handleCommentInputChange}
-            onAddComment={handleAddComment}
-            onHidePost={handleHidePost}
-            onUnhidePost={() => {}}
-            hiddenPosts={[]}
-            onUpvote={handleUpvote}
-            onDownvote={handleDownvote}
-            onCommentVote={handleCommentVote}
-            onCommentReply={handleCommentReply}
-            getThumbnailImage={getThumbnailImage}
-            toggleExpand={toggleExpand}
-            isGuest={true}
-            onPromptLogin={promptLogin}
-          />
+
+        <TrendingPosts
+          posts={posts}
+          viewMode={viewMode}
+          darkMode={darkMode}
+          onVote={handleVote}
+          formatNumber={formatNumber}
+          onToggleComments={toggleComments}
+          onPostClick={handlePostClick}
+          onJoinCommunity={() => {}}
+          joinedCommunities={{}}
+          expandedPostId={expandedPostId}
+          commentInputs={{}}
+          onCommentInputChange={handleCommentInputChange}
+          onAddComment={handleAddComment}
+          onHidePost={handleHidePost}
+          onUnhidePost={() => {}}
+          hiddenPosts={[]}
+          onUpvote={handleUpvote}
+          onDownvote={handleDownvote}
+          onCommentVote={handleCommentVote}
+          onCommentReply={handleCommentReply}
+          getThumbnailImage={getThumbnailImage}
+          toggleExpand={toggleExpand}
+          isGuest={true}
+          onPromptLogin={promptLogin}
+        />
       </div>
 
       <div className="sidebar">
-        <PopularCommunities communities={popularCommunities} darkMode={darkMode} />
+        <PopularCommunities 
+          communities={popularCommunities} 
+          darkMode={darkMode}
+          onCommunityClick={handleCommunityClick}
+        />
       </div>
 
-      {/* Footer Text */}
       <div className="footer-text">
         <p className="footer-line">Reddit Rules    Privacy Policy    User Agreement</p>
         <p className="footer-copyright">Reddit, Inc. © 2025. All rights reserved.</p>

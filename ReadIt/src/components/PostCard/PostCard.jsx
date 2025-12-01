@@ -42,13 +42,13 @@ export default function PostCard({
     return darkMode ? "/compact-image-dark.png" : "/compact-image.png";
   });
 
-  // Handler functions
+
   const handleUpvote = (e) => {
     e.stopPropagation();
     if (isGuest) {
       onPromptLogin?.();
     } else {
-      onUpvote?.(post.id, e) || onVote?.(post.id, 1);
+      onVote?.(post.id, 1);  // Just use onVote
     }
   };
 
@@ -57,7 +57,7 @@ export default function PostCard({
     if (isGuest) {
       onPromptLogin?.();
     } else {
-      onDownvote?.(post.id, e) || onVote?.(post.id, -1);
+      onVote?.(post.id, -1);  // Just use onVote
     }
   };
 

@@ -1,13 +1,8 @@
 // pages/HomePage/HomePage.jsx
 import React, { useState, useEffect } from "react";
-import { 
-  FaPlus, FaBell, FaUser, FaCog, FaSignOutAlt, 
-  FaHome, FaFire, FaStar, FaRegBookmark, FaShare, FaEllipsisH, FaEyeSlash,
-  FaArrowUp, FaRegCommentAlt ,FaFlag
-} from "react-icons/fa";
+import { FaArrowUp, FaRegCommentAlt, FaEllipsisH } from "react-icons/fa";
 import "./HomePage.css";
 import "../../components/PostCard/PostCard.css";
-import { FaExpand, FaCompress } from "react-icons/fa";
 import Comment from "../../components/Comment/Comment";
 import TrendingPosts from "../../components/TrendingPosts/TrendingPosts";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
@@ -37,9 +32,7 @@ const HomePage = ({ user, onLogout, darkMode }) => {
   });
 
   const [showSortDropdown, setShowSortDropdown] = useState(false);
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [commentInputs, setCommentInputs] = useState({});
-  const [joined, setJoined] = useState(false);
 
   // Initialize expandedPostId from localStorage
   const [expandedPostId, setExpandedPostId] = useState(() => {
@@ -47,8 +40,6 @@ const HomePage = ({ user, onLogout, darkMode }) => {
       const savedExpandedPostId = localStorage.getItem('expandedPostId');
       if (savedExpandedPostId) {
         const parsedId = JSON.parse(savedExpandedPostId);
-        console.log('Loaded expandedPostId from localStorage:', parsedId);
-        // Only return if it's a valid number (post ID)
         return typeof parsedId === 'number' ? parsedId : null;
       }
     } catch (error) {
@@ -105,7 +96,6 @@ const HomePage = ({ user, onLogout, darkMode }) => {
       const savedRecentPosts = localStorage.getItem('recentPosts');
       if (savedRecentPosts) {
         const parsedPosts = JSON.parse(savedRecentPosts);
-        // Ensure we have valid posts with required properties
         return Array.isArray(parsedPosts) ? parsedPosts : [];
       }
     } catch (error) {
@@ -147,7 +137,7 @@ const HomePage = ({ user, onLogout, darkMode }) => {
         time: "2 hours ago",
         userVote: 0,
         image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-        isExpanded: false, // This will be overridden by expandedPosts
+        isExpanded: false,
         commentsList: [
           {
             id: 1,
@@ -194,7 +184,7 @@ const HomePage = ({ user, onLogout, darkMode }) => {
         time: "5 hours ago",
         userVote: 0,
         image: "https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-        isExpanded: false, // This will be overridden by expandedPosts
+        isExpanded: false,
         commentsList: [
           {
             id: 4,
@@ -220,10 +210,9 @@ const HomePage = ({ user, onLogout, darkMode }) => {
         time: "1 day ago",
         userVote: 0,
         image: null,
-        isExpanded: false, // This will be overridden by expandedPosts
+        isExpanded: false,
         commentsList: []
       },
-      // User's own post
       { 
         id: 4,
         community: null, 
@@ -234,9 +223,9 @@ const HomePage = ({ user, onLogout, darkMode }) => {
         upvotes: 42, 
         comments: 8,
         time: "30 minutes ago",
-        userVote: 0, // Changed from 1 to 0 to allow loading from localStorage
+        userVote: 0,
         image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-        isExpanded: false, // This will be overridden by expandedPosts
+        isExpanded: false,
         isUserPost: true,
         commentsList: [
           {
@@ -290,7 +279,7 @@ const HomePage = ({ user, onLogout, darkMode }) => {
             return {
               ...post,
               userVote: savedVote,
-              upvotes: post.upvotes + savedVote // Adjust upvotes based on saved vote
+              upvotes: post.upvotes + savedVote
             };
           }
           return post;
@@ -317,7 +306,6 @@ const HomePage = ({ user, onLogout, darkMode }) => {
   useEffect(() => {
     try {
       localStorage.setItem('viewMode', viewMode);
-      console.log('Saved viewMode to localStorage:', viewMode);
     } catch (error) {
       console.error('Error saving view mode to localStorage:', error);
     }
@@ -327,7 +315,6 @@ const HomePage = ({ user, onLogout, darkMode }) => {
   useEffect(() => {
     try {
       localStorage.setItem('sortBy', sortBy);
-      console.log('Saved sortBy to localStorage:', sortBy);
     } catch (error) {
       console.error('Error saving sort by to localStorage:', error);
     }
@@ -338,11 +325,8 @@ const HomePage = ({ user, onLogout, darkMode }) => {
     try {
       if (expandedPostId) {
         localStorage.setItem('expandedPostId', JSON.stringify(expandedPostId));
-        console.log('Saved expandedPostId to localStorage:', expandedPostId);
       } else {
-        // If no post is expanded, remove it from localStorage
         localStorage.removeItem('expandedPostId');
-        console.log('Removed expandedPostId from localStorage');
       }
     } catch (error) {
       console.error('Error saving expanded post to localStorage:', error);
@@ -353,7 +337,6 @@ const HomePage = ({ user, onLogout, darkMode }) => {
   useEffect(() => {
     try {
       localStorage.setItem('expandedPosts', JSON.stringify(expandedPosts));
-      console.log('Saved expandedPosts to localStorage:', expandedPosts);
     } catch (error) {
       console.error('Error saving expanded posts to localStorage:', error);
     }
@@ -433,14 +416,12 @@ const HomePage = ({ user, onLogout, darkMode }) => {
       community: post.community,
       user: post.user,
       userAvatar: post.userAvatar || "/profile.png",
-      timestamp: Date.now(), // Add timestamp for sorting
+      timestamp: Date.now(),
       time: post.time
     };
 
     setRecentPosts(prev => {
-      // Remove if already exists (to avoid duplicates)
       const filtered = prev.filter(p => p.id !== post.id);
-      // Add to beginning and limit to 5 posts
       const updated = [recentPost, ...filtered].slice(0, 5);
       return updated;
     });
@@ -449,7 +430,6 @@ const HomePage = ({ user, onLogout, darkMode }) => {
   // Function to clear all recent posts
   const clearRecentPosts = () => {
     setRecentPosts([]);
-    // Also clear from localStorage
     localStorage.removeItem('recentPosts');
   };
 
@@ -459,7 +439,6 @@ const HomePage = ({ user, onLogout, darkMode }) => {
     if (post) {
       addToRecentPosts(post);
     }
-    console.log(`Opening post details for post ${postId}`);
   };
 
   // Function to format relative time
@@ -468,7 +447,6 @@ const HomePage = ({ user, onLogout, darkMode }) => {
     
     let formattedTime = timeString.toLowerCase();
     
-    // Replace common time patterns with abbreviated versions
     formattedTime = formattedTime
       .replace(/(\d+)\s+minutes?\s+ago/, '$1m')
       .replace(/(\d+)\s+min\s+ago/, '$1m')
@@ -531,16 +509,13 @@ const HomePage = ({ user, onLogout, darkMode }) => {
         let newUpvotes = comment.upvotes;
         let newUserVote = voteType;
         
-        // If clicking the same vote again, remove the vote
         if (comment.userVote === voteType) {
           newUserVote = 0;
           newUpvotes -= voteType;
         } 
-        // If changing vote
         else if (comment.userVote !== 0) {
           newUpvotes = newUpvotes - comment.userVote + voteType;
         }
-        // If new vote
         else {
           newUpvotes += voteType;
         }
@@ -552,7 +527,6 @@ const HomePage = ({ user, onLogout, darkMode }) => {
         };
       }
       
-      // Recursively update replies
       if (comment.replies && comment.replies.length > 0) {
         return {
           ...comment,
@@ -595,7 +569,6 @@ const HomePage = ({ user, onLogout, darkMode }) => {
         };
       }
       
-      // Recursively search in replies
       if (comment.replies && comment.replies.length > 0) {
         return {
           ...comment,
@@ -610,7 +583,6 @@ const HomePage = ({ user, onLogout, darkMode }) => {
   // Toggle comments visibility
   const toggleComments = (postId) => {
     const newExpandedPostId = expandedPostId === postId ? null : postId;
-    console.log('Toggling comments for post:', postId, 'New expandedPostId:', newExpandedPostId);
     setExpandedPostId(newExpandedPostId);
   };
 
@@ -650,7 +622,6 @@ const HomePage = ({ user, onLogout, darkMode }) => {
       )
     );
 
-    // Clear the input
     setCommentInputs(prev => ({
       ...prev,
       [postId]: ""
@@ -667,13 +638,10 @@ const HomePage = ({ user, onLogout, darkMode }) => {
       )
     );
 
-    // Update the expandedPosts state for persistence
     setExpandedPosts(prev => {
       if (prev.includes(postId)) {
-        // Remove from expanded posts if it's already there (collapsing)
         return prev.filter(id => id !== postId);
       } else {
-        // Add to expanded posts (expanding)
         return [...prev, postId];
       }
     });
@@ -687,16 +655,13 @@ const HomePage = ({ user, onLogout, darkMode }) => {
           let newUpvotes = post.upvotes;
           let newUserVote = voteType;
           
-          // If clicking the same vote again, remove the vote
           if (post.userVote === voteType) {
             newUserVote = 0;
             newUpvotes -= voteType;
           } 
-          // If changing vote
           else if (post.userVote !== 0) {
             newUpvotes = newUpvotes - post.userVote + voteType;
           }
-          // If new vote
           else {
             newUpvotes += voteType;
           }
@@ -720,21 +685,9 @@ const HomePage = ({ user, onLogout, darkMode }) => {
     return darkMode ? "/compact-image-dark.png" : "/compact-image.png";
   };
 
-  const handleUpvote = (postId, e) => {
-    e.stopPropagation();
-    handleVote(postId, 1);
-  };
-
-  const handleDownvote = (postId, e) => {
-    e.stopPropagation();
-    handleVote(postId, -1);
-  };
-
   const toggleViewMode = () => {
     setViewMode(prev => {
-      const newViewMode = prev === 'card' ? 'compact' : 'card';
-      console.log('Toggling view mode to:', newViewMode);
-      return newViewMode;
+      return prev === 'card' ? 'compact' : 'card';
     });
   };
 
@@ -742,22 +695,13 @@ const HomePage = ({ user, onLogout, darkMode }) => {
     setShowSortDropdown(prev => !prev);
   };
 
-  const toggleProfileMenu = () => {
-    setShowProfileMenu(prev => !prev);
-  };
-
   const handleSortSelect = (option) => {
-    console.log('Selected sort option:', option);
     setSortBy(option);
     setShowSortDropdown(false);
   };
 
   const handleCommunityClick = (communityName) => {
     console.log(`Opening community page for r/${communityName}`);
-  };
-
-  const handleCreatePost = () => {
-    console.log("Create new post");
   };
 
   const formatNumber = (num) => {
@@ -827,13 +771,10 @@ const HomePage = ({ user, onLogout, darkMode }) => {
             onHidePost={handleHidePost}
             onUnhidePost={handleUnhidePost}
             hiddenPosts={hiddenPosts}
-            onUpvote={handleUpvote}
-            onDownvote={handleDownvote}
             onCommentVote={handleCommentVote}
             onCommentReply={handleCommentReply}
             getThumbnailImage={getThumbnailImage}
             toggleExpand={toggleExpand}
-            isGuest={false}
             recentPosts={recentPosts}
             onClearRecentPosts={clearRecentPosts}
             showRecentPosts={true}
@@ -877,7 +818,6 @@ const HomePage = ({ user, onLogout, darkMode }) => {
                   </div>
                   
                   <div className="recent-post-content">
-                    {/* New header with user avatar, community, and time */}
                     <div className="recent-post-header">
                       <img 
                         src={post.userAvatar} 
