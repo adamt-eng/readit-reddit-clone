@@ -1,0 +1,100 @@
+/* Layout */
+.auth-page {
+  display: flex;
+  height: 100vh;
+  background: #ffffff;
+  font-family: sans-serif;
+  position: relative;
+}
+
+/* Top-page logos */
+.auth-logo {
+  display: block;
+  margin: 20px auto;
+}
+
+.login-top-logo {
+  width: 140px;
+}
+
+.signup-logo {
+  width: 200px;
+}
+
+/* Left side content */
+.auth-left {
+  flex: 1;
+  padding: 80px;
+  background: #f6f7f8;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-side-logo {
+  width: 150px;
+  margin-bottom: 2px;
+}
+
+.auth-left h1 {
+  font-size: 32px;
+  color: #1a1a1b;
+  margin-bottom: 10px;
+}
+
+.auth-left p {
+  font-size: 16px;
+  color: #555;
+}
+
+/* Right side form area */
+.auth-right {
+  width: 520px;
+  padding: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Form */
+.auth-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.auth-input {
+  padding: 16px;
+  font-size: 16px;
+  border-radius: 24px;
+  background: #f6f7f8;
+  border: 1px solid #ccc;
+  color: #1a1a1b;
+}
+
+.auth-btn {
+  padding: 16px;
+  font-size: 17px;
+  border-radius: 24px;
+  background: #ff4500;
+  color: white;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+.auth-btn:hover {
+  background: #d03a00;
+}
+
+.auth-small {
+  font-size: 14px;
+  color: #444;
+  margin-top: 5px;
+}
+
+.auth-small a {
+  color: #0079d3;
+  font-weight: 600;
+}
