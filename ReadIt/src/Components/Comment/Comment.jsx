@@ -1,6 +1,4 @@
-
 import React, { useState } from "react";
-import { FaArrowUp, FaArrowDown, FaReply } from "react-icons/fa";
 import "./Comment.css";
 
 const Comment = ({ comment, depth = 0, darkMode, onVote, onReply, postId }) => {
@@ -35,32 +33,32 @@ const Comment = ({ comment, depth = 0, darkMode, onVote, onReply, postId }) => {
           onClick={() => handleVote(1)} 
           className={`vote-btn ${comment.userVote === 1 ? "upvoted" : ""}`}
         >
-          <FaArrowUp />
+          ▲
         </button>
         <span className={`vote-count ${comment.userVote === 1 ? "upvoted" : comment.userVote === -1 ? "downvoted" : ""}`}>
-          {comment.upvotes}
+          {comment.upvotes || comment.votes || 0}
         </span>
         <button 
           onClick={() => handleVote(-1)} 
           className={`vote-btn ${comment.userVote === -1 ? "downvoted" : ""}`}
         >
-          <FaArrowDown />
+          ▼
         </button>
       </div>
 
       <div className="comment-body">
         <div className="comment-header">
-          <img src={comment.avatar} alt={comment.author} className="comment-avatar" />
+          {comment.avatar && <img src={comment.avatar} alt={comment.author} className="comment-avatar" />}
           <span className="comment-author">u/{comment.author}</span>
-          <span className="comment-time">• {comment.time}</span>
+          <span className="comment-time">• {comment.time || comment.timeAgo}</span>
         </div>
-        <div className="comment-content">{comment.content}</div>
+        <div className="comment-content">{comment.content || comment.body}</div>
         <div className="comment-actions">
           <button 
             className="action-btn" 
             onClick={() => setIsReplying(!isReplying)}
           >
-            <FaReply /> Reply
+            ↩ Reply
           </button>
           <button className="action-btn">Share</button>
           <button className="action-btn">Report</button>
