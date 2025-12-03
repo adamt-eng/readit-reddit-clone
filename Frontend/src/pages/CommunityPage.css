@@ -1,0 +1,28 @@
+/* CommunityPage.css */
+.communityPage {
+  background: #f8f9fa;
+  min-height: 100vh;
+  padding-top: 24px;
+}
+
+.communityContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  gap: 24px;
+}
+
+.left {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 960px) {
+  .communityContent {
+    flex-direction: column;
+  }
+  .communitySidebar {
+    width: 100%;
+  }
+}
