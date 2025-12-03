@@ -109,16 +109,3 @@ Frontend will run on:
 ⚙ API connections and authentication upcoming
 
 ---
-
-## 📬 Contributing
-
-Pull requests are welcome!
-Make sure to explain the feature or bug fix clearly in your PR description.
-
----
-
-## 📜 License
-
-This project is for educational purposes. No license restrictions applied yet.
-
-```
