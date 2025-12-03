@@ -13,6 +13,7 @@ body {
 
 .app {
   min-height: 100vh;
+  background: #dae0e6;   /* same light grey Reddit uses */
 }
 
 /* Global layout styles */
@@ -40,12 +41,11 @@ body {
 
 /* Dark mode global styles */
 body.dark-mode {
-  background: #030303;
+  background: #1a1a1b;   /* was #030303 */
   color: #d7dadc;
 }
 
 .dark-mode .app {
-  background: #030303;
+  background: #1a1a1b;   /* was #030303 */
   color: #d7dadc;
 }
-
