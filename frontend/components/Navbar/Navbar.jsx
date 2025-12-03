@@ -1,5 +1,6 @@
 // components/Navbar/Navbar.jsx
 import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { FaSearch, FaPlus, FaBell, FaUser, FaCog, FaSignOutAlt, FaMoon, FaSun, FaComment } from "react-icons/fa";
 import "./Navbar.css";
 
@@ -14,24 +15,13 @@ export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleD
   };
 
   const handleCreatePost = () => {
-    if (isLoggedIn) {
-      console.log("Opening create post modal");
-      // You can implement create post functionality here
-    } else {
-      promptLogin();
-    }
+    if (!isLoggedIn) return promptLogin();
   };
 
   const handleOpenMessages = () => {
-    if (isLoggedIn) {
-      console.log("Opening direct messages");
-      // You can implement DM functionality here
-    } else {
-      promptLogin();
-    }
+    if (!isLoggedIn) return promptLogin();
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
@@ -40,20 +30,15 @@ export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleD
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Handle dropdown item clicks
   const handleDropdownItemClick = (action) => {
-    setShowProfileMenu(false); // Close dropdown immediately
-    
-    // Execute the action after a small delay for better UX
+    setShowProfileMenu(false);
     setTimeout(() => {
       switch (action) {
         case 'profile':
-          console.log("Opening profile");
+          // Route handled by <Link>
           break;
         case 'settings':
           console.log("Opening settings");
@@ -75,11 +60,13 @@ export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleD
       <div className="navbar">
         <div className="nav-left">
           <div className="logo-section">
-            <img 
-              src={ "../../src/assets/reddit-text.png"} 
-              alt="reddit logo text"
-              className="nav-logo-text"
-            />
+            <Link to="/">
+              <img 
+                src={"../../src/assets/reddit-text.png"} 
+                alt="reddit logo text"
+                className="nav-logo-text"
+              />
+            </Link>
           </div>
         </div>
 
@@ -96,32 +83,31 @@ export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleD
         </div>
 
         <div className="nav-right logged-in">
-          {/* Create Post Button with Text - No Background */}
-          <button 
+
+          <Link 
+            to="/create-post"
             className="nav-icon-btn create-post-btn"
             onClick={handleCreatePost}
             title="Create Post"
           >
             <FaPlus className={darkMode ? "dark-mode-icon" : ""} />
             <span className="create-text">Create</span>
-          </button>
+          </Link>
 
-          {/* Chat/Direct Messages Button */}
-          <button 
+          <Link 
+            to="/messages"
             className="nav-icon-btn"
             onClick={handleOpenMessages}
             title="Direct Messages"
           >
             <FaComment className={`nav-icon ${darkMode ? "dark-mode-icon" : ""}`} />
-          </button>
+          </Link>
 
-          {/* Notifications Button */}
-          <button className="nav-icon-btn" title="Notifications">
+          <Link to="/notifications" className="nav-icon-btn" title="Notifications">
             <FaBell className={`nav-icon ${darkMode ? "dark-mode-icon" : ""}`} />
             <span className="notification-badge">3</span>
-          </button>
+          </Link>
 
-          {/* Profile Menu */}
           <div className="profile-menu-container" ref={profileMenuRef}>
             <button className="profile-btn" onClick={toggleProfileMenu}>
               <img 
@@ -137,13 +123,16 @@ export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleD
             
             {showProfileMenu && (
               <div className="profile-dropdown">
-                <div 
+
+                <Link 
+                  to={`/user/${user?.username}`} 
                   className="dropdown-item"
                   onClick={() => handleDropdownItemClick('profile')}
                 >
                   <FaUser className="dropdown-icon" />
                   <span>Profile</span>
-                </div>
+                </Link>
+
                 <div 
                   className="dropdown-item"
                   onClick={() => handleDropdownItemClick('settings')}
@@ -151,14 +140,17 @@ export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleD
                   <FaCog className="dropdown-icon" />
                   <span>Settings</span>
                 </div>
+
                 <div 
-                  className="dropdown-item" 
+                  className="dropdown-item"
                   onClick={() => handleDropdownItemClick('darkMode')}
                 >
                   {darkMode ? <FaSun className="dropdown-icon" /> : <FaMoon className="dropdown-icon" />}
                   <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
                 </div>
+
                 <div className="dropdown-divider"></div>
+
                 <div 
                   className="dropdown-item logout-btn" 
                   onClick={() => handleDropdownItemClick('logout')}
@@ -166,6 +158,7 @@ export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleD
                   <FaSignOutAlt className="dropdown-icon" />
                   <span>Log Out</span>
                 </div>
+
               </div>
             )}
           </div>
@@ -174,16 +167,17 @@ export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleD
     );
   }
 
-  // Guest navbar
   return (
     <div className="navbar">
       <div className="nav-left">
         <div className="logo-section">
-          <img 
-            src="../../src/assets/reddit-text.png" 
-            alt="reddit logo text"
-            className="nav-logo-text"
-          />
+          <Link to="/guest">
+            <img 
+              src="../../src/assets/reddit-text.png" 
+              alt="reddit logo text"
+              className="nav-logo-text"
+            />
+          </Link>
         </div>
       </div>
 
@@ -205,10 +199,8 @@ export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleD
       </div>
 
       <div className="nav-right">
-        <button className="login-btn" onClick={promptLogin}>Log In</button>
-        <button className="signup-btn" onClick={promptLogin}>
-          Sign Up
-        </button>
+        <Link className="login-btn" to="/login">Log In</Link>
+        <Link className="signup-btn" to="/signup">Sign Up</Link>
       </div>
     </div>
   );

@@ -91,7 +91,7 @@
 
 // src/components/profile/UserProfilePage.jsx
 import React from 'react';
-import LeftSidebar from '../LeftSidebar';
+import LeftSidebar from '../LeftSidebar/LeftSidebar';
 import ProfileBanner from './ProfileBanner';
 import ProfileHeader from './ProfileHeader';
 import ProfileTabs from './ProfileTabs';
