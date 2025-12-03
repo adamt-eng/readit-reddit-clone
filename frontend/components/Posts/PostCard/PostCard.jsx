@@ -2,7 +2,7 @@
 // components/PostCard/PostCard.jsx
 import React from "react";
 import { FaRegCommentAlt, FaShare, FaBookmark, FaEllipsisH, FaExpand, FaCompress, FaBell, FaRegBookmark, FaEyeSlash, FaFlag } from "react-icons/fa";
-import Comment from "../Comment/Comment";
+import Comment from "../../Comment/Comment";
 import "./PostCard.css";
 
 export default function PostCard({
