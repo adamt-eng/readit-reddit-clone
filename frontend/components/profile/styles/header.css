@@ -1,15 +1,24 @@
 /* NEW REDDIT PROFILE HEADER - 100% MATCH */
+/* NEW REDDIT PROFILE HEADER */
 .profile-header {
   background: white;
-  padding: 64px 24px 24px 170px;   /* Space for avatar */
+  padding: 24px 24px 16px 24px;   /* was 64px 24px 24px 170px */
   border: 1px solid #edeff1;
   border-top: none;
-  border-radius: 8px 8px 0 0; 
+  border-radius: 8px 8px 0 0;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;            /* center avatar + text vertically */
+  justify-content: flex-start;    /* put them next to each other on the left */
+  gap: 16px;                      /* space between avatar and text */
   position: relative;
   z-index: 5;
+}
+
+.header-avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 4px solid white;
 }
 
 .profile-header h1 {
@@ -24,6 +33,8 @@
   color: #787c7e;
   font-weight: 400;
 }
+
+
 
 .karma-line {
   font-size: 14px;

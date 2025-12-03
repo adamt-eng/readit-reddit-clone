@@ -1,10 +1,15 @@
+import avatarImg from "/src/assets/default-avatar.png";
 
-export default function ProfileHeader() {
+export default function ProfileHeader({ user }) {
   return (
     <div className="profile-header">
+      <img src={avatarImg} alt="avatar" className="header-avatar" />
+
       <div className="profile-info">
-        <h1>Moist_Barber_9724</h1>
-        <p className="karma-line">Karma: 1 • Cake day: November 2024</p>
+        <h1>{user.username}</h1>
+        <p className="karma-line">
+          Karma: {user.karma} • Cake day: {user.cakeDay}
+        </p>
       </div>
     </div>
   );

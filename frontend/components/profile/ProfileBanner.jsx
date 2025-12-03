@@ -1,14 +1,4 @@
-// src/components/profile/ProfileBanner.jsx
-import './styles/profile.css';
-
+// REMOVE THE <img> — banner should be empty
 export default function ProfileBanner() {
-  return (
-    <div className="profile-banner-fullwidth">
-      <img
-        src="/src/assets/default-avatar.png"
-        alt="User avatar"
-        className="profile-avatar"
-      />
-    </div>
-  );
+  return <div className="profile-banner-fullwidth"></div>;
 }
