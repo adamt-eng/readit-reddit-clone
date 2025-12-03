@@ -5,6 +5,8 @@ import { Routes, Route } from "react-router-dom";
 import HomePage from "../pages/HomePage/HomePage.jsx";
 import UserProfilePage from "../components/profile/UserProfilePage.jsx";
 import EditProfilePage from "../components/profile/EditProfile/EditProfilePage.jsx";
+import CreatePost from "../components/Posts/CreatePost/CreatePost.jsx"; 
+
 
 export default function AppRoutes({
   darkMode,
@@ -47,6 +49,17 @@ export default function AppRoutes({
       }
       />
 
+      {/* */}
+      <Route
+        path="/create-post"
+        element={
+          <CreatePost 
+            isDark={darkMode}
+            toggleDarkMode={toggleDarkMode}
+            currentUser={currentUser}
+          />
+        }
+      />
       {/* You can add more routes here later */}
     </Routes>
   );

@@ -14,8 +14,11 @@ export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleD
     setShowProfileMenu(prev => !prev);
   };
 
-  const handleCreatePost = () => {
-    if (!isLoggedIn) return promptLogin();
+  const handleCreatePost = (e) => {
+    if (!isLoggedIn) {
+        e.preventDefault();
+        return promptLogin();
+    }
   };
 
   const handleOpenMessages = () => {
@@ -87,7 +90,7 @@ export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleD
           <Link 
             to="/create-post"
             className="nav-icon-btn create-post-btn"
-            onClick={handleCreatePost}
+            onClick={handleCreatePost} 
             title="Create Post"
           >
             <FaPlus className={darkMode ? "dark-mode-icon" : ""} />
