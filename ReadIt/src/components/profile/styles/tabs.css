@@ -1,0 +1,58 @@
+/* src/components/profile/styles/tabs.css — EXACT REDDIT 2025 TABS (light + dark) */
+
+.profile-tabs {
+  display: flex;
+  background: white;
+  border: 1px solid #edc;
+  border-top: none;
+  margin-top: -1px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.profile-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.profile-tab {
+  padding: 12px 20px;
+  font-weight: 500;
+  font-size: 14px;
+  color: #787c7e;
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+  transition: color 0.2s;
+  position: relative;
+}
+
+.profile-tab:hover {
+  color: #1c1c1c;
+}
+
+.profile-tab.active {
+  color: #1c1c1c;
+  font-weight: 600;
+  border-bottom-color: #ff4500;     /* Real Reddit uses ORANGE */
+}
+
+/* DARK MODE — PERFECT REDDIT STYLE */
+.dark-mode .profile-tabs {
+  background: #1a1a1b !important;
+  border-color: #343536 !important;
+}
+
+.dark-mode .profile-tab {
+  color: #818384;
+}
+
+.dark-mode .profile-tab:hover {
+  color: #d7dadc;
+}
+
+.dark-mode .profile-tab.active {
+  color: #d7dadc;
+  font-weight: 600;
+  border-bottom-color: #ff4500;     /* Orange underline in dark mode too */
+}

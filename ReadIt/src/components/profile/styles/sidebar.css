@@ -1,0 +1,181 @@
+/* src/components/profile/styles/sidebar.css — EXACT REDDIT 2025 RIGHT PANEL */
+
+.profile-sidebar {
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 0;
+  margin-top: 16px;
+  overflow: hidden;
+}
+
+.profile-sidebar-top {
+  background: linear-gradient(135deg, #0079d3 0%, #004578 100%);
+  height: 94px;
+  position: relative;
+}
+
+.profile-sidebar-avatar {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  width: 72px;
+  height: 72px;
+  border: 4px solid white;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background: white;
+  z-index: 10;
+}
+
+.profile-sidebar-info {
+  padding: 16px 16px 16px 16px;
+  background: white;
+}
+
+.profile-sidebar-name {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 2px 0;
+  color: #1c1c1c;
+}
+
+.profile-sidebar-handle {
+  font-size: 12px;
+  color: #7c7c7c;
+  margin: 0 0 16px 0;
+}
+
+.profile-sidebar button {
+  width: 100%;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  background: white;
+  border: 1px solid #0079d3;
+  color: #0079d3;
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.profile-sidebar button:hover {
+  background: #f6f7f8;
+}
+
+.profile-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 24px;
+  font-size: 14px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #edeff1;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-value {
+  font-weight: 500;
+  font-size: 16px;
+  color: #1c1c1c;
+}
+
+.stat-label {
+  color: #7c7c7c;
+  font-size: 12px;
+}
+
+.achievements-section {
+  padding-top: 8px;
+}
+
+.achievements-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin: 0 0 12px;
+  color: #7c7c7c;
+  text-transform: uppercase;
+}
+
+.achievement-badges {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.achievement-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #ff4500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.achievement-text {
+  font-size: 14px;
+  color: #1c1c1c;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.achievement-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.unlocked-count {
+  color: #1c1c1c;
+  font-weight: 500;
+}
+
+.view-all-link {
+  color: #0079d3;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.view-all-link:hover {
+  text-decoration: underline;
+}
+
+/* Edit Profile button in right sidebar */
+.edit-profile-sidebar-btn {
+  width: 100%;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  background: #0079d3;
+  border: 1px solid #0079d3;
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.edit-profile-sidebar-btn:hover {
+  background: #0061a8;
+}
+
+/* DARK MODE */
+.dark-mode .edit-profile-sidebar-btn {
+  background: #d7dadc !important;
+  color: #000 !important;
+}
+
+.dark-mode .edit-profile-sidebar-btn:hover {
+  background: #c7cacd !important;
+}
