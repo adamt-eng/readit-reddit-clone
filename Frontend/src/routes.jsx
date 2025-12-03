@@ -4,6 +4,7 @@ import { Routes, Route } from "react-router-dom";
 
 import HomePage from "../pages/HomePage/HomePage.jsx";
 import UserProfilePage from "../components/profile/UserProfilePage.jsx";
+import EditProfilePage from "../components/profile/EditProfile/EditProfilePage.jsx";
 
 export default function AppRoutes({
   darkMode,
@@ -34,6 +35,16 @@ export default function AppRoutes({
             toggleDarkMode={toggleDarkMode}
           />
         }
+      />
+
+      <Route
+        path="/edit-profile"
+        element={
+        <EditProfilePage
+        isDark={darkMode}
+        toggleDarkMode={toggleDarkMode}
+        />
+      }
       />
 
       {/* You can add more routes here later */}
