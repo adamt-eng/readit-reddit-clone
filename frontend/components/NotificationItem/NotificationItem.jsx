@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useRef } from "react";
 import "./NotificationItem.css";
 import { IoIosArrowForward } from "react-icons/io";

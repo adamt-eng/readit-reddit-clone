@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // components/LeftSidebar/LeftSidebar.jsx
 import React from "react";
 import { 

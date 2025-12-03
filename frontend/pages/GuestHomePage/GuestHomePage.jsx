@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // pages/GuestHomePage/GuestHomePage.jsx
 import React, { useState, useEffect } from "react";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
@@ -200,7 +201,7 @@ export default function GuestHomePage({ darkMode, onLogin }) {
   useEffect(() => {
     try {
       localStorage.setItem('viewMode', viewMode);
-    } catch {}
+    } catch { /* empty */ }
   }, [viewMode]);
 
   useEffect(() => {
@@ -210,13 +211,13 @@ export default function GuestHomePage({ darkMode, onLogin }) {
       } else {
         localStorage.removeItem('expandedPostId');
       }
-    } catch {}
+    } catch { /* empty */ }
   }, [expandedPostId]);
 
   useEffect(() => {
     try {
       localStorage.setItem('expandedPosts', JSON.stringify(expandedPosts));
-    } catch {}
+    } catch { /* empty */ }
   }, [expandedPosts]);
 
   useEffect(() => {

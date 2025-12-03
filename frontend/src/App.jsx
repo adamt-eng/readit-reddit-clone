@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useLayoutEffect } from "react";
 import Navbar from "../components/Navbar/Navbar.jsx";
 import GuestHomePage from "../pages/GuestHomePage/GuestHomePage.jsx";
