@@ -1,10 +1,30 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
+body {
+  background: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  color: #1c1c1c;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.app {
+  min-height: 100vh;
+}
+
+/* Global layout styles */
+.page-container {
+  display: flex;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 0;
+  gap: 24px;
+}
+
+<<<<<<< HEAD:frontend/src/App.css
 input, textarea {
   color: #1a1a1b;
 }
@@ -28,20 +48,30 @@ input, textarea {
   }
   to {
     transform: rotate(360deg);
+=======
+/* Responsive layout */
+@media (max-width: 1200px) {
+  .page-container {
+    padding: 20px;
+    gap: 20px;
+>>>>>>> origin/men3em's-Branch:ReadIt/src/App.css
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+@media (max-width: 768px) {
+  .page-container {
+    padding: 16px;
   }
 }
 
-.card {
-  padding: 2em;
+/* Dark mode global styles */
+body.dark-mode {
+  background: #030303;
+  color: #d7dadc;
 }
 
-.read-the-docs {
-  color: #888;
+.dark-mode .app {
+  background: #030303;
+  color: #d7dadc;
 }
 
