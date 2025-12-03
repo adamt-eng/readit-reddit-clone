@@ -2,7 +2,7 @@
 .profile-content {
   background: white;
   min-height: 400px;
-  border: 1px solid #edc;
+  border: 1px solid #edeff1; 
   border-top: none;
   border-radius: 0 0 8px 8px;
   padding: 20px;

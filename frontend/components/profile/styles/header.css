@@ -2,7 +2,7 @@
 .profile-header {
   background: white;
   padding: 80px 24px 24px 170px;   /* Space for avatar */
-  border: 1px solid #edc;
+  border: 1px solid #edeff1;
   border-top: none;
   border-radius: 0 0 8px 8px;
   display: flex;
