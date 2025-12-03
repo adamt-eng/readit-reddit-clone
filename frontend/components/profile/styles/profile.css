@@ -17,33 +17,6 @@
   padding: 0;
 }
 
-.profile-banner-fullwidth {
-  height: 72px;                    /* just enough space for avatar overlap */
-  background: #dae0e6;             /* same as page background → bar “disappears” */
-  border-radius: 0;
-  position: relative;
-  overflow: visible;               /* keep avatar visible */
-}
-
-/* remove glow overlay */
-.profile-banner-fullwidth::after {
-  content: none;
-}
-
-
-/* .profile-avatar {
-  position: absolute;
-  left: 24px;
-  bottom: -50px;
-  width: 120px;
-  height: 120px;
-  border: 5px solid white;
-  border-radius: 50%;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  z-index: 10;
-  background: white;
-  object-fit: cover;
-} */
 
 .profile-container {
   max-width: 1248px;

@@ -2,7 +2,7 @@
 // src/components/profile/UserProfilePage.jsx
 import React from 'react';
 import LeftSidebar from '../LeftSidebar/LeftSidebar';
-import ProfileBanner from './ProfileBanner';
+//import ProfileBanner from './ProfileBanner';
 import ProfileHeader from './ProfileHeader';
 import ProfileTabs from './ProfileTabs';
 import ProfileContent from './ProfileContent';
@@ -59,7 +59,7 @@ export default function UserProfilePage({ isDark, toggleDarkMode }) {
         <LeftSidebar />
 
         <div className="profile-page">
-          <ProfileBanner />
+          {/* <ProfileBanner /> */}
           
           <div className="profile-container">
             <main className="profile-main">
