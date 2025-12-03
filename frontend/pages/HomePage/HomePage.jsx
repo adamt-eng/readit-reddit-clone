@@ -1,9 +1,6 @@
-// pages/HomePage/HomePage.jsx
 import React, { useState, useEffect } from "react";
 import { FaArrowUp, FaRegCommentAlt, FaEllipsisH } from "react-icons/fa";
 import "./HomePage.css";
-import "../../components/PostCard/PostCard.css";
-import Comment from "../../components/Comment/Comment";
 import TrendingPosts from "../../components/TrendingPosts/TrendingPosts";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 import RecentPosts from "../../components/RecentPosts/RecentPosts";
