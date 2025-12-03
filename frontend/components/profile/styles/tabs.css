@@ -3,7 +3,7 @@
 .profile-tabs {
   display: flex;
   background: white;
-  border: 1px solid #edc;
+  border: 1px solid #edeff1;
   border-top: none;
   margin-top: -1px;
   overflow-x: auto;
