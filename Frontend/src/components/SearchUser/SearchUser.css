@@ -1,0 +1,22 @@
+.su-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.su-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.su-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.su-handle {
+  font-size: 13px;
+  color: #7c7c7c;
+}

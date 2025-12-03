@@ -1,0 +1,127 @@
+/* ----------------------------------------------
+   NOTIFICATIONS PAGE
+---------------------------------------------- */
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;   /* disable full-page scrolling */
+}
+
+.notifs-page {
+  width: 100%;
+  max-width: 850px;
+  margin: 0 auto;
+  height: calc(100vh - 60px); /* full window controlled area */
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px;
+}
+
+
+/* HEADER ALWAYS FIXED */
+.notifs-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+
+  background: #ffffff;
+  padding: 16px 0;
+  margin: 0;
+
+  border-bottom: 1px solid #ddd;
+
+  display: flex;
+  justify-content: space-between;  /* Title left, button right */
+  align-items: center;             /* vertically centered */
+}
+
+
+/* SCROLLABLE LIST */
+.notifs-list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+
+  /* so items collapsing inside here DO NOT affect the header */
+}
+.notifs-list::-webkit-scrollbar {
+  display: none;          /* Chrome/Safari/Edge */
+}
+
+.notifs-header h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1b;
+  margin: 0;
+}
+
+
+/* Header controls (Mark as read + icons) */
+.header-btn {
+  background: transparent;
+  border: none;
+  color: #0079d3;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.header-btn:hover {
+  text-decoration: underline;
+}
+
+.notifs-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.notifs-icon-btn {
+  cursor: pointer;
+  opacity: 0.75;
+  transition: 0.15s;
+}
+
+.notifs-icon-btn:hover {
+  opacity: 1;
+}
+
+/* Section Title */
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  color: #333;
+}
+
+
+/* Empty State */
+.no-new-message {
+  padding: 22px;
+  background: #f2f4f5;
+  border-radius: 6px;
+  text-align: center;
+  color: #6f6f6f;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+/* Expand earlier btn */
+.expand-earlier-btn {
+  background: none;
+  border: none;
+  font-size: 15px;
+  color: #0079d3;
+  cursor: pointer;
+  margin: 12px auto;
+  display: block;
+}
+
+.expand-earlier-btn:hover {
+  text-decoration: underline;
+}
