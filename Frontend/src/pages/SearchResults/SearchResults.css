@@ -1,3 +1,4 @@
+
 :root {
   --bg: #f6f7f8;
   --card: #ffffff;
@@ -130,6 +131,7 @@
 .sr-side-item.no-router-click {
   display: flex;
   align-items: center;
+  text-align: left;
   gap: 12px;
   padding: 6px 0;
   cursor: pointer;
@@ -143,10 +145,10 @@
 }
 
 .sr-side-icon {
-  width: 32px;
-  height: 32px;
+   width: 30px;
+  height: 30px;
+  border-radius: 50%;
   object-fit: cover;
-  border-radius: 6px;
 }
 
 .sr-side-title {

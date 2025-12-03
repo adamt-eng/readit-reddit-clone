@@ -1,71 +1,86 @@
-/* ----------------------------------------------
-   NOTIFICATION ITEM (LIGHT MODE ONLY)
----------------------------------------------- */
-
+/* core card (keeps previous visual look) */
 .notif-card {
   display: flex;
   align-items: flex-start;
   gap: 14px;
-
-  background: #ffffff;
-  border: 1px solid #e5e5e5;
-
-  padding: 14px 16px;
-  border-radius: 8px;
-
+  background: #f2f4f5;
+  padding: 14px 18px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background 0.18s ease;
+  transform: translateX(0);
+  opacity: 1;
+  will-change: transform, opacity;
+  width: 100%;              /* ✅ FULL WIDTH */
+  box-sizing: border-box;  /* ✅ prevent overflow */
+  text-align: left;
 }
 
+
+/* hover */
 .notif-card:hover {
-  background: #f8f9fa;
+  background: #e6e8e9;
 }
 
+/* unread neutral bar */
 .notif-unread {
-  background: #f6fafd;
-  border-left: 3px solid #0079d3;
+  border-left: 4px solid #cecece;
+  background: #ececec;
 }
 
-.notif-left {
-  flex-shrink: 0;
+/* disable pointer events while animating (prevents double clicks) */
+.notif-slide-out {
+  pointer-events: none;
 }
+
+/* SLIDE OUT animation (move left & fade) */
+.notif-slide-out {
+  animation: notifSlideOut 360ms cubic-bezier(.2,.9,.2,1) forwards;
+}
+
+@keyframes notifSlideOut {
+  0% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+    margin-bottom: 12px;
+  }
+
+  40% {
+    transform: translateX(-8px) scale(0.995);
+    opacity: 0.85;
+  }
+
+  100% {
+    transform: translateX(-120%) scale(0.98);
+    opacity: 0;
+    margin-bottom: 0;
+  }
+}
+
+
+/* icon / text styling (kept from previous design) */
+.notif-left { flex-shrink: 0; }
 
 .notif-icon {
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid #ddd;
+  object-fit: contain;
 }
 
 .notif-main {
   flex: 1;
-}
-
-.notif-title {
-  font-size: 15px;
-  margin-bottom: 3px;
-  color: #1a1a1b;
-  font-weight: 500;
-}
-
-.notif-preview {
-  font-size: 14px;
-  color: #444;
-}
-
-.notif-time {
-  font-size: 13px;
-  color: #777;
-  margin-top: 6px;
-}
-
-.notif-right {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 6px;
 }
 
-.notif-menu {
-  cursor: pointer;
-  color: #555;
-}
+.notif-title { font-size: 16px; font-weight: 600; }
+.notif-preview { color: #555; margin-top: 4px; }
+.notif-time { color: #777; font-size: 13px; margin-top: 6px; }
+
+.notif-right { display: flex; flex-direction: column; gap: 8px; }
+.notif-menu { opacity: 0.75; transition: 0.2s; }
+.notif-menu:hover { opacity: 1; }

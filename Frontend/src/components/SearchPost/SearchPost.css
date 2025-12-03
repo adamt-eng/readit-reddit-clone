@@ -3,6 +3,7 @@
   justify-content: space-between;
   gap: 14px;
   color: #1a1a1b;
+  text-align: left;
 }
 
 .sp-left {
@@ -14,7 +15,24 @@
   color: #7c7c7c;
   margin-bottom: 4px;
 }
+.sp-icon {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+}
 
+.info {
+display: flex;
+  align-items: center;
+  text-align: left;
+  gap: 12px;
+  padding: 6px 0;
+  cursor: pointer;
+  border-radius: 6px;
+  text-decoration: none;
+  color: inherit;
+   
+}
 .sp-title {
   font-size: 17px;
   font-weight: 600;

@@ -51,8 +51,11 @@ export default function Notifications() {
 
   return (
     <div className="notifs-page">
+
+      {/* Sticky Header */}
       <div className="notifs-header">
         <h2>Notifications</h2>
+
         {unread.length > 0 && (
           <button className="header-btn" onClick={markAll}>
             Mark all as read
@@ -60,11 +63,14 @@ export default function Notifications() {
         )}
       </div>
 
-      {/* UNREAD SECTION */}
-      {unread.length > 0 ? (
-        <>
-          <h3 className="section-title">New</h3>
-          <div className="notifs-list">
+      {/* EVERYTHING SCROLLS INSIDE THIS ONE LIST */}
+      <div className="notifs-list">
+
+        {/* NEW SECTION */}
+        {unread.length > 0 ? (
+          <>
+            <h3 className="section-title">New</h3>
+
             {unread.map((n) => (
               <NotificationItem
                 key={n._id}
@@ -72,40 +78,39 @@ export default function Notifications() {
                 onRead={() => markOne(n._id)}
               />
             ))}
-          </div>
-        </>
-      ) : (
-        <div className="no-new-message">
-          You’re all caught up 🎉  
-        </div>
-      )}
+          </>
+        ) : (
+          <div className="no-new-message">You’re all caught up 🎉</div>
+        )}
 
-      {/* EARLIER SECTION */}
-      {read.length > 0 && (
-        <>
+        {/* EARLIER BUTTON — INSIDE THE LIST (FIXES THE GAP) */}
+        {read.length > 0 && (
           <button
             className="expand-earlier-btn"
             onClick={() => setShowEarlier(!showEarlier)}
           >
-            {showEarlier ? "Hide earlier notifications ▲" : "Show earlier notifications ▼"}
+            {showEarlier
+              ? "Hide earlier notifications ▲"
+              : "Show earlier notifications ▼"}
           </button>
+        )}
 
-          {showEarlier && (
-            <>
-              <h3 className="section-title">Earlier</h3>
-              <div className="notifs-list">
-                {read.map((n) => (
-                  <NotificationItem
-                    key={n._id}
-                    data={n}
-                    onRead={() => markOne(n._id)}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-        </>
-      )}
+        {/* EARLIER SECTION */}
+        {showEarlier && read.length > 0 && (
+          <>
+            <h3 className="section-title">Earlier</h3>
+
+            {read.map((n) => (
+              <NotificationItem
+                key={n._id}
+                data={n}
+                onRead={() => markOne(n._id)}
+              />
+            ))}
+          </>
+        )}
+
+      </div>
     </div>
   );
 }
