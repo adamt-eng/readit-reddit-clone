@@ -20,9 +20,10 @@ export default function ProfileSidebar() {
         <button>Share</button>
 
         {/* ← NEW: EDIT PROFILE BUTTON */}
-        <Link to="/edit">
-          <button className="edit-profile-sidebar-btn">Edit Profile</button>
+       <Link to="/edit-profile">
+        <button className="edit-profile-sidebar-btn">Edit Profile</button>
         </Link>
+
 
         <div className="profile-stats-grid">
           <div className="stat-item">
