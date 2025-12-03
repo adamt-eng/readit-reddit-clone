@@ -4,11 +4,15 @@
 // -------------------------------
 // Notifications (UI schema)
 // -------------------------------
+// -------------------------------
+// Notifications (UI schema)
+// -------------------------------
 export const notifications = [
   {
     _id: "n1",
-    userId: "currentUser",    // receiver of the notification
-    type: "post-activity",
+    userId: "currentUser",
+    type: "post", // user got activity on their post
+    description: "There was activity on your post",
     payload: {
       postId: "p1",
       commentId: null,
@@ -16,12 +20,13 @@ export const notifications = [
       message: `Activity on your post "Ah the fun of abusing a perks intent due to wording."`
     },
     isRead: false,
-    createdAt: new Date(Date.now() - 22 * 60 * 1000) // 22m
+    timestamp: new Date(Date.now() - 22 * 60 * 1000) // 22 minutes ago
   },
   {
     _id: "n2",
     userId: "currentUser",
-    type: "comment-activity",
+    type: "comment", // someone interacted with your comment
+    description: "Your comment received new activity",
     payload: {
       postId: null,
       commentId: "c1",
@@ -29,12 +34,13 @@ export const notifications = [
       message: `Activity on your comment "Just wondering if you could ionize green..."`
     },
     isRead: false,
-    createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000) // 1h
+    timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000) // 1 hour ago
   },
   {
     _id: "n3",
     userId: "currentUser",
-    type: "reply",
+    type: "reply", // direct reply
+    description: "You received a reply",
     payload: {
       postId: null,
       commentId: null,
@@ -42,12 +48,13 @@ export const notifications = [
       message: `"They're also needed to grow clones" — related lore discussion.`
     },
     isRead: true,
-    createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000) // 6h
+    timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000) // 6h ago
   },
   {
     _id: "n4",
     userId: "currentUser",
     type: "reply",
+    description: "You received a reply",
     payload: {
       postId: null,
       commentId: null,
@@ -56,7 +63,7 @@ export const notifications = [
         "Fidelius charm? Toolbox from Gaogaigar can reinforce and fix structures..."
     },
     isRead: true,
-    createdAt: new Date(Date.now() - 21 * 60 * 60 * 1000) // 21h
+    timestamp: new Date(Date.now() - 21 * 60 * 60 * 1000) // 21h ago
   }
 ];
 
@@ -149,7 +156,7 @@ export const users = [
   },
   {
     id: "u2",
-    username: "gamingwizard",
+    username: "gamewiz",
     displayName: "Gaming Wizard",
     avatar: null
   },
