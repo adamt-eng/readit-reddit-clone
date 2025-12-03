@@ -6,6 +6,7 @@ import "../../components/PostCard/PostCard.css";
 import Comment from "../../components/Comment/Comment";
 import TrendingPosts from "../../components/TrendingPosts/TrendingPosts";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
+import RecentPosts from "../../components/RecentPosts/RecentPosts";
 
 const HomePage = ({ user, onLogout, darkMode }) => {
   // Initialize viewMode from localStorage
@@ -783,81 +784,17 @@ const HomePage = ({ user, onLogout, darkMode }) => {
 
       {/* Right Sidebar */}
       <div className="sidebar">
-        {/* Recent Posts Section - Only show if there are recent posts */}
-        {recentPosts.length > 0 && (
-          <div className="recent-posts-box">
-            <div className="recent-posts-header">
-              <h3>RECENT POSTS</h3>
-              <button 
-                className="clear-recent-btn"
-                onClick={clearRecentPosts}
-                title="Clear all recent posts"
-              >
-                Clear
-              </button>
-            </div>
-            
-            <div className="recent-posts-list">
-              {recentPosts.map((post) => (
-                <div 
-                  key={post.id} 
-                  className="recent-post-item"
-                  onClick={() => handlePostClick(post.id)}
-                >
-                  <div className="recent-post-thumbnail">
-                    {post.image ? (
-                      <img 
-                        src={getRecentPostThumbnail(post)} 
-                        alt={post.title}
-                      />
-                    ) : (
-                      <div className="default-thumbnail">
-                        📝
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="recent-post-content">
-                    <div className="recent-post-header">
-                      <img 
-                        src={post.userAvatar} 
-                        alt={post.user}
-                        className="recent-post-user-avatar"
-                      />
-                      <span 
-                        className="recent-post-community"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleCommunityClick(post.community);
-                        }}
-                      >
-                        r/{post.community}
-                      </span>
-                      <span className="recent-post-divider">•</span>
-                      <span className="recent-post-time">
-                        {formatRelativeTime(post.time)}
-                      </span>
-                    </div>
-                    
-                    <div className="recent-post-title">
-                      {post.title}
-                    </div>
-                    <div className="recent-post-stats">
-                      <div className="recent-post-stat">
-                        <FaArrowUp className="icon" />
-                        <span>{formatNumber(post.upvotes)}</span>
-                      </div>
-                      <div className="recent-post-stat">
-                        <FaRegCommentAlt className="icon" />
-                        <span>{formatNumber(post.comments)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Recent Posts Component - Only shown when there are recent posts */}
+        <RecentPosts
+          recentPosts={recentPosts}
+          darkMode={darkMode}
+          onClearRecentPosts={clearRecentPosts}
+          onPostClick={handlePostClick}
+          onCommunityClick={handleCommunityClick}
+          formatRelativeTime={formatRelativeTime}
+          formatNumber={formatNumber}
+          getRecentPostThumbnail={getRecentPostThumbnail}
+        />
       </div>
 
       {/* Footer Text */}
