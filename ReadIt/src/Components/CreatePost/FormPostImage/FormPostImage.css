@@ -1,0 +1,126 @@
+.form-image {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #f6f7f8;
+  border: 1.5px solid #edeff1;
+  border-radius: 9999px;
+  padding: 0 16px;
+  height: 50px;
+}
+
+.input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 1.2rem;
+  font-weight: 500;
+  outline: none;
+  padding: 0;
+  color: #1a1a1b;
+}
+
+.input-required {
+  color: #ff4500;
+  margin-left: -4px;
+  font-size: 1.3em;
+}
+
+.title-count {
+  position: absolute;
+  right: 16px;
+  bottom: 4px;
+  font-size: 0.9em;
+  color: #878a8c;
+}
+
+.tags-btn {
+  font-size: 1em;
+  padding: 8px 22px;
+  border-radius: 12px;
+  background: #f6f7f8;
+  color: #b4b8be;
+  border: none;
+  margin-left: 6px;
+  cursor: not-allowed;
+}
+
+.dropzone {
+  width: 100%;
+  min-height: 145px;
+  border: 1.5px dashed #d7dadc;
+  border-radius: 18px;
+  background: #fcfcfb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 1.09em;
+  color: #7c7c7c;
+  position: relative;
+  cursor: pointer;
+  margin: 0 auto 0 auto;
+  transition: background 0.17s, border-color 0.17s;
+}
+
+.dropzone:hover {
+  background: #f3f6fa;
+  border-color: #b3b8c3;
+}
+
+.dropzone-text {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+}
+
+.dropzone-icon {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.image-preview {
+  margin-top: 8px;
+  color: #1a1a1b;
+  font-size: 1rem;
+}
+
+.btn-row {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn {
+  border: none;
+  border-radius: 9999px;
+  padding: 8px 22px;
+  font-weight: bold;
+  font-size: 1rem;
+  background: #edeff1;
+  color: #787c83;
+  cursor: not-allowed;
+  transition: background 0.18s;
+}
+
+.btn.primary {
+  background: #0079d3;
+  color: #fff;
+  cursor: pointer;
+}
+
+.btn.primary:disabled {
+  background: #d9eafa;
+  color: #a8b8c7;
+  cursor: not-allowed;
+}

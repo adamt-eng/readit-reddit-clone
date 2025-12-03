@@ -1,0 +1,114 @@
+.form-text {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #f6f7f8;
+  border: 1.5px solid #edeff1;
+  border-radius: 9999px;
+  padding: 0 16px;
+  height: 50px;
+}
+
+.input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 1.2rem;
+  font-weight: 500;
+  outline: none;
+  padding: 0;
+  margin-right: 10px;
+  color: #1a1a1b;
+}
+
+.input-required {
+  color: #ff4500;
+  margin-left: -4px;
+  font-size: 1.3em;
+}
+
+.title-count {
+  position: absolute;
+  right: 16px;
+  bottom: 4px;
+  font-size: 0.9em;
+  color: #878a8c;
+}
+
+.textarea-wrap {
+  background: #fff;
+  border: 1.5px solid #edeff1;
+  border-radius: 12px;
+  padding: 0 0 12px 0;
+}
+
+.textarea-toolbar {
+  display: flex;
+  padding: 6px 12px 0 12px;
+  gap: 8px;
+  border-bottom: 1px solid #edeff1;
+}
+
+.toolbar-btn {
+  background: none;
+  border: none;
+  color: #878a8c;
+  font-size: 1.07em;
+  padding: 3px 5px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.toolbar-btn:hover {
+  background: #f6f7f8;
+  color: #313131;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 90px;
+  border: none;
+  outline: none;
+  background: transparent;
+  resize: vertical;
+  font-size: 1.1rem;
+  padding: 12px;
+  color: #1a1a1b;
+}
+
+.btn-row {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.btn {
+  border: none;
+  border-radius: 9999px;
+  padding: 8px 22px;
+  font-weight: bold;
+  font-size: 1rem;
+  margin-top: 8px;
+  background: #edeff1;
+  color: #787c83;
+  cursor: not-allowed;
+  transition: background 0.18s;
+}
+
+.btn.primary {
+  background: #0079d3;
+  color: #fff;
+  cursor: pointer;
+}
+
+.btn.primary:disabled {
+  background: #d9eafa;
+  color: #a8b8c7;
+  cursor: not-allowed;
+}

@@ -1,0 +1,36 @@
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+.vote-btn {
+  background: none;
+  border: none;
+  font-size: 1.3em;
+  color: #b4b8be;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: color 0.18s;
+}
+.vote-btn.upvote:hover { color: #ff4500; }
+.vote-btn.downvote:hover { color: #7193ff; }
+.post-votes {
+  font-weight: bold;
+  min-width: 24px;
+  text-align: center;
+  color: #1a1a1b;
+}
+.action-btn {
+  background: none;
+  border: none;
+  color: #878a8c;
+  font-size: 1em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+}

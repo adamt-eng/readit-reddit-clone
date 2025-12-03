@@ -1,0 +1,15 @@
+.post-card {
+  background: #fff;
+  border: 1px solid #edeff1;
+  border-radius: 8px;
+  max-width: 750px;
+  margin: 32px auto 24px auto;
+  padding: 18px 22px 12px 22px;
+  box-shadow: 0 2px 8px 0 rgba(60,74,130,0.05);
+}
+.comments-list {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
