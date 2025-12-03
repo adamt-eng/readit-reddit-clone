@@ -64,7 +64,9 @@ export default function UserProfilePage({ isDark, toggleDarkMode }) {
           <div className="profile-container">
             <main className="profile-main">
               <ProfileHeader user={user} />
+             <div className="profile-tabs-wrapper">
               <ProfileTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+                </div>
               <ProfileContent activeTab={activeTab} />
             </main>
 
