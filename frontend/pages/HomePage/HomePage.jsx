@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
 import { FaArrowUp, FaRegCommentAlt, FaEllipsisH } from "react-icons/fa";
 import "./HomePage.css";
