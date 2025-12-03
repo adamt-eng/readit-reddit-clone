@@ -9,7 +9,7 @@ import {
 } from "react-icons/hi";
 import "./LeftSidebar.css";
 
-import CreateCommunityModal from "../CreateCommunityModal/CreateCommunityModal";
+import CreateCommunityModal from "../Community/CreateCommunityModal/CreateCommunityModal";
 
 export default function LeftSidebar({ darkMode, showStartCommunity = false }) {
   const [showCreateModal, setShowCreateModal] = useState(false);

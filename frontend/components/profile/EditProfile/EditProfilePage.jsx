@@ -1,6 +1,6 @@
 // src/components/EditProfile/EditProfilePage.jsx
 import { Link } from 'react-router-dom';
-import LeftSidebar from '../LeftSidebar/LeftSidebar';
+import LeftSidebar from '../../LeftSidebar/LeftSidebar';
 import './EditProfilePage.css';
 
 export default function EditProfilePage({ isDark, toggleDarkMode }) {

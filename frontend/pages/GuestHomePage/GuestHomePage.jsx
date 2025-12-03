@@ -2,8 +2,8 @@
 // pages/GuestHomePage/GuestHomePage.jsx
 import React, { useState, useEffect } from "react";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
-import PopularCommunities from "../../components/PopularCommunities/PopularCommunities";
-import TrendingPosts from "../../components/TrendingPosts/TrendingPosts";
+import PopularCommunities from "../../components/Community/PopularCommunities/PopularCommunities";
+import TrendingPosts from "../../components/Posts/TrendingPosts/TrendingPosts";
 import "./GuestHomePage.css";
 
 export default function GuestHomePage({ darkMode, onLogin }) {

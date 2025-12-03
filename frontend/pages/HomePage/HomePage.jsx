@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { FaArrowUp, FaRegCommentAlt, FaEllipsisH } from "react-icons/fa";
 import "./HomePage.css";
-import TrendingPosts from "../../components/TrendingPosts/TrendingPosts";
+import TrendingPosts from "../../components/Posts/TrendingPosts/TrendingPosts";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
-import RecentPosts from "../../components/RecentPosts/RecentPosts";
+import RecentPosts from "../../components/Posts/RecentPosts/RecentPosts";
 
 const HomePage = ({ user, onLogout, darkMode }) => {
   // Initialize viewMode from localStorage

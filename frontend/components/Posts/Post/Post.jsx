@@ -4,7 +4,7 @@ import PostHeader from "./PostHeader/PostHeader";
 import PostContent from "./PostContent/PostContent";
 import PostActions from "./PostActions/PostActions";
 import CommentForm from "./CommentForm/CommentForm";
-import Comment from "../Comment/Comment"; 
+import Comment from "../../Comment/Comment"; 
 
 export default function Post({ post, comments = [], onUpvote, onDownvote, onComment, onVote, onReply }) {
   return (
