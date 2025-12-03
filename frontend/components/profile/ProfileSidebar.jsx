@@ -8,7 +8,7 @@ export default function ProfileSidebar() {
       <div className="profile-sidebar-top" />
       
       <img
-        src="/default-avatar.png"
+        src="/src/assets/default-avatar.png"
         alt="avatar"
         className="profile-sidebar-avatar"
       />
