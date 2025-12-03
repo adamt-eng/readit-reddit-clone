@@ -6,7 +6,7 @@ import TrendingPosts from "../../components/Posts/TrendingPosts/TrendingPosts";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 import RecentPosts from "../../components/Posts/RecentPosts/RecentPosts";
 
-const HomePage = ({ user, onLogout, darkMode }) => {
+const HomePage = ({ user, onLogout, darkMode, onStartCommunity }) => {  // <-- added onStartCommunity here
   // Initialize viewMode from localStorage
   const [viewMode, setViewMode] = useState(() => {
     try {
@@ -713,7 +713,11 @@ const HomePage = ({ user, onLogout, darkMode }) => {
   return (
     <div className="page-container">
       {/* Use LeftSidebar component with start community button */}
-      <LeftSidebar darkMode={darkMode} showStartCommunity={true} />
+      <LeftSidebar
+        darkMode={darkMode}
+        showStartCommunity={true}
+        onStartCommunity={onStartCommunity}   // <-- pass it down
+      />
 
       {/* Main Feed */}
       <div className="main-feed">
@@ -753,31 +757,31 @@ const HomePage = ({ user, onLogout, darkMode }) => {
         </div>
 
         {/* Posts */}
-          <TrendingPosts
-            posts={posts}
-            viewMode={viewMode}
-            darkMode={darkMode}
-            onVote={handleVote}
-            formatNumber={formatNumber}
-            onToggleComments={toggleComments}
-            onPostClick={handlePostClick}
-            onJoinCommunity={handleJoinCommunity}
-            joinedCommunities={joinedCommunities}
-            expandedPostId={expandedPostId}
-            commentInputs={commentInputs}
-            onCommentInputChange={handleCommentInputChange}
-            onAddComment={handleAddComment}
-            onHidePost={handleHidePost}
-            onUnhidePost={handleUnhidePost}
-            hiddenPosts={hiddenPosts}
-            onCommentVote={handleCommentVote}
-            onCommentReply={handleCommentReply}
-            getThumbnailImage={getThumbnailImage}
-            toggleExpand={toggleExpand}
-            recentPosts={recentPosts}
-            onClearRecentPosts={clearRecentPosts}
-            showRecentPosts={true}
-          />
+        <TrendingPosts
+          posts={posts}
+          viewMode={viewMode}
+          darkMode={darkMode}
+          onVote={handleVote}
+          formatNumber={formatNumber}
+          onToggleComments={toggleComments}
+          onPostClick={handlePostClick}
+          onJoinCommunity={handleJoinCommunity}
+          joinedCommunities={joinedCommunities}
+          expandedPostId={expandedPostId}
+          commentInputs={commentInputs}
+          onCommentInputChange={handleCommentInputChange}
+          onAddComment={handleAddComment}
+          onHidePost={handleHidePost}
+          onUnhidePost={handleUnhidePost}
+          hiddenPosts={hiddenPosts}
+          onCommentVote={handleCommentVote}
+          onCommentReply={handleCommentReply}
+          getThumbnailImage={getThumbnailImage}
+          toggleExpand={toggleExpand}
+          recentPosts={recentPosts}
+          onClearRecentPosts={clearRecentPosts}
+          showRecentPosts={true}
+        />
       </div>
 
       {/* Right Sidebar */}
