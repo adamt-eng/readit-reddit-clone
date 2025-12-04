@@ -1,4 +1,4 @@
-import "../../../src/assets/moviebanner.jpg" ;
+import "../../../assets/moviebanner.jpg" ;
 
 function CommunityHeader({ community }) {
   if (!community) return null;
@@ -7,7 +7,7 @@ function CommunityHeader({ community }) {
     <div className="communityHeader">
       <div className="bannerContainer">
       <img 
-        src="../../../src/assets/moviebanner.jpg" 
+        src="../../../assets/moviebanner.jpg" 
         alt="banner" 
         className="banner" 
       />
@@ -15,7 +15,7 @@ function CommunityHeader({ community }) {
 
       <div className="info">
        <img 
-         src="../../../src/assets/movieicon.webp" 
+         src="../../../assets/movieicon.webp" 
           alt="icon" 
           className="communityIcon" 
         />

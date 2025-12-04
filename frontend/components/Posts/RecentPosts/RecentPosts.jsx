@@ -15,7 +15,7 @@ const RecentPosts = ({
     if (post.image) {
       return post.image;
     }
-    return darkMode ? "../../../src/assets/compact-image-dark.png" : "../../../src/assets/compact-image.png";
+    return darkMode ? "../../../assets/compact-image-dark.png" : "../../../assets/compact-image.png";
   };
 
   if (!recentPosts || recentPosts.length === 0) {

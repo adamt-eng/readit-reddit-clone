@@ -24,8 +24,8 @@ function CommunityPage() {
     const fetchCommunityData = async () => {
       const communityData = {
         name: "MovieDetails",
-        banner: "../../src/assets/moviebanner.jpg",
-        icon: "../../src/assets/movieicon.webp",
+        banner: "../../assets/moviebanner.jpg",
+        icon: "../../assets/movieicon.webp",
         description: "Movie Details, Movie Details",
       };
 
@@ -36,7 +36,7 @@ function CommunityPage() {
             "During the dinner scene in the first Alien (1979), it can be noted that in addition to androids, biological weapons and starships, Weyland-Yutani brews beer.",
           text:
             "During the dinner scene in the first Alien (1979), it can be noted that in addition to androids, biological weapons and starships, Weyland-Yutani brews beer.",
-          thumbnail: "../../src/assets/alienbeer.jpg",
+          thumbnail: "../../assets/alienbeer.jpg",
           community: "MovieDetails",
           author: "u/Cassrole",
           time: "1hr ago",

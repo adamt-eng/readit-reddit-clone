@@ -46,7 +46,7 @@ export default function EditProfilePage({ isDark, toggleDarkMode }) {
               <div className="avatar-section">
                 <div className="avatar-with-button">
                   <img
-                    src="../../../src/assets/default-avatar.png"
+                    src="../../../assets/default-avatar.png"
                     alt="User avatar"
                     className="current-avatar"
                   />

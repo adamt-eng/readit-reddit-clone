@@ -64,7 +64,7 @@ export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleD
           <div className="logo-section">
             <Link to="/">
               <img 
-                src={"../../src/assets/reddit-text.png"} 
+                src={"../../assets/reddit-text.png"} 
                 alt="reddit logo text"
                 className="nav-logo-text"
               />
@@ -113,7 +113,7 @@ export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleD
           <div className="profile-menu-container" ref={profileMenuRef}>
             <button className="profile-btn" onClick={toggleProfileMenu}>
               <img 
-                src={user?.avatar || "../../src/assets/profile.png"} 
+                src={user?.avatar || "../../assets/profile.png"} 
                 alt="Profile"
                 className="profile-avatar"
               />
@@ -175,7 +175,7 @@ export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleD
         <div className="logo-section">
           <Link to="/guest">
             <img 
-              src="../../src/assets/reddit-text.png" 
+              src="../../assets/reddit-text.png" 
               alt="reddit logo text"
               className="nav-logo-text"
             />
@@ -192,7 +192,7 @@ export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleD
           />
           <div className="search-icon">
             <img 
-              src="../../src/assets/logo.png" 
+              src="../../assets/logo.png" 
               alt="reddit logo"
               className="nav-logo"
             />

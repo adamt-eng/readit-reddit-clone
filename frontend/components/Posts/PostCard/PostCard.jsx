@@ -39,7 +39,7 @@ export default function PostCard({
   // Use the provided function or create a default
   const getThumbnail = getThumbnailImage || ((post) => {
     if (post.image) return post.image;
-    return darkMode ? "../../../src/assets/compact-image-dark.png" : "../../../src/assets/compact-image.png";
+    return darkMode ? "../../../assets/compact-image-dark.png" : "../../../assets/compact-image.png";
   });
 
 

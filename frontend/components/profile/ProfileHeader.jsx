@@ -1,4 +1,4 @@
-import avatarImg from "/src/assets/default-avatar.png";
+import avatarImg from "../../assets/default-avatar.png";
 
 export default function ProfileHeader({ user }) {
   return (

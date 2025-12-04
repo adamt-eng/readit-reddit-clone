@@ -1,5 +1,4 @@
-// Frontend/src/routes.jsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 
 import HomePage from "../pages/HomePage/HomePage.jsx";
@@ -23,7 +22,6 @@ export default function AppRoutes({
   return (
     <>
       <Routes>
-        {/* Feed / Home */}
         <Route
           path="/"
           element={
@@ -31,13 +29,11 @@ export default function AppRoutes({
               user={currentUser}
               onLogout={onLogout}
               darkMode={darkMode}
-              // ⬇️ pass the handler down
               onStartCommunity={openCommunityModal}
             />
           }
         />
 
-        {/* User profile page: /user/:username */}
         <Route
           path="/user/:username"
           element={

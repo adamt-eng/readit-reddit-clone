@@ -1,17 +1,8 @@
-// src/data/dummyData.js
-// FINAL UI-FRIENDLY SCHEMA
-
-// -------------------------------
-// Notifications (UI schema)
-// -------------------------------
-// -------------------------------
-// Notifications (UI schema)
-// -------------------------------
 export const notifications = [
   {
     _id: "n1",
     userId: "currentUser",
-    type: "post", // user got activity on their post
+    type: "post",
     description: "There was activity on your post",
     payload: {
       postId: "p1",
@@ -20,12 +11,12 @@ export const notifications = [
       message: `Activity on your post "Ah the fun of abusing a perks intent due to wording."`
     },
     isRead: false,
-    timestamp: new Date(Date.now() - 22 * 60 * 1000) // 22 minutes ago
+    timestamp: new Date(Date.now() - 22 * 60 * 1000)
   },
   {
     _id: "n2",
     userId: "currentUser",
-    type: "comment", // someone interacted with your comment
+    type: "comment",
     description: "Your comment received new activity",
     payload: {
       postId: null,
@@ -34,12 +25,12 @@ export const notifications = [
       message: `Activity on your comment "Just wondering if you could ionize green..."`
     },
     isRead: false,
-    timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000) // 1 hour ago
+    timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000)
   },
   {
     _id: "n3",
     userId: "currentUser",
-    type: "reply", // direct reply
+    type: "reply",
     description: "You received a reply",
     payload: {
       postId: null,
@@ -48,7 +39,7 @@ export const notifications = [
       message: `"They're also needed to grow clones" — related lore discussion.`
     },
     isRead: true,
-    timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000) // 6h ago
+    timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000)
   },
   {
     _id: "n4",
@@ -63,14 +54,10 @@ export const notifications = [
         "Fidelius charm? Toolbox from Gaogaigar can reinforce and fix structures..."
     },
     isRead: true,
-    timestamp: new Date(Date.now() - 21 * 60 * 60 * 1000) // 21h ago
+    timestamp: new Date(Date.now() - 21 * 60 * 60 * 1000)
   }
 ];
 
-
-// -------------------------------
-// Posts (UI schema)
-// -------------------------------
 export const posts = [
   {
     id: "p1",
@@ -113,9 +100,6 @@ export const posts = [
   }
 ];
 
-// -------------------------------
-// Communities (UI schema)
-// -------------------------------
 export const communities = [
   {
     id: "c1",
@@ -144,9 +128,6 @@ export const communities = [
   }
 ];
 
-// -------------------------------
-// Users (UI schema)
-// -------------------------------
 export const users = [
   {
     id: "u1",

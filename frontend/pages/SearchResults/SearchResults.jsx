@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/purity */
 import React, { useState, useMemo } from "react";
 import "./SearchResults.css";
 
