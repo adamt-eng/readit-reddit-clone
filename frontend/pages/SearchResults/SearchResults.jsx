@@ -31,6 +31,7 @@ export default function SearchResults({ query = "" }) {
   const q = (query || "").trim().toLowerCase();
   const now = Date.now();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const isWithinTime = (timeAgo) => {
     if (timeFilter === "all") return true;
     const ts = parseTimeAgo(timeAgo);
@@ -68,7 +69,7 @@ export default function SearchResults({ query = "" }) {
           (u.displayName && u.displayName.toLowerCase().includes(q))
       ),
     };
-  }, [q, timeFilter]);
+  }, [isWithinTime, q]);
 
   // --- FIXED sorting logic ---
   const sortedList = useMemo(() => {
