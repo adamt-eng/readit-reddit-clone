@@ -98,6 +98,7 @@ function App() {
           onClose={closeAuthModal}
           onLogin={handleLogin}
           darkMode={darkMode}
+          setShowAuthModal={setShowAuthModal}
         />
       )}
     </div>

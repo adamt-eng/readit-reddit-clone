@@ -1,12 +1,3 @@
-/* Base Layout */
-.auth-page {
-  display: flex;
-  height: 100vh;
-  background: var(--auth-bg);
-  font-family: sans-serif;
-  transition: background 0.3s ease;
-}
-
 /* Theme Variables */
 :root {
   --auth-bg: #ffffff;
@@ -26,89 +17,103 @@
   --auth-border: #3b3c3d;
 }
 
-/* Page Split */
+/* Main Layout */
+.auth-page {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  background: var(--auth-bg);
+  font-family: sans-serif;
+  transition: background 0.3s ease;
+}
+
+/* Left Side - EXACT 50% width */
 .auth-left {
-  flex: 1;
-  padding: 80px;
+  width: 50%;
   background: var(--auth-light);
   display: flex;
   flex-direction: column;
   justify-content: center;
-}
-
-.auth-left h1 {
-  font-size: 34px;
-  font-weight: 700;
-  color: var(--auth-text);
-  margin-bottom: 12px;
-}
-
-.auth-left p {
-  font-size: 16px;
-  color: var(--auth-subtext);
-  line-height: 1.4;
-}
-
-/* Right Form */
-.auth-right {
-  width: 520px;
+  align-items: flex-end; /* align toward middle */
   padding: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  text-align: right;
+}
+
+/* Right Side - EXACT 50% width */
+.auth-right {
+  width: 50%;
   background: var(--auth-bg);
+  display: flex;
+  justify-content: flex-start; /* align toward middle */
+  align-items: center;
+  padding: 80px;
 }
 
 /* Form */
 .auth-form {
   width: 100%;
+  max-width: 360px;
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 
 .auth-input {
-  padding: 15px 18px;
+  padding: 14px 16px;
   font-size: 15px;
   border-radius: 8px;
   background: var(--auth-light);
   border: 1px solid var(--auth-border);
   color: var(--auth-text);
-  transition: border 0.2s ease, background 0.2s ease;
 }
 
 .auth-input:focus {
   border-color: var(--reddit-main);
-  outline: none;
   background: #fff;
+  outline: none;
 }
 
 .dark-mode .auth-input:focus {
-  background: #3a3b3c;
+  background: #3b3c3d;
 }
 
 .auth-btn {
-  padding: 15px;
-  font-size: 17px;
+  padding: 14px;
+  font-size: 16px;
   font-weight: 600;
-  border-radius: 50px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  border-radius: 30px;
   background: var(--reddit-main);
-  border: none;
   color: #fff;
+  border: none;
   cursor: pointer;
   transition: background 0.2s ease;
 }
-
 .auth-btn:hover {
   background: var(--reddit-main-hover);
 }
 
-/* Login / Signup Links */
+/* Logo placement (full page mode) */
+.auth-page:not(.auth-modal-content) .auth-logo {
+  width: 160px;
+  margin-bottom: 16px;
+  align-self: flex-end;
+}
+
+/* Headings & text */
+.auth-left h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--auth-text);
+  margin-bottom: 10px;
+}
+
+.auth-left p,
 .auth-small {
   font-size: 14px;
   color: var(--auth-subtext);
+}
+
+.auth-small {
   text-align: center;
 }
 
@@ -117,58 +122,49 @@
   color: #0079d3;
   text-decoration: none;
 }
-
 .auth-small a:hover {
   text-decoration: underline;
 }
 
-/* Logo position */
-.auth-logo {
-  width: 180px;
-  margin-bottom: 20px;
-  align-self: center;
-}
-
-/* Responsive */
-@media (max-width: 930px) {
+/* MOBILE responsive */
+@media (max-width: 900px) {
   .auth-left {
     display: none;
   }
   .auth-right {
     width: 100%;
-    padding: 40px;
+    justify-content: center;
+    padding: 50px;
   }
 }
 
-/* ---------------- MODAL VERSION ---------------- */
+/* ---------------- MODAL MODE ---------------- */
 .auth-modal-content {
-  display: flex;
   flex-direction: column;
-  height: auto;
   width: 100%;
-  padding: 0;
+  height: auto;
   background: transparent;
 }
 
 .auth-modal-content .auth-left {
-  display: none; /* hide big left promo area */
+  display: none;
 }
 
 .auth-modal-content .auth-right {
   width: 100%;
-  padding: 0;
-  background: transparent;
+  justify-content: center;
+  padding: 0 20px;
+  text-align: center;
+}
+
+.auth-modal-content .auth-logo {
+  width: 130px;
+  align-self: center !important;
+  margin-bottom: 12px;
 }
 
 .auth-modal-content .auth-form {
-  padding: 0;
-  background: transparent;
-  box-shadow: none;
-  border: none;
-  width: 100%;
-}
-
-.auth-modal-content .auth-input {
+  max-width: 300px;
   width: 100%;
 }
 
