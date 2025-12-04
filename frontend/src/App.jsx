@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useLayoutEffect } from "react";
+import { useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar/Navbar.jsx";
 import GuestHomePage from "../pages/GuestHomePage/GuestHomePage.jsx";
 import AppRoutes from "./routes.jsx";
@@ -11,31 +12,24 @@ function App() {
   const [darkMode, setDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  const location = useLocation();
+  const isAuthPage =
+    location.pathname === "/login" || location.pathname === "/signup";
+
   const mockUser = {
     username: "john_doe",
     avatar: "profile.png",
     karma: 1247,
   };
 
-  // Load initial dark mode (and future: auth persistence)
   useLayoutEffect(() => {
     const savedDarkMode = localStorage.getItem("darkMode");
     const isDark = savedDarkMode === "true";
-
     setDarkMode(isDark);
     document.body.classList.toggle("dark-mode", isDark);
-
-    // If you implement persistent login later:
-    // const savedUser = JSON.parse(localStorage.getItem("user"));
-    // if (savedUser) {
-    //   setCurrentUser(savedUser);
-    //   setIsLoggedIn(true);
-    // }
-
     setIsLoading(false);
   }, []);
 
-  // Save dark mode preference + apply to DOM
   useLayoutEffect(() => {
     if (!isLoading) {
       localStorage.setItem("darkMode", darkMode);
@@ -61,23 +55,38 @@ function App() {
 
   return (
     <div className={`app ${darkMode ? "dark-mode" : ""}`}>
-      <Navbar
-        user={currentUser}
-        onLogout={handleLogout}
-        isLoggedIn={isLoggedIn}
-        darkMode={darkMode}
-        onToggleDarkMode={toggleDarkMode}
-      />
+      {!isAuthPage && (
+        <Navbar
+          user={currentUser}
+          onLogout={handleLogout}
+          isLoggedIn={isLoggedIn}
+          darkMode={darkMode}
+          onToggleDarkMode={toggleDarkMode}
+        />
+      )}
 
-      {isLoggedIn ? (
+      {isLoggedIn && !isAuthPage && (
         <AppRoutes
           darkMode={darkMode}
           toggleDarkMode={toggleDarkMode}
           currentUser={currentUser}
           onLogout={handleLogout}
+          onLogin={handleLogin}
         />
-      ) : (
+      )}
+
+      {!isLoggedIn && !isAuthPage && (
         <GuestHomePage onLogin={handleLogin} darkMode={darkMode} />
+      )}
+
+      {isAuthPage && (
+        <AppRoutes
+          darkMode={darkMode}
+          toggleDarkMode={toggleDarkMode}
+          currentUser={currentUser}
+          onLogout={handleLogout}
+          onLogin={handleLogin}
+        />
       )}
     </div>
   );

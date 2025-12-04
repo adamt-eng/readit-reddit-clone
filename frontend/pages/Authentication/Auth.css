@@ -1,59 +1,62 @@
-/* Layout */
+/* Base Layout */
 .auth-page {
   display: flex;
   height: 100vh;
-  background: #ffffff;
+  background: var(--auth-bg);
   font-family: sans-serif;
-  position: relative;
+  transition: background 0.3s ease;
 }
 
-/* Top-page logos */
-.auth-logo {
-  display: block;
-  margin: 20px auto;
+/* Theme Variables */
+:root {
+  --auth-bg: #ffffff;
+  --auth-light: #f6f7f8;
+  --auth-text: #1a1a1b;
+  --auth-subtext: #555;
+  --auth-border: #d3d3d3;
+  --reddit-main: #ff4500;
+  --reddit-main-hover: #d03a00;
 }
 
-.login-top-logo {
-  width: 140px;
+.dark-mode {
+  --auth-bg: #1a1a1b;
+  --auth-light: #2c2d2e;
+  --auth-text: #d7dadc;
+  --auth-subtext: #9a9a9a;
+  --auth-border: #3b3c3d;
 }
 
-.signup-logo {
-  width: 200px;
-}
-
-/* Left side content */
+/* Page Split */
 .auth-left {
   flex: 1;
   padding: 80px;
-  background: #f6f7f8;
+  background: var(--auth-light);
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-.login-side-logo {
-  width: 150px;
-  margin-bottom: 2px;
-}
-
 .auth-left h1 {
-  font-size: 32px;
-  color: #1a1a1b;
-  margin-bottom: 10px;
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--auth-text);
+  margin-bottom: 12px;
 }
 
 .auth-left p {
   font-size: 16px;
-  color: #555;
+  color: var(--auth-subtext);
+  line-height: 1.4;
 }
 
-/* Right side form area */
+/* Right Form */
 .auth-right {
   width: 520px;
   padding: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--auth-bg);
 }
 
 /* Form */
@@ -61,40 +64,78 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
 }
 
 .auth-input {
-  padding: 16px;
-  font-size: 16px;
-  border-radius: 24px;
-  background: #f6f7f8;
-  border: 1px solid #ccc;
-  color: #1a1a1b;
+  padding: 15px 18px;
+  font-size: 15px;
+  border-radius: 8px;
+  background: var(--auth-light);
+  border: 1px solid var(--auth-border);
+  color: var(--auth-text);
+  transition: border 0.2s ease, background 0.2s ease;
+}
+
+.auth-input:focus {
+  border-color: var(--reddit-main);
+  outline: none;
+  background: #fff;
+}
+
+.dark-mode .auth-input:focus {
+  background: #3a3b3c;
 }
 
 .auth-btn {
-  padding: 16px;
+  padding: 15px;
   font-size: 17px;
-  border-radius: 24px;
-  background: #ff4500;
-  color: white;
-  font-weight: bold;
+  font-weight: 600;
+  border-radius: 50px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--reddit-main);
   border: none;
+  color: #fff;
   cursor: pointer;
+  transition: background 0.2s ease;
 }
 
 .auth-btn:hover {
-  background: #d03a00;
+  background: var(--reddit-main-hover);
 }
 
+/* Login / Signup Links */
 .auth-small {
   font-size: 14px;
-  color: #444;
-  margin-top: 5px;
+  color: var(--auth-subtext);
+  text-align: center;
 }
 
 .auth-small a {
+  font-weight: bold;
   color: #0079d3;
-  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-small a:hover {
+  text-decoration: underline;
+}
+
+/* Logo position */
+.auth-logo {
+  width: 180px;
+  margin-bottom: 20px;
+  align-self: center;
+}
+
+/* Responsive */
+@media (max-width: 930px) {
+  .auth-left {
+    display: none;
+  }
+  .auth-right {
+    width: 100%;
+    padding: 40px;
+  }
 }

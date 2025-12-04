@@ -7,12 +7,15 @@ import EditProfilePage from "../components/profile/EditProfile/EditProfilePage.j
 import CreatePost from "../components/Posts/CreatePost/CreatePost.jsx";
 import DirectMessages from "../pages/Direct Messages/DirectMessages.jsx";
 import CreateCommunityModal from "../components/Community/CreateCommunityModal/CreateCommunityModal.jsx";
+import Login from "../pages/Authentication/Login.jsx";
+import Signup from "../pages/Authentication/Signup.jsx";
 
 export default function AppRoutes({
   darkMode,
   toggleDarkMode,
   currentUser,
   onLogout,
+  onLogin,
 }) {
   const [showCommunityModal, setShowCommunityModal] = useState(false);
 
@@ -65,7 +68,16 @@ export default function AppRoutes({
           }
         />
 
-        <Route path="/messages" element={<DirectMessages />} />
+        <Route
+          path="/login"
+          element={<Login onLogin={onLogin} darkMode={darkMode} />}
+        />
+        <Route path="/signup" element={<Signup darkMode={darkMode} />} />
+
+        <Route
+          path="/messages"
+          element={<DirectMessages darkMode={darkMode} />}
+        />
       </Routes>
 
       {showCommunityModal && (

@@ -1,15 +1,14 @@
-
 import "./Auth.css";
 
-export default function Signup() {
+export default function Signup({ darkMode }) {
   return (
+      <div className={`auth-page login-page ${darkMode ? "dark-mode" : ""}`}>
     <div className="auth-page signup-page">
       <div className="auth-left">
-        {/* Left-side login logo */}
         <img
-          src="/reddit-logo-text.png"
+          src="../../assets/reddit-logo-text.png"
           alt="reddit"
-          className="auth-logo login-side-logo"
+          className="auth-logo side-logo"
         />
 
         <h1>Create your account</h1>
@@ -33,6 +32,6 @@ export default function Signup() {
           </p>
         </form>
       </div>
-    </div>
+    </div>    </div>
   );
 }

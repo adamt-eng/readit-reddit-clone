@@ -1,15 +1,21 @@
-
 import "./Auth.css";
+import { useNavigate } from "react-router-dom";
 
-export default function Login() {
+export default function Login({ onLogin, darkMode }) {
+  const navigate = useNavigate();
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onLogin();
+    navigate("/");
+  };
+
   return (
-    <div className="auth-page login-page">
+      <div className={`auth-page login-page ${darkMode ? "dark-mode" : ""}`}>
       <div className="auth-left">
-        {/* Left-side login logo */}
         <img
-          src="/reddit-logo-text.png"
+          src="../../assets/reddit-logo-text.png"
           alt="reddit"
-          className="auth-logo login-side-logo"
+          className="auth-logo side-logo"
         />
 
         <h1>Welcome back</h1>
@@ -17,14 +23,16 @@ export default function Login() {
       </div>
 
       <div className="auth-right">
-        <form className="auth-form">
+        <form className="auth-form" onSubmit={handleSubmit}>
           <input className="auth-input" type="email" placeholder="Email" />
           <input
             className="auth-input"
             type="password"
             placeholder="Password"
           />
-          <button className="auth-btn">Log In</button>
+          <button className="auth-btn" type="submit">
+            Log In
+          </button>
 
           <p className="auth-small">Forgot your password?</p>
           <p className="auth-small">

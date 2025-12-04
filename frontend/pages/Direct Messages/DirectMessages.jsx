@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./DM.css";
 
-export default function DirectMessages() {
+export default function DirectMessages({ darkMode }) {
   const [selected, setSelected] = useState(null);
 
   const chats = [
@@ -21,7 +21,7 @@ export default function DirectMessages() {
   };
 
   return (
-    <div className="chat-layout">
+    <div className={`chat-layout ${darkMode ? "dark-mode" : ""}`}>
       {/* LEFT SIDEBAR */}
       <div className="chat-sidebar">
         <div className="chat-sidebar-header">Chats</div>
@@ -32,7 +32,9 @@ export default function DirectMessages() {
           {chats.map((c) => (
             <div
               key={c.id}
-              className={`chat-list-item ${selected === c.name ? "active" : ""}`}
+              className={`chat-list-item ${
+                selected === c.name ? "active" : ""
+              }`}
               onClick={() => setSelected(c.name)}
             >
               <img src={c.avatar} className="chat-avatar" />
@@ -57,7 +59,9 @@ export default function DirectMessages() {
               {messages[selected].map((m, i) => (
                 <div
                   key={i}
-                  className={`chat-message ${m.from === "me" ? "sent" : "received"}`}
+                  className={`chat-message ${
+                    m.from === "me" ? "sent" : "received"
+                  }`}
                 >
                   {m.text}
                 </div>
