@@ -1,90 +1,174 @@
-/* =============================
-   PAGE STRUCTURE (copy of profile)
-============================= */
+/* ================================
+   REDDIT-STYLE PAGE LAYOUT
+================================ */
 
-.createpost-page-wrapper {
+/* The whole content area */
+.main-page-layout {
   display: flex;
+  justify-content: flex-start;     /* Sidebar anchors left */
   width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding-top: 20px;
-  gap: 20px;
-}
-
-.createpost-page {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.createpost-container {
-  display: flex;
+  max-width: 1360px;               /* Reddit's approx layout width */
+  margin: 0 auto;                  /* Center whole 1360px container */
+  padding: 24px 16px;
   gap: 24px;
-  width: 100%;
+  align-items: flex-start;
 }
 
-/* Left sidebar already styled by your site */
+/* ================================
+   SIDEBAR — FIXED, LEFT
+================================ */
 .left-sidebar {
-  width: 260px;
-  flex-shrink: 0;
+  width: 260px;                    /* Reddit's sidebar width */
+  flex-shrink: 0;                  /* Never shrink */
+  position: sticky;
+  top: 70px;                       /* Same sticky behavior Reddit uses */
+  height: calc(100vh - 70px);
+  overflow-y: auto;
+  padding-right: 8px;              /* Matches Reddit's spacing */
 }
 
-/* MAIN POST AREA */
-.createpost-main {
+/* ================================
+   MAIN CONTENT WRAPPER
+================================ */
+
+.create-post-wrapper {
   flex: 1;
-  min-width: 0;
   display: flex;
-  justify-content: center;
+  justify-content: center;         /* Center the Create post card */
+  min-width: 0;
 }
+
+/* ================================
+   CREATE POST CARD
+================================ */
 
 .create-post-container {
   width: 100%;
-  max-width: 740px;
-  background: var(--card-bg);
-  border-radius: 12px;
-  border: 1px solid var(--card-border);
+  max-width: 740px;                /* Reddit post card width */
+  background: #ffffff;
   padding: 24px;
+  border-radius: 12px;
+  border: 1px solid #edeff1;
+  box-shadow: 0 2px 4px rgba(44,56,74,0.05);
+  margin: 0 auto;                  /* Ensure perfect centering */
 }
 
-/* Right column (empty for now) */
-.createpost-aside {
-  width: 312px;
-  flex-shrink: 0;
+.create-post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-
-/* =============================
-   DARK MODE — EXACT COPY OF WORKING ONE
-============================= */
-
-.createpost-page-wrapper.dark {
-  background: var(--dark-bg);
-  color: var(--dark-text);
+/* Title */
+.create-post-title {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #1a1a1b;
 }
 
-.dark .create-post-container {
-  background: #1a1a1b;
-  border-color: #343536;
+.drafts-link {
+  color: #878a8c;
+  font-weight: 500;
+  cursor: pointer;
 }
 
-.dark .community-selector {
-  background: #272729;
-  border-color: #343536;
-  color: #d7dadc;
+/* Community Selector */
+.create-post-controls {
+  margin: 18px 0 10px 0;
+  display: flex;
+  gap: 12px;
 }
 
-.dark .dropdown-icon path {
-  stroke: #d7dadc;
+.community-selector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #f6f7f8;
+  border-radius: 9999px;
+  border: 1px solid #edeff1;
+  color: #1a1a1b;
+  cursor: pointer;
 }
 
-.dark input,
-.dark textarea {
-  background: #272729;
-  border-color: #343536;
-  color: #d7dadc;
+.community-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #ccc;
 }
 
-.dark button {
-  background: #272729;
-  color: #d7dadc;
+.dropdown-icon {
+  margin-left: 6px;
 }
+
+/* ===================================================
+   DARK MODE — EXACT REDDIT COLORS
+=================================================== */
+
+.dark-mode,
+.dark-mode * {
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.dark-mode {
+  background-color: #030303 !important;
+  color: #d7dadc !important;
+}
+
+.dark-mode .main-page-layout {
+  background-color: #030303 !important;
+}
+
+/* Sidebar */
+.dark-mode .left-sidebar {
+  background: #1a1a1b !important;
+  border-right: 1px solid #343536 !important;
+}
+
+/* Post container */
+.dark-mode .create-post-container {
+  background: #1a1a1b !important;
+  border-color: #343536 !important;
+}
+
+/* Text colors */
+.dark-mode .create-post-title {
+  color: #d7dadc !important;
+}
+
+.dark-mode .drafts-link {
+  color: #818384 !important;
+}
+
+/* Community selector */
+.dark-mode .community-selector {
+  background: #272729 !important;
+  border-color: #343536 !important;
+  color: #d7dadc !important;
+}
+
+.dark-mode .community-avatar {
+  background: #505050 !important;
+}
+
+/* Inputs */
+.dark-mode input,
+.dark-mode textarea {
+  background: #272729 !important;
+  border-color: #343536 !important;
+  color: #d7dadc !important;
+}
+
+/* Buttons */
+.dark-mode button {
+  background: #272729 !important;
+  border-color: #343536 !important;
+  color: #d7dadc !important;
+}
+
+/* SVG Icons */
+.dark-mode svg path {
+  stroke: #d7dadc !important;
+}
+
