@@ -139,3 +139,40 @@
     padding: 40px;
   }
 }
+
+/* ---------------- MODAL VERSION ---------------- */
+.auth-modal-content {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  width: 100%;
+  padding: 0;
+  background: transparent;
+}
+
+.auth-modal-content .auth-left {
+  display: none; /* hide big left promo area */
+}
+
+.auth-modal-content .auth-right {
+  width: 100%;
+  padding: 0;
+  background: transparent;
+}
+
+.auth-modal-content .auth-form {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  width: 100%;
+}
+
+.auth-modal-content .auth-input {
+  width: 100%;
+}
+
+.auth-modal-content h1,
+.auth-modal-content p {
+  text-align: center;
+}

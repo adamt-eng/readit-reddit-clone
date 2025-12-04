@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { FaSearch, FaPlus, FaBell, FaUser, FaCog, FaSignOutAlt, FaMoon, FaSun, FaComment } from "react-icons/fa";
 import "./Navbar.css";
 
-export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleDarkMode }) {
+export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleDarkMode, onLoginClick, onSignupClick }) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef(null);
 
@@ -201,8 +201,8 @@ export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleD
       </div>
 
       <div className="nav-right">
-        <Link className="login-btn" to="/login">Log In</Link>
-        <Link className="signup-btn" to="/signup">Sign Up</Link>
+        <button className="login-btn" onClick={onLoginClick}>Log In</button >
+        <button className="signup-btn" onClick={onSignupClick}>Sign Up</button >
       </div>
     </div>
   );
