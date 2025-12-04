@@ -1,47 +1,45 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import React, { useState, useLayoutEffect } from "react";
+import { useState, useLayoutEffect } from "react";
 import Navbar from "../components/Navbar/Navbar.jsx";
 import GuestHomePage from "../pages/GuestHomePage/GuestHomePage.jsx";
 import AppRoutes from "./routes.jsx";
 import "./App.css";
 
 function App() {
-  const mockUser = {
-    username: "john_doe",
-    avatar: "profile.png",
-    karma: 1247
-  };
-
   const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const [currentUser, setCurrentUser] = useState(mockUser);
+  const [currentUser, setCurrentUser] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load initial dark mode
+  const mockUser = {
+    username: "john_doe",
+    avatar: "profile.png",
+    karma: 1247,
+  };
+
+  // Load initial dark mode (and future: auth persistence)
   useLayoutEffect(() => {
     const savedDarkMode = localStorage.getItem("darkMode");
-    const isDarkMode = savedDarkMode === "true";
-    setDarkMode(isDarkMode);
+    const isDark = savedDarkMode === "true";
 
-    if (isDarkMode) {
-      document.body.classList.add("dark-mode");
-    } else {
-      document.body.classList.remove("dark-mode");
-    }
+    setDarkMode(isDark);
+    document.body.classList.toggle("dark-mode", isDark);
+
+    // If you implement persistent login later:
+    // const savedUser = JSON.parse(localStorage.getItem("user"));
+    // if (savedUser) {
+    //   setCurrentUser(savedUser);
+    //   setIsLoggedIn(true);
+    // }
 
     setIsLoading(false);
   }, []);
 
-  // Save dark mode preference
+  // Save dark mode preference + apply to DOM
   useLayoutEffect(() => {
     if (!isLoading) {
       localStorage.setItem("darkMode", darkMode);
-
-      if (darkMode) {
-        document.body.classList.add("dark-mode");
-      } else {
-        document.body.classList.remove("dark-mode");
-      }
+      document.body.classList.toggle("dark-mode", darkMode);
     }
   }, [darkMode, isLoading]);
 
@@ -55,9 +53,7 @@ function App() {
     setCurrentUser(null);
   };
 
-  const toggleDarkMode = () => {
-    setDarkMode((prev) => !prev);
-  };
+  const toggleDarkMode = () => setDarkMode((prev) => !prev);
 
   if (isLoading) {
     return <div className="app-loading" />;
@@ -74,7 +70,6 @@ function App() {
       />
 
       {isLoggedIn ? (
-        //  WHEN LOGGED IN → use routes (Home, Profile, etc.)
         <AppRoutes
           darkMode={darkMode}
           toggleDarkMode={toggleDarkMode}
@@ -82,7 +77,6 @@ function App() {
           onLogout={handleLogout}
         />
       ) : (
-        //  WHEN LOGGED OUT → show guest home
         <GuestHomePage onLogin={handleLogin} darkMode={darkMode} />
       )}
     </div>
