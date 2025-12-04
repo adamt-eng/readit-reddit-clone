@@ -1,5 +1,3 @@
-// src/components/profile/ProfileContent.jsx
-import React from 'react';
 import EmptyState from './EmptyState';
 import CreatePostButton from './CreatePostButton';   // ← NEW
 

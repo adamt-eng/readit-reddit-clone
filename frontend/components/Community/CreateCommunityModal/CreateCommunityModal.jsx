@@ -1,5 +1,4 @@
-// src/components/CreateCommunityModal.jsx
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import "./CreateCommunityModal.css";
 
 

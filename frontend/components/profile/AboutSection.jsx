@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function AboutSection({ user }) {
   return (
     <div className="card about-section">

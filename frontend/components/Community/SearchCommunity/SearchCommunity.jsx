@@ -1,5 +1,5 @@
-import React from "react";
 import "./SearchCommunity.css";
+
 export default function SearchCommunity({ comm }) {
   return (
     <div className="sc-container">

@@ -1,4 +1,3 @@
-import React from "react";
 import "./PostTabs.css";
 
 export default function PostTabs({ activeTab, setActiveTab }) {

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import "./FormPostImage.css";
 
 const MAX_TITLE_LENGTH = 300;

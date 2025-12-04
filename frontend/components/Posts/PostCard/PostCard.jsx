@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
-// components/PostCard/PostCard.jsx
-import React from "react";
-import { FaRegCommentAlt, FaShare, FaBookmark, FaEllipsisH, FaExpand, FaCompress, FaBell, FaRegBookmark, FaEyeSlash, FaFlag } from "react-icons/fa";
+
+import { FaRegCommentAlt, FaShare, FaEllipsisH, FaExpand, FaCompress, FaBell, FaRegBookmark, FaEyeSlash, FaFlag } from "react-icons/fa";
 import Comment from "../../Comment/Comment";
 import "./PostCard.css";
 
@@ -40,7 +39,7 @@ export default function PostCard({
   // Use the provided function or create a default
   const getThumbnail = getThumbnailImage || ((post) => {
     if (post.image) return post.image;
-    return darkMode ? "/compact-image-dark.png" : "/compact-image.png";
+    return darkMode ? "../../../src/assets/compact-image-dark.png" : "../../../src/assets/compact-image.png";
   });
 
 

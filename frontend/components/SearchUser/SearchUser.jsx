@@ -1,4 +1,3 @@
-import React from "react";
 import "./SearchUser.css";
 
 export default function SearchUser({ user }) {

@@ -1,6 +1,4 @@
-// src/components/profile/ProfileSidebar.jsx
-import { Link } from 'react-router-dom';   // ← ADD THIS
-import './styles/sidebar.css';
+import { Link } from 'react-router-dom';
 
 export default function ProfileSidebar() {
   return (
@@ -8,7 +6,7 @@ export default function ProfileSidebar() {
       <div className="profile-sidebar-top" />
       
       <img
-        src="/src/assets/default-avatar.png"
+        src="../../src/assets/default-avatar.png"
         alt="avatar"
         className="profile-sidebar-avatar"
       />

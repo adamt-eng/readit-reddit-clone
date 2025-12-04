@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "./CommentForm.css";
 
 export default function CommentForm({ postId, onComment }) {

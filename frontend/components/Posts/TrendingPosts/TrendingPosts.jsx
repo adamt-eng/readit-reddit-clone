@@ -1,5 +1,3 @@
-// components/TrendingPosts/TrendingPosts.jsx
-import React from "react";
 import PostCard from "../PostCard/PostCard.jsx";
 import "./TrendingPosts.css";
 

@@ -1,7 +1,5 @@
-// src/components/EditProfile/EditProfilePage.jsx
 import { Link } from 'react-router-dom';
 import LeftSidebar from '../../LeftSidebar/LeftSidebar';
-import './EditProfilePage.css';
 
 export default function EditProfilePage({ isDark, toggleDarkMode }) {
   return (
@@ -48,7 +46,7 @@ export default function EditProfilePage({ isDark, toggleDarkMode }) {
               <div className="avatar-section">
                 <div className="avatar-with-button">
                   <img
-                    src="/src/assets/default-avatar.png"
+                    src="../../../src/assets/default-avatar.png"
                     alt="User avatar"
                     className="current-avatar"
                   />

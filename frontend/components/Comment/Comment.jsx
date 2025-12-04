@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "./Comment.css";
 
 const Comment = ({ comment, depth = 0, darkMode, onVote, onReply, postId }) => {

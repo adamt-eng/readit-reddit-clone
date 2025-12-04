@@ -1,15 +1,15 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "./SortBar.css";
 
 function SortBar({ onSortChange }) {
-  const [activeSort, setActiveSort] = useState("Best"); // Default to "Best"
+  const [activeSort, setActiveSort] = useState("Best");
 
   const handleSortClick = (sortType) => {
     setActiveSort(sortType);
     if (onSortChange) onSortChange(sortType);
   };
 
-  const sortOptions = ["Best", "Hot", "New", "Top"]; // Matches screenshot
+  const sortOptions = ["Best", "Hot", "New", "Top"];
 
   return (
     <div className="sortBar">

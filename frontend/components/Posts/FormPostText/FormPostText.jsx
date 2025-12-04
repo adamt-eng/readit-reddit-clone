@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "./FormPostText.css";
 
 const MAX_TITLE_LENGTH = 300;

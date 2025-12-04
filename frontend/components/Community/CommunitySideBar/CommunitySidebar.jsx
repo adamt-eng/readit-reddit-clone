@@ -1,4 +1,3 @@
-import React from "react";
 import "./CommunitySidebar.css";
 
 function CommunitySidebar({ community }) {

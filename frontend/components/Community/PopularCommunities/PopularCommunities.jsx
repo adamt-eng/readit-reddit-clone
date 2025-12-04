@@ -1,5 +1,4 @@
-// components/PopularCommunities/PopularCommunities.jsx
-import React, { useState } from "react";
+import { useState } from "react";
 import "./PopularCommunities.css";
 
 const PopularCommunities = ({ communities, darkMode }) => {

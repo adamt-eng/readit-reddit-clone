@@ -1,4 +1,3 @@
-import React from "react";
 import "./PostActions.css";
 
 export default function PostActions({ post, onUpvote, onDownvote }) {

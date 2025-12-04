@@ -1,5 +1,3 @@
-
-// src/components/profile/UserProfilePage.jsx
 import React from 'react';
 import LeftSidebar from '../LeftSidebar/LeftSidebar';
 //import ProfileBanner from './ProfileBanner';

@@ -1,4 +1,3 @@
-import React from "react";
 import "./PostContent.css";
 
 export default function PostContent({ post }) {

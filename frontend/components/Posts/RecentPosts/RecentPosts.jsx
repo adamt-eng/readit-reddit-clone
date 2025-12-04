@@ -1,7 +1,4 @@
-// components/RecentPosts/RecentPosts.jsx
-import React from "react";
 import { FaArrowUp, FaRegCommentAlt } from "react-icons/fa";
-import "./RecentPosts.css";
 
 const RecentPosts = ({ 
   recentPosts, 
@@ -18,7 +15,7 @@ const RecentPosts = ({
     if (post.image) {
       return post.image;
     }
-    return darkMode ? "/compact-image-dark.png" : "/compact-image.png";
+    return darkMode ? "../../../src/assets/compact-image-dark.png" : "../../../src/assets/compact-image.png";
   };
 
   if (!recentPosts || recentPosts.length === 0) {

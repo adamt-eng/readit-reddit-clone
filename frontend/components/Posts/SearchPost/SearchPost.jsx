@@ -1,4 +1,3 @@
-import React from "react";
 import "./SearchPost.css";
 
 export default function SearchPost({ post }) {

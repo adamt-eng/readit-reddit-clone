@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import LeftSidebar from "../../LeftSidebar/LeftSidebar";
 import PostTabs from "../PostTabs/PostTabs";
 import FormPostText from "../FormPostText/FormPostText";

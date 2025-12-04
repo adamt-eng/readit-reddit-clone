@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-vars */
-// components/LeftSidebar/LeftSidebar.jsx
-import React from "react";
+
 import { 
   HiHome, HiFire, HiSearch, HiClock, HiUserGroup,
   HiInformationCircle, HiSpeakerphone, HiCode,

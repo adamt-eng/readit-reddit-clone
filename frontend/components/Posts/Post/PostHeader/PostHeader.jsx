@@ -1,4 +1,3 @@
-import React from "react";
 import "./PostHeader.css";
 
 export default function PostHeader({ post }) {

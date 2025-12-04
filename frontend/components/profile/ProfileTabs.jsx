@@ -1,5 +1,3 @@
-import React from 'react';
-
 const tabs = ['Overview', 'Posts', 'Comments', 'Saved', 'History', 'Hidden', 'Upvoted', 'Downvoted'];
 
 export default function ProfileTabs({ activeTab, setActiveTab }) {
