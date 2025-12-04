@@ -20,7 +20,7 @@ const ALL_TOPICS = [
   "Cars & Trucks",
 ];
 
-const CreateCommunityModal = ({ onClose }) => {
+const CreateCommunityModal = ({ onClose, darkMode }) => {
   const [step, setStep] = useState(0);
 
   // --- form state ---
@@ -342,8 +342,8 @@ const CreateCommunityModal = ({ onClose }) => {
 
   // --- main render ---
   return (
-    <div className="cc-overlay">
-      <div className="cc-modal">
+    <div className={`cc-overlay ${darkMode ? "dark" : ""}`}>
+      <div className={`cc-modal ${darkMode ? "dark" : ""}`}>
         <div className="cc-header">
           <button className="cc-x" onClick={onClose}>
             ✕

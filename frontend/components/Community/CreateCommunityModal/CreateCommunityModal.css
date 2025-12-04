@@ -386,3 +386,75 @@
   background: #0079d3;
   color: #ffffff;
 }
+
+/* === DARK MODE === */
+
+.cc-overlay.dark {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.cc-modal.dark {
+  background: #1a1a1b;
+  color: #d7dadc;
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.05);
+}
+
+/* Inputs/Textareas */
+.cc-modal.dark .cc-input,
+.cc-modal.dark .cc-textarea {
+  background: #272729;
+  border: 1px solid #3a3a3c;
+  color: #e4e6eb;
+}
+
+.cc-modal.dark .cc-input:focus,
+.cc-modal.dark .cc-textarea:focus {
+  background: #1a1a1b;
+  border-color: #4fbcff;
+}
+
+/* Preview Card */
+.cc-modal.dark .cc-preview-card {
+  background: #272729;
+  box-shadow: 0 0 0 1px #3a3a3c;
+}
+
+/* Chips & States */
+.cc-modal.dark .cc-chip {
+  background: #272729;
+  border-color: #4a4a4c;
+  color: #d7dadc;
+}
+
+.cc-modal.dark .cc-chip.selected {
+  background: #0079d3;
+  border-color: #0079d3;
+  color: white;
+}
+
+/* Footer + Headers */
+.cc-modal.dark .cc-footer {
+  border-top: 1px solid #3a3a3c;
+}
+
+.cc-modal.dark .cc-type-card {
+  border-color: #3a3a3c;
+  background: #272729;
+}
+
+.cc-modal.dark .cc-type-card.selected {
+  background: #003e64;
+  border-color: #4fbcff;
+}
+
+/* Buttons */
+.cc-modal.dark .cc-btn.secondary {
+  background: #272729;
+  border: 1px solid #3a3a3c;
+  color: #d7dadc;
+}
+
+.cc-modal.dark .cc-btn.primary {
+  background: #0079d3;
+  color: white;
+}

@@ -81,7 +81,7 @@ export default function AppRoutes({
       </Routes>
 
       {showCommunityModal && (
-        <CreateCommunityModal onClose={closeCommunityModal} />
+        <CreateCommunityModal onClose={closeCommunityModal}  darkMode={darkMode}/>
       )}
     </>
   );
