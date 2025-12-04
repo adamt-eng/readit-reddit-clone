@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/purity */
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import "./SearchResults.css";
 
 import SearchPost from "../../components/SearchPost/SearchPost";
