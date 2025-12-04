@@ -4,7 +4,8 @@ import { Routes, Route } from "react-router-dom";
 import HomePage from "../pages/HomePage/HomePage.jsx";
 import UserProfilePage from "../components/profile/UserProfilePage.jsx";
 import EditProfilePage from "../components/profile/EditProfile/EditProfilePage.jsx";
-import CreatePost from "../components/Posts/CreatePost/CreatePost.jsx"; 
+import CreatePost from "../components/Posts/CreatePost/CreatePost.jsx";
+import DirectMessages from "../pages/Direct Messages/DirectMessages.jsx";
 import CreateCommunityModal from "../components/Community/CreateCommunityModal/CreateCommunityModal.jsx";
 
 export default function AppRoutes({
@@ -13,7 +14,6 @@ export default function AppRoutes({
   currentUser,
   onLogout,
 }) {
-  
   const [showCommunityModal, setShowCommunityModal] = useState(false);
 
   const openCommunityModal = () => setShowCommunityModal(true);
@@ -57,13 +57,15 @@ export default function AppRoutes({
         <Route
           path="/create-post"
           element={
-            <CreatePost 
+            <CreatePost
               isDark={darkMode}
               toggleDarkMode={toggleDarkMode}
               currentUser={currentUser}
             />
           }
         />
+
+        <Route path="/messages" element={<DirectMessages />} />
       </Routes>
 
       {showCommunityModal && (
