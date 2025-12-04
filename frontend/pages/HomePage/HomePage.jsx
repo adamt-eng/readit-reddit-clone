@@ -1,12 +1,11 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect } from "react";
-import { FaArrowUp, FaRegCommentAlt, FaEllipsisH } from "react-icons/fa";
+import { useState, useEffect } from "react";
 import "./HomePage.css";
 import TrendingPosts from "../../components/Posts/TrendingPosts/TrendingPosts";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 import RecentPosts from "../../components/Posts/RecentPosts/RecentPosts";
 
-const HomePage = ({ user, onLogout, darkMode, onStartCommunity }) => {  // <-- added onStartCommunity here
+const HomePage = ({ user, onLogout, darkMode, onStartCommunity }) => {
   // Initialize viewMode from localStorage
   const [viewMode, setViewMode] = useState(() => {
     try {
