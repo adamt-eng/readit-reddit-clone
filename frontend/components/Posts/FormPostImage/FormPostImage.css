@@ -193,3 +193,9 @@
   background: #1a4164;
   color: #4a5c6e;
 }
+
+.dark .dropzone{
+  background-color: #272729;
+  color: #d7dadc;
+  border-color: #343536;
+}
