@@ -14,28 +14,6 @@ export default function CreatePost({ isDark, toggleDarkMode }) {
 
   return (
     <>
-      {/* global dark mode toggle */}
-      <button
-        onClick={toggleDarkMode}
-        aria-label="Toggle dark mode"
-        style={{
-          position: "fixed",
-          top: "70px",
-          right: "20px",
-          zIndex: 10000,
-          padding: "10px 16px",
-          borderRadius: "999px",
-          background: isDark ? "#d7dadc" : "#1a1a1b",
-          color: isDark ? "#000" : "#fff",
-          border: "none",
-          fontWeight: "bold",
-          fontSize: "14px",
-          cursor: "pointer",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-        }}
-      >
-        {isDark ? "Light Mode" : "Dark Mode"}
-      </button>
 
       <div className={`createpost-page-wrapper ${isDark ? "dark" : ""}`}>
         <LeftSidebar />
