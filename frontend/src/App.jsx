@@ -2,11 +2,10 @@
 import React, { useState, useLayoutEffect } from "react";
 import Navbar from "../components/Navbar/Navbar.jsx";
 import GuestHomePage from "../pages/GuestHomePage/GuestHomePage.jsx";
-import AppRoutes from "./routes.jsx";            // 👈 NEW: use routes file
+import AppRoutes from "./routes.jsx";
 import "./App.css";
 
 function App() {
-  // mock logged-in user
   const mockUser = {
     username: "john_doe",
     avatar: "profile.png",
@@ -14,7 +13,7 @@ function App() {
   };
 
   const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const [currentUser, setCurrentUser] = useState(mockUser);   // 👈 start with mock user
+  const [currentUser, setCurrentUser] = useState(mockUser);
   const [darkMode, setDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
