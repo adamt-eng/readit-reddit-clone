@@ -36,9 +36,6 @@ export default function FormPostImage() {
         <span className="input-required">*</span>
         <span className="title-count">{title.length}/{MAX_TITLE_LENGTH}</span>
       </div>
-      <button type="button" className="tags-btn" disabled>
-        Add tags
-      </button>
       <div
         className="dropzone"
         onClick={() => fileInputRef.current?.click()}
