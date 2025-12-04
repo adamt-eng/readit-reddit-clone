@@ -1,4 +1,5 @@
 import { FaArrowUp, FaRegCommentAlt } from "react-icons/fa";
+import "./RecentPosts.css";
 
 const RecentPosts = ({ 
   recentPosts, 
