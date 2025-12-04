@@ -124,3 +124,72 @@
   color: #a8b8c7;
   cursor: not-allowed;
 }
+
+/* ================================================== */
+/* ===== DARK MODE STYLES - ADD BELOW THIS LINE ==== */
+/* ================================================== */
+
+.main-page-layout.dark-mode .input-wrap {
+  background: #272729;
+  border-color: #343536;
+}
+
+.main-page-layout.dark-mode .input {
+  color: #d7dadc;
+}
+
+.main-page-layout.dark-mode .input::placeholder {
+  color: #818384;
+}
+
+.main-page-layout.dark-mode .title-count {
+  color: #818384;
+}
+
+.main-page-layout.dark-mode .input-required {
+  color: #ff4500;
+}
+
+.main-page-layout.dark-mode .tags-btn {
+  background: #272729;
+  color: #565758;
+  border-color: #343536;
+}
+
+.main-page-layout.dark-mode .dropzone {
+  background: #272729;
+  border-color: #343536;
+  color: #818384;
+}
+
+.main-page-layout.dark-mode .dropzone:hover {
+  background: #1a1a1b;
+  border-color: #565758;
+}
+
+.main-page-layout.dark-mode .dropzone-icon circle {
+  stroke: #343536;
+}
+
+.main-page-layout.dark-mode .dropzone-icon path {
+  stroke: #818384;
+}
+
+.main-page-layout.dark-mode .image-preview {
+  color: #d7dadc;
+}
+
+.main-page-layout.dark-mode .btn {
+  background: #343536;
+  color: #818384;
+}
+
+.main-page-layout.dark-mode .btn.primary {
+  background: #0079d3;
+  color: #fff;
+}
+
+.main-page-layout.dark-mode .btn.primary:disabled {
+  background: #1a4164;
+  color: #4a5c6e;
+}

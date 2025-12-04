@@ -112,3 +112,74 @@
   color: #a8b8c7;
   cursor: not-allowed;
 }
+
+/* ================================================== */
+/* ===== DARK MODE STYLES ===== */
+/* ================================================== */
+
+.main-page-layout.dark-mode .input-wrap {
+  background: #272729;
+  border-color: #343536;
+}
+
+.main-page-layout.dark-mode .input {
+  color: #d7dadc;
+}
+
+.main-page-layout.dark-mode .input::placeholder {
+  color: #818384;
+}
+
+.main-page-layout.dark-mode .title-count {
+  color: #818384;
+}
+
+.main-page-layout.dark-mode .input-required {
+  color: #ff4500;
+}
+
+/* Textarea container */
+.main-page-layout.dark-mode .textarea-wrap {
+  background: #1a1a1b;
+  border-color: #343536;
+}
+
+.main-page-layout.dark-mode .textarea-toolbar {
+  border-bottom-color: #343536;
+}
+
+/* Toolbar buttons */
+.main-page-layout.dark-mode .toolbar-btn {
+  color: #818384;
+}
+
+.main-page-layout.dark-mode .toolbar-btn:hover {
+  background: #343536;
+  color: #d7dadc;
+}
+
+/* Textarea */
+.main-page-layout.dark-mode .textarea {
+  background: #1a1a1b;
+  color: #d7dadc;
+}
+
+.main-page-layout.dark-mode .textarea::placeholder {
+  color: #818384;
+}
+
+/* Buttons */
+.main-page-layout.dark-mode .btn {
+  background: #343536;
+  color: #818384;
+}
+
+.main-page-layout.dark-mode .btn.primary {
+  background: #0079d3;
+  color: #fff;
+}
+
+.main-page-layout.dark-mode .btn.primary:disabled {
+  background: #1a4164;
+  color: #4a5c6e;
+}

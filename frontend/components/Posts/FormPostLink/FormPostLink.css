@@ -85,3 +85,49 @@
   color: #a8b8c7;
   cursor: not-allowed;
 }
+
+/* ---------------------------------------------------- */
+/* --- Dark Mode Styles --- */
+/* ---------------------------------------------------- */
+
+.main-page-layout.dark-mode .input-wrap {
+  background: #272729;
+  border-color: #343536;
+}
+
+.main-page-layout.dark-mode .input {
+  color: #d7dadc;
+}
+
+.main-page-layout.dark-mode .input::placeholder {
+  color: #818384;
+}
+
+.main-page-layout.dark-mode .title-count {
+  color: #818384;
+}
+
+.main-page-layout.dark-mode .input-required {
+  color: #ff4500;
+}
+
+.main-page-layout.dark-mode .tags-btn {
+  background: #272729;
+  color: #565758;
+  border-color: #343536;
+}
+
+.main-page-layout.dark-mode .btn {
+  background: #343536;
+  color: #818384;
+}
+
+.main-page-layout.dark-mode .btn.primary {
+  background: #0079d3;
+  color: #fff;
+}
+
+.main-page-layout.dark-mode .btn.primary:disabled {
+  background: #1a4164;
+  color: #4a5c6e;
+}

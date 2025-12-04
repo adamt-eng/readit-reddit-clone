@@ -24,3 +24,24 @@
   border-bottom: 2px solid #0079d3;
   font-weight: bold;
 }
+
+/* ---------------------------------------------------- */
+/* --- Dark Mode Styles --- */
+/* ---------------------------------------------------- */
+
+.main-page-layout.dark-mode .tabs {
+  border-bottom-color: #343536;
+}
+
+.main-page-layout.dark-mode .tab {
+  color: #818384;
+}
+
+.main-page-layout.dark-mode .tab.active {
+  color: #d7dadc;
+  border-bottom-color: #0079d3;
+}
+
+.main-page-layout.dark-mode .tab:hover {
+  color: #d7dadc;
+}
