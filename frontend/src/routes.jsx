@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 
 import HomePage from "../pages/HomePage/HomePage.jsx";
+import GuestHomePage from "../pages/GuestHomePage/GuestHomePage.jsx";
 import UserProfilePage from "../components/profile/UserProfilePage.jsx";
 import EditProfilePage from "../components/profile/EditProfile/EditProfilePage.jsx";
 import CreatePost from "../components/Posts/CreatePost/CreatePost.jsx";
@@ -16,6 +17,7 @@ export default function AppRoutes({
   currentUser,
   onLogout,
   onLogin,
+  isLoggedIn,
 }) {
   const [showCommunityModal, setShowCommunityModal] = useState(false);
 
@@ -25,63 +27,167 @@ export default function AppRoutes({
   return (
     <>
       <Routes>
+        {/* Home page - shows different content based on login status */}
         <Route
           path="/"
           element={
-            <HomePage
-              user={currentUser}
-              onLogout={onLogout}
-              darkMode={darkMode}
-              onStartCommunity={openCommunityModal}
-            />
+            isLoggedIn ? (
+              <HomePage
+                user={currentUser}
+                onLogout={onLogout}
+                darkMode={darkMode}
+                onStartCommunity={openCommunityModal}
+              />
+            ) : (
+              <GuestHomePage 
+                onLogin={onLogin} 
+                darkMode={darkMode} 
+              />
+            )
           }
         />
 
+        {/* Guest route for logged-out users */}
+        <Route
+          path="/guest"
+          element={
+            !isLoggedIn ? (
+              <GuestHomePage 
+                onLogin={onLogin} 
+                darkMode={darkMode} 
+              />
+            ) : (
+              // Redirect to home if already logged in
+              <HomePage
+                user={currentUser}
+                onLogout={onLogout}
+                darkMode={darkMode}
+                onStartCommunity={openCommunityModal}
+              />
+            )
+          }
+        />
+
+        {/* User profile - protected route */}
         <Route
           path="/user/:username"
           element={
-            <UserProfilePage
-              isDark={darkMode}
-              toggleDarkMode={toggleDarkMode}
-            />
+            isLoggedIn ? (
+              <UserProfilePage
+                isDark={darkMode}
+                toggleDarkMode={toggleDarkMode}
+                currentUser={currentUser}
+              />
+            ) : (
+              // Show guest home with login prompt
+              <GuestHomePage 
+                onLogin={onLogin} 
+                darkMode={darkMode} 
+              />
+            )
           }
         />
 
+        {/* Edit profile - protected route */}
         <Route
           path="/edit-profile"
           element={
-            <EditProfilePage
-              isDark={darkMode}
-              toggleDarkMode={toggleDarkMode}
-            />
+            isLoggedIn ? (
+              <EditProfilePage
+                isDark={darkMode}
+                toggleDarkMode={toggleDarkMode}
+                currentUser={currentUser}
+              />
+            ) : (
+              // Show guest home with login prompt
+              <GuestHomePage 
+                onLogin={onLogin} 
+                darkMode={darkMode} 
+              />
+            )
           }
         />
 
+        {/* Create post - protected route */}
         <Route
           path="/create-post"
           element={
-            <CreatePost
-              isDark={darkMode}
-              toggleDarkMode={toggleDarkMode}
-              currentUser={currentUser}
-            />
+            isLoggedIn ? (
+              <CreatePost
+                isDark={darkMode}
+                toggleDarkMode={toggleDarkMode}
+                currentUser={currentUser}
+              />
+            ) : (
+              // Show guest home with login prompt
+              <GuestHomePage 
+                onLogin={onLogin} 
+                darkMode={darkMode} 
+              />
+            )
           }
         />
 
-        <Route
-          path="/login"
-          element={<Login onLogin={onLogin} darkMode={darkMode} />}
-        />
-        <Route path="/signup" element={<Signup darkMode={darkMode} />} />
-
+        {/* Direct messages - protected route */}
         <Route
           path="/messages"
-          element={<DirectMessages darkMode={darkMode} />}
+          element={
+            isLoggedIn ? (
+              <DirectMessages darkMode={darkMode} />
+            ) : (
+              // Show guest home with login prompt
+              <GuestHomePage 
+                onLogin={onLogin} 
+                darkMode={darkMode} 
+              />
+            )
+          }
+        />
+
+        {/* Authentication pages */}
+        <Route
+          path="/login"
+          element={
+            !isLoggedIn ? (
+              <Login onLogin={onLogin} darkMode={darkMode} />
+            ) : (
+              // Redirect to home if already logged in
+              <HomePage
+                user={currentUser}
+                onLogout={onLogout}
+                darkMode={darkMode}
+                onStartCommunity={openCommunityModal}
+              />
+            )
+          }
+        />
+        
+        <Route 
+          path="/signup" 
+          element={
+            !isLoggedIn ? (
+              <Signup darkMode={darkMode} onSignup={onLogin} />
+            ) : (
+              // Redirect to home if already logged in
+              <HomePage
+                user={currentUser}
+                onLogout={onLogout}
+                darkMode={darkMode}
+                onStartCommunity={openCommunityModal}
+              />
+            )
+          }
         />
       </Routes>
 
+      {/* Community Modal */}
       {showCommunityModal && (
-        <CreateCommunityModal onClose={closeCommunityModal}  darkMode={darkMode}/>
+        <CreateCommunityModal 
+          onClose={closeCommunityModal}  
+          darkMode={darkMode}
+          isLoggedIn={isLoggedIn}
+          onLogin={onLogin}
+        />
       )}
     </>
   );

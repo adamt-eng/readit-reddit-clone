@@ -59,9 +59,8 @@ function App() {
 
   if (isLoading) return <div className="app-loading" />;
 
-  return (
+   return (
     <div className={`app ${darkMode ? "dark-mode" : ""}`}>
-
       {/* NAVBAR always visible except when visiting actual auth pages */}
       {!isAuthPage && (
         <Navbar
@@ -75,23 +74,17 @@ function App() {
         />
       )}
 
-      {/* Routes render ONLY when modal is not open */}
-      {!showAuthModal && (
-        <AppRoutes
-          darkMode={darkMode}
-          toggleDarkMode={toggleDarkMode}
-          currentUser={currentUser}
-          onLogout={handleLogout}
-          onLogin={handleLogin}
-        />
-      )}
+      {/* Routes for ALL pages */}
+      <AppRoutes
+        darkMode={darkMode}
+        toggleDarkMode={toggleDarkMode}
+        currentUser={currentUser}
+        onLogout={handleLogout}
+        onLogin={handleLogin}
+        isLoggedIn={isLoggedIn}
+      />
 
-      {/* Guest Home shown when logged out AND not in a route-only view */}
-      {!isLoggedIn && location.pathname === "/" && !showAuthModal && (
-        <GuestHomePage onLogin={openLoginModal} darkMode={darkMode} />
-      )}
-
-      {/* Modal only, hides route pages */}
+      {/* Auth Modal */}
       {showAuthModal && (
         <AuthModal
           mode={showAuthModal}

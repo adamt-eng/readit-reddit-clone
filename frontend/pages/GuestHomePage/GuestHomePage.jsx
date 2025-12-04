@@ -36,7 +36,7 @@ export default function GuestHomePage({ darkMode, onLogin }) {
     }
   });
 
-  const [posts] = useState([
+  const [posts,setPosts] = useState([
     { 
       id: 1,
       community: "news", 
