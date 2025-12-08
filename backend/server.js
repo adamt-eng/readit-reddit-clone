@@ -23,7 +23,17 @@ app.use(
 
 ///////routers///////
 app.use('/authentication', AuthRouter);
+
 //app.use(auth()); commented till all apis are working and tested to add authentication later
+
+app.use('/users', UserRouter);
+app.use('/posts', PostRouter);
+app.use('/comments', CommentRouter);
+app.use('/communities', CommunityRouter);
+app.use('/votes', VoteRouter);
+app.use('/memberships', MembershipRouter);
+app.use('/notifications', NotificationRouter);
+app.use('/ai-summary', AiSummaryRouter);
 
 
 
