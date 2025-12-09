@@ -32,7 +32,9 @@ async function main() {
       createdBy: { type: Schema.Types.ObjectId, ref: "User" },
       createdAt: Date,
       nsfw: Boolean,
-      memberCount: Number
+      memberCount: Number,
+      bannerUrl: { type: String, default: "" }, 
+      iconUrl:   { type: String, default: "" },
     }, { collection: "communities" });
 
     const membershipSchema = new Schema({

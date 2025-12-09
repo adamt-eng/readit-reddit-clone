@@ -9,7 +9,10 @@ const CommunitySchema = new Schema(
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
     createdAt: { type: Date, default: Date.now },
     nsfw: { type: Boolean, default: false },
-    memberCount: { type: Number, default: 0 }
+    memberCount: { type: Number, default: 0 },
+    bannerUrl: { type: String, default: "" }, 
+    iconUrl:   { type: String, default: "" },
+
   },
   { collection: "communities" }
 );

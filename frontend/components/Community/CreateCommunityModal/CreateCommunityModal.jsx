@@ -1,24 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import "./CreateCommunityModal.css";
-
-
-const ALL_TOPICS = [
-  "Consumer Electronics",
-  "Computers & Hardware",
-  "Software & Apps",
-  "DIY Electronics",
-  "Artificial Intelligence & Machine Learning",
-  "Virtual & Augmented Reality",
-  "3D Printing",
-  "Programming",
-  "Tech News & Discussion",
-  "Streaming Services",
-  "Boating & Sailing",
-  "Aviation",
-  "Trains & Public Transportation",
-  "Motorcycles",
-  "Cars & Trucks",
-];
 
 const CreateCommunityModal = ({ onClose, darkMode }) => {
   const [step, setStep] = useState(0);
@@ -30,29 +11,12 @@ const CreateCommunityModal = ({ onClose, darkMode }) => {
   );
   const [bannerPreview, setBannerPreview] = useState(null);
   const [iconPreview, setIconPreview] = useState(null);
-  const [topicFilter, setTopicFilter] = useState("");
-  const [selectedTopics, setSelectedTopics] = useState([]);
-  const [communityType, setCommunityType] = useState("public");
-  const [isMature, setIsMature] = useState(false);
 
-  // --- step navigation ---
-  const nextStep = () => setStep((s) => Math.min(s + 1, 3));
+  // --- step navigation (ONLY 0 and 1 now) ---
+  const nextStep = () => setStep((s) => Math.min(s + 1, 1));
   const prevStep = () => setStep((s) => Math.max(s - 1, 0));
 
   // --- handlers ---
-  const handleSelectTopic = (topic) => {
-    if (selectedTopics.includes(topic)) {
-      setSelectedTopics(selectedTopics.filter((t) => t !== topic));
-    } else if (selectedTopics.length < 3) {
-      setSelectedTopics([...selectedTopics, topic]);
-    }
-  };
-
-  const filteredTopics = useMemo(() => {
-    const search = topicFilter.toLowerCase();
-    return ALL_TOPICS.filter((t) => t.toLowerCase().includes(search));
-  }, [topicFilter]);
-
   const handleBannerChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -69,26 +33,48 @@ const CreateCommunityModal = ({ onClose, darkMode }) => {
     }
   };
 
-  const handleCreate = (e) => {
-    e.preventDefault();
-    console.log({
-      name,
-      description,
-      bannerPreview,
-      iconPreview,
-      selectedTopics,
-      communityType,
-      isMature,
+const handleCreate = async (e) => {
+  e.preventDefault();
+
+  try {
+    const response = await fetch("http://localhost:5000/communities", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: name.replace(/^r\//, ""),
+        title: name,
+        description,
+        bannerUrl: bannerPreview || "",
+        iconUrl: iconPreview || "",
+        nsfw: false, // add later if needed
+      }),
     });
-    alert("Community data logged to console (shape only).");
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message || "Error");
+      return;
+    }
+
+    console.log("Created:", data);
+    alert("Community created!");
     onClose();
-  };
+  } catch (error) {
+    console.error(error);
+    alert("Network error");
+  }
+};
+
 
   // --- small helpers ---
 
   const renderStepDots = () => (
     <div className="cc-step-dots">
-      {[0, 1, 2, 3].map((i) => (
+      {[0, 1].map((i) => (
         <span key={i} className={`cc-dot ${step === i ? "active" : ""}`} />
       ))}
     </div>
@@ -96,7 +82,14 @@ const CreateCommunityModal = ({ onClose, darkMode }) => {
 
   const renderPreviewCard = () => (
     <div className="cc-preview-card">
-      <div className="cc-preview-banner" />
+      <div
+        className="cc-preview-banner"
+        style={
+          bannerPreview
+            ? { backgroundImage: `url(${bannerPreview})`, backgroundSize: "cover" }
+            : {}
+        }
+      />
       <div className="cc-preview-header">
         <div className="cc-preview-icon-wrapper">
           {iconPreview ? (
@@ -120,8 +113,7 @@ const CreateCommunityModal = ({ onClose, darkMode }) => {
     </div>
   );
 
-  // --- RENDER FUNCTIONS (instead of components) ---
-
+  // --- STEP 1: name + description ---
   const renderStep1 = () => (
     <div className="cc-step-body cc-step-columns">
       <div className="cc-left">
@@ -162,6 +154,7 @@ const CreateCommunityModal = ({ onClose, darkMode }) => {
     </div>
   );
 
+  // --- STEP 2: style (banner + icon) ---
   const renderStep2 = () => (
     <div className="cc-step-body cc-step-columns">
       <div className="cc-left">
@@ -208,138 +201,6 @@ const CreateCommunityModal = ({ onClose, darkMode }) => {
     </div>
   );
 
-  const renderStep3 = () => (
-    <div className="cc-step-body">
-      <h2 className="cc-title">Pick your topics</h2>
-      <p className="cc-subtitle">
-        Add up to 3 topics to help interested redditors find your community.
-      </p>
-
-      <div className="cc-topic-search">
-        <input
-          className="cc-input"
-          placeholder="Filter topics"
-          value={topicFilter}
-          onChange={(e) => setTopicFilter(e.target.value)}
-        />
-      </div>
-
-      <div className="cc-selected-topics">
-        Topics {selectedTopics.length}/3
-      </div>
-
-      <div className="cc-topic-chips">
-        {filteredTopics.map((topic) => {
-          const selected = selectedTopics.includes(topic);
-          return (
-            <button
-              key={topic}
-              type="button"
-              className={`cc-chip ${selected ? "selected" : ""}`}
-              onClick={() => handleSelectTopic(topic)}
-            >
-              {topic}
-              {selected && <span className="cc-chip-x">×</span>}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-
-  const renderStep4 = () => (
-    <div className="cc-step-body">
-      <h2 className="cc-title">What kind of community is this?</h2>
-      <p className="cc-subtitle">
-        Decide who can view and contribute in your community.
-      </p>
-
-      <div className="cc-type-list">
-        <label
-          className={`cc-type-card ${
-            communityType === "public" ? "selected" : ""
-          }`}
-        >
-          <input
-            type="radio"
-            name="communityType"
-            value="public"
-            checked={communityType === "public"}
-            onChange={() => setCommunityType("public")}
-          />
-          <div className="cc-type-main">
-            <div className="cc-type-title">Public</div>
-            <div className="cc-type-desc">
-              Anyone can view, post, and comment in this community.
-            </div>
-          </div>
-        </label>
-
-        <label
-          className={`cc-type-card ${
-            communityType === "restricted" ? "selected" : ""
-          }`}
-        >
-          <input
-            type="radio"
-            name="communityType"
-            value="restricted"
-            checked={communityType === "restricted"}
-            onChange={() => setCommunityType("restricted")}
-          />
-          <div className="cc-type-main">
-            <div className="cc-type-title">Restricted</div>
-            <div className="cc-type-desc">
-              Anyone can view, but only approved users can contribute.
-            </div>
-          </div>
-        </label>
-
-        <label
-          className={`cc-type-card ${
-            communityType === "private" ? "selected" : ""
-          }`}
-        >
-          <input
-            type="radio"
-            name="communityType"
-            value="private"
-            checked={communityType === "private"}
-            onChange={() => setCommunityType("private")}
-          />
-          <div className="cc-type-main">
-            <div className="cc-type-title">Private</div>
-            <div className="cc-type-desc">
-              Only approved users can view and contribute.
-            </div>
-          </div>
-        </label>
-      </div>
-
-      <div className="cc-mature-row">
-        <div>
-          <div className="cc-type-title">Mature (18+)</div>
-          <div className="cc-type-desc">
-            Users must be over 18 to view and contribute.
-          </div>
-        </div>
-        <label className="cc-switch">
-          <input
-            type="checkbox"
-            checked={isMature}
-            onChange={(e) => setIsMature(e.target.checked)}
-          />
-          <span className="cc-slider" />
-        </label>
-      </div>
-
-      <p className="cc-footnote">
-        By continuing, you agree to our Mod Code of Conduct and acknowledge
-        that you understand the Reddit Content Policy.
-      </p>
-    </div>
-  );
-
   // --- main render ---
   return (
     <div className={`cc-overlay ${darkMode ? "dark" : ""}`}>
@@ -353,8 +214,6 @@ const CreateCommunityModal = ({ onClose, darkMode }) => {
         {/* step content */}
         {step === 0 && renderStep1()}
         {step === 1 && renderStep2()}
-        {step === 2 && renderStep3()}
-        {step === 3 && renderStep4()}
 
         {/* footer */}
         <div className="cc-footer">
@@ -368,7 +227,7 @@ const CreateCommunityModal = ({ onClose, darkMode }) => {
                 Back
               </button>
             )}
-            {step < 3 ? (
+            {step < 1 ? (
               <button className="cc-btn primary" onClick={nextStep}>
                 Next
               </button>

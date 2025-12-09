@@ -2,8 +2,12 @@ import express from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import cors from 'cors';
+import cookieParser from "cookie-parser";
 import auth from './Middleware/AuthMiddleware.js';
-import AuthRouter from './Routes/AuthRouter.js';
+import AuthRouter from './Routers/AuthRouter.js';
+import CommunityRouter from "./Routers/CommunityRouter.js";
+import UserRouter from "./Routers/UserRouter.js";
+
 
 dotenv.config();
 const app = express();
@@ -26,14 +30,14 @@ app.use('/authentication', AuthRouter);
 
 //app.use(auth()); commented till all apis are working and tested to add authentication later
 
-app.use('/users', UserRouter);
-app.use('/posts', PostRouter);
-app.use('/comments', CommentRouter);
+//app.use('/users', UserRouter);
+//app.use('/posts', PostRouter);
+//app.use('/comments', CommentRouter);
 app.use('/communities', CommunityRouter);
-app.use('/votes', VoteRouter);
-app.use('/memberships', MembershipRouter);
-app.use('/notifications', NotificationRouter);
-app.use('/ai-summary', AiSummaryRouter);
+//app.use('/votes', VoteRouter);
+//app.use('/memberships', MembershipRouter);
+//app.use('/notifications', NotificationRouter);
+//app.use('/ai-summary', AiSummaryRouter);
 
 
 
