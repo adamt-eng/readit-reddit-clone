@@ -7,5 +7,5 @@ import {
 
 const router = express.Router();
 
-router.get('/communities', getPostableCommunities);
+router.get('/communities', auth ,getPostableCommunities);
 export default router;
