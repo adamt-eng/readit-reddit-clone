@@ -7,6 +7,7 @@ import auth from './Middleware/AuthMiddleware.js';
 import AuthRouter from './Routers/AuthRouter.js';
 import CommunityRouter from "./Routers/CommunityRouter.js";
 import UserRouter from "./Routers/UserRouter.js";
+import PostRouter from "./Routers/PostRouter.js";
 
 
 dotenv.config();
@@ -31,7 +32,7 @@ app.use('/authentication', AuthRouter);
 //app.use(auth()); commented till all apis are working and tested to add authentication later
 
 //app.use('/users', UserRouter);
-//app.use('/posts', PostRouter);
+app.use('/posts', PostRouter);
 //app.use('/comments', CommentRouter);
 app.use('/communities', CommunityRouter);
 //app.use('/votes', VoteRouter);
