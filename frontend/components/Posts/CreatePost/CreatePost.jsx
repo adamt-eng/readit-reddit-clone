@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LeftSidebar from "../../LeftSidebar/LeftSidebar";
 import PostTabs from "../PostTabs/PostTabs";
 import FormPostText from "../FormPostText/FormPostText";
@@ -9,6 +9,28 @@ import "./CreatePost.css";
 
 export default function CreatePost({ isDark }) {
   const [activeTab, setActiveTab] = useState("post");
+
+  // NEW state
+  const [communities, setCommunities] = useState([]);
+  const [selectedCommunity, setSelectedCommunity] = useState(null);
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  // Fetch communities on mount
+  useEffect(() => {
+    const fetchCommunities = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/posts/communities", {
+          credentials: "include"
+        });
+        const data = await res.json();
+        setCommunities(data);
+      } catch (err) {
+        console.error("Failed to fetch communities", err);
+      }
+    };
+
+    fetchCommunities();
+  }, []);
 
   return (
     <div className={`createpost-page-wrapper ${isDark ? "dark" : ""}`}>
@@ -27,9 +49,17 @@ export default function CreatePost({ isDark }) {
 
             {/* Community selector */}
             <div className="create-post-controls">
-              <button className="community-selector">
+              <button
+                className="community-selector"
+                onClick={() => setShowDropdown(!showDropdown)}
+                type="button"
+              >
                 <span className="community-avatar" />
-                <span>Select a community</span>
+                <span>
+                  {selectedCommunity
+                    ? selectedCommunity.name
+                    : "Select a community"}
+                </span>
                 <svg
                   width="18"
                   height="18"
@@ -46,13 +76,40 @@ export default function CreatePost({ isDark }) {
               </button>
             </div>
 
+            {/* Simple dropdown list */}
+            {showDropdown && (
+              <div style={{ marginBottom: "12px" }}>
+                {communities.map((c) => (
+                  <div
+                    key={c._id}
+                    style={{
+                      cursor: "pointer",
+                      padding: "6px 8px"
+                    }}
+                    onClick={() => {
+                      setSelectedCommunity(c);
+                      setShowDropdown(false);
+                    }}
+                  >
+                    {c.name}
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Tabs */}
             <PostTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
             {/* Tab content */}
-            {activeTab === "post" && <FormPostText />}
-            {activeTab === "image" && <FormPostImage />}
-            {activeTab === "link" && <FormPostLink />}
+            {activeTab === "post" && (
+              <FormPostText selectedCommunity={selectedCommunity} />
+            )}
+            {activeTab === "image" && (
+              <FormPostImage selectedCommunity={selectedCommunity} />
+            )}
+            {activeTab === "link" && (
+              <FormPostLink selectedCommunity={selectedCommunity} />
+            )}
           </div>
         </div>
 
