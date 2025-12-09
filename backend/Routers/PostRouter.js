@@ -1,11 +1,9 @@
-import express from 'express';
+import express from "express";
 import auth from "../Middleware/AuthMiddleware.js";
-
-import {
-    getPostableCommunities
-} from "../Controllers/PostController.js";
+import { getPostableCommunities } from "../Controllers/PostController.js";
 
 const router = express.Router();
 
-router.get('/communities', auth ,getPostableCommunities);
+router.get("/communities", auth, getPostableCommunities);
+
 export default router;
