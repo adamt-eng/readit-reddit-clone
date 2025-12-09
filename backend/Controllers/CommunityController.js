@@ -1,5 +1,6 @@
 import Community from "../Models/Community.js";
 import Post from "../Models/Post.js"; // only if you need posts
+import Membership from "../Models/Membership.js";
 
 // ----------------------------------------------------
 // CREATE COMMUNITY
@@ -77,5 +78,40 @@ export const deleteCommunity = async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Join Community
+export const joinCommunity = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    const community = await Community.findOne({ name: req.params.name });
+    if (!community) {
+      return res.status(404).json({ message: "Community not found" });
+    }
+
+    const exists = await Membership.findOne({
+      userId: req.user.id,
+      communityId: community._id
+    });
+
+    if (exists) {
+      return res.status(400).json({ message: "Already joined" });
+    }
+
+    await Membership.create({
+      userId: req.user.id,
+      communityId: community._id,
+      role: "member",
+      joinedAt: new Date()
+    });
+
+    res.json({ message: "Joined community" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Join failed" });
   }
 };
