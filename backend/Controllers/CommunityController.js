@@ -119,25 +119,50 @@ export const joinCommunity = async (req, res) => {
 
 /* ---------------- COMMUNITY SEARCH ---------------- */
 export async function searchCommunities(req, res) {
-  console.log("henaaa")
   try {
-    const q = req.query.q?.trim().toLowerCase() || "";
+    let { q = "", page = 1, limit = 20 } = req.query;
+    q = q.trim().toLowerCase();
 
-    if (!q) return res.json([]);
+    if (!q) return res.json({ results: [], total: 0 });
 
-    const communities = await Community.find({
-      name: { $regex: q, $options: "i" }
-    })
-      .select("name title description memberCount createdAt iconUrl bannerUrl")
-      .limit(20);
+    const query = {
+      $or: [
+        { name: { $regex: q, $options: "i" } },
+        { description: { $regex: q, $options: "i" } }
+      ]
+    };
 
-    console.log(communities)
-    res.json(communities);
+    const total = await Community.countDocuments(query);
+
+    const communities = await Community.find(query)
+      .select("name title description memberCount iconUrl")
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+
+    res.json({ results: communities, total });
+
   } catch (err) {
     console.error("searchCommunities error:", err);
     res.status(500).json({ error: "Server error while searching communities" });
   }
 }
+
+
+///get top communities
+export async function getTopCommunities(req, res) {
+  try {
+    const communities = await Community.find({})
+      .sort({ memberCount: -1 })   // highest first
+      .limit(5)
+      .select("name memberCount iconUrl bannerUrl");
+
+    res.json(communities);
+  } catch (err) {
+    console.error("getTopCommunities error:", err);
+    res.status(500).json({ error: "Failed to load top communities" });
+  }
+}
+
 
 
 

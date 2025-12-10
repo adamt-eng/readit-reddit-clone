@@ -74,22 +74,49 @@ export const createPost = async (req, res) => {
 
 /* ---------------- POST SEARCH ---------------- */
 export async function searchPosts(req, res) {
-  console.log("henaaa 2")
   try {
-    const q = req.query.q?.trim().toLowerCase() || "";
+    let { q = "", page = 1, limit = 20, sort = "relevance", time = "all" } = req.query;
+    q = q.trim().toLowerCase();
+    page = Number(page);
+    limit = Number(limit);
 
-    if (!q) return res.json([]);
+    if (!q) return res.json({ results: [], total: 0 });
 
-    const posts = await Post.find({
-      title: { $regex: q, $options: "i" }
-    })
+    // --- TIME FILTER ---
+    let timeFilter = {};
+    const now = new Date();
+
+    if (time === "24h") {
+      timeFilter = { createdAt: { $gte: new Date(now - 24 * 60 * 60 * 1000) } };
+    } else if (time === "7d") {
+      timeFilter = { createdAt: { $gte: new Date(now - 7 * 24 * 60 * 60 * 1000) } };
+    } else if (time === "30d") {
+      timeFilter = { createdAt: { $gte: new Date(now - 30 * 24 * 60 * 60 * 1000) } };
+    }
+
+    // --- SEARCH QUERY ---
+    const query = {
+      ...timeFilter,
+      $or: [
+        { title: { $regex: q, $options: "i" } },     // priority
+      ]
+    };
+
+    // --- SORT ---
+    let sortOption = {};
+    if (sort === "newest") sortOption = { createdAt: -1 };
+    else if (sort === "oldest") sortOption = { createdAt: 1 };
+    else sortOption = {}; // relevance default (Mongo handles regex match quality)
+
+    const total = await Post.countDocuments(query);
+
+    const posts = await Post.find(query)
       .populate("communityId", "name")
       .populate("authorId", "username avatarUrl")
-      .select("title content createdAt upvoteCount downvoteCount commentCount")
-      .sort({ createdAt: -1 }) // newest first
-      .limit(20);
+      .sort(sortOption)
+      .skip((page - 1) * limit)
+      .limit(limit);
 
-    // Format exactly how your frontend expects dummyData
     const formatted = posts.map((p) => ({
       id: p._id,
       title: p.title,
@@ -98,12 +125,12 @@ export async function searchPosts(req, res) {
       author: p.authorId?.username || "",
       avatarUrl: p.authorId?.avatarUrl || "",
       upvoteCount: p.upvoteCount,
-      downvoteCount: p.downvoteCount,
       commentCount: p.commentCount,
       createdAt: p.createdAt,
     }));
 
-    res.json(formatted);
+    res.json({ results: formatted, total });
+
   } catch (err) {
     console.error("searchPosts error:", err);
     res.status(500).json({ error: "Server error while searching posts" });

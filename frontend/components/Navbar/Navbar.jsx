@@ -29,7 +29,7 @@ export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleD
 
 const handleSearch = () => {
   const q = searchText.trim();
-  if (!q) return;
+  if (!q) navigate("/");
 
   navigate(`/search?q=${encodeURIComponent(q)}`);
 };

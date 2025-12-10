@@ -18,25 +18,31 @@ export const getUserById = async (req, res) => {
 
 /* ---------------- USER SEARCH ---------------- */
 export async function searchUsers(req, res) {
-  console.log("henaaa 3")
-
   try {
-    const q = req.query.q?.trim().toLowerCase() || "";
+    let { q = "", page = 1, limit = 20 } = req.query;
+    q = q.trim().toLowerCase();
 
-    if (!q) return res.json([]);
+    if (!q) return res.json({ results: [], total: 0 });
 
-    const users = await User.find({
-      username: { $regex: q, $options: "i" }   // case-insensitive match
-    })
-      .select("username avatarUrl bio createdAt karma")
-      .limit(20);
+    const query = {
+      username: { $regex: q, $options: "i" }
+    };
 
-    res.json(users);
+    const total = await User.countDocuments(query);
+
+    const users = await User.find(query)
+      .select("username avatarUrl karma")
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+
+    res.json({ results: users, total });
+
   } catch (err) {
     console.error("searchUsers error:", err);
     res.status(500).json({ error: "Server error while searching users" });
   }
 }
+
 
 
 
