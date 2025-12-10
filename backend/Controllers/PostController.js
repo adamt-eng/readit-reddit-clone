@@ -69,3 +69,42 @@ export const createPost = async (req, res) => {
     res.status(500).json({ message: "Failed to create post" });
   }
 };
+
+
+/* ---------------- POST SEARCH ---------------- */
+export async function searchPosts(req, res) {
+  console.log("henaaa 2")
+  try {
+    const q = req.query.q?.trim().toLowerCase() || "";
+
+    if (!q) return res.json([]);
+
+    const posts = await Post.find({
+      title: { $regex: q, $options: "i" }
+    })
+      .populate("communityId", "name")
+      .populate("authorId", "username avatarUrl")
+      .select("title content createdAt upvoteCount downvoteCount commentCount")
+      .sort({ createdAt: -1 }) // newest first
+      .limit(20);
+
+    // Format exactly how your frontend expects dummyData
+    const formatted = posts.map((p) => ({
+      id: p._id,
+      title: p.title,
+      content: p.content,
+      communityName: p.communityId?.name || "",
+      author: p.authorId?.username || "",
+      avatarUrl: p.authorId?.avatarUrl || "",
+      upvoteCount: p.upvoteCount,
+      downvoteCount: p.downvoteCount,
+      commentCount: p.commentCount,
+      createdAt: p.createdAt,
+    }));
+
+    res.json(formatted);
+  } catch (err) {
+    console.error("searchPosts error:", err);
+    res.status(500).json({ error: "Server error while searching posts" });
+  }
+}

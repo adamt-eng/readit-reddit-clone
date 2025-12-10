@@ -1,13 +1,17 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 import "./SearchResults.css";
 
 import SearchItem from "../../components/SearchItem/SearchItem";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
-import dummyData from "../../data/dummydata";
 
-// parse "3y ago", "7mo ago", "22m", "1h", etc -> timestamp (ms)
+const API_URL = "http://localhost:5000";
+console.log("API_URL =", API_URL);
+
+
+// parse "3y ago", "7mo ago", etc.
 function parseTimeAgo(s) {
   if (!s) return 0;
   const str = s.toLowerCase().replace("ago", "").trim();
@@ -19,6 +23,7 @@ function parseTimeAgo(s) {
   if (str.includes("d")) return Date.now() - num * 24 * 60 * 60 * 1000;
   if (str.includes("mo")) return Date.now() - num * 30 * 24 * 60 * 60 * 1000;
   if (str.includes("y")) return Date.now() - num * 365 * 24 * 60 * 60 * 1000;
+
   return 0;
 }
 
@@ -26,54 +31,71 @@ export default function SearchResults() {
   const [activeTab, setActiveTab] = useState("Posts");
   const [sortBy, setSortBy] = useState("relevance");
   const [timeFilter, setTimeFilter] = useState("all");
+
+  const [searchResults, setSearchResults] = useState({
+    posts: [],
+    users: [],
+    communities: []
+  });
+
   const [params] = useSearchParams();
   const navigate = useNavigate();
 
   const query = params.get("q") || "";
+  console.log(query)
 
   if (query === "") navigate("/");
 
   const q = query.trim().toLowerCase();
   const now = Date.now();
 
-  const isWithinTime = (timeAgo) => {
+
+  useEffect(() => {
+    if (!q) return;
+
+    async function runSearch() {
+      try {
+        const [postsRes, usersRes, communitiesRes] = await Promise.all([
+          axios.get(`http://localhost:5000/search/posts`, { params: { q } }),
+          axios.get(`http://localhost:5000/search/users`, { params: { q } }),
+          axios.get(`http://localhost:5000/search/communities`, { params: { q } }),
+        ]);
+
+        setSearchResults({
+          posts: Array.isArray(postsRes.data) ? postsRes.data : [],
+          users: Array.isArray(usersRes.data) ? usersRes.data : [],
+          communities: Array.isArray(communitiesRes.data) ? communitiesRes.data : [],
+
+        });
+
+      } catch (err) {
+        console.error("Search error:", err);
+      }
+    }
+
+    runSearch();
+  }, [q]);
+
+  const isWithinTime = (createdAt) => {
     if (timeFilter === "all") return true;
-    const ts = parseTimeAgo(timeAgo);
+
+    const ts = new Date(createdAt).getTime();
     const diff = now - ts;
+
     if (timeFilter === "24h") return diff <= 24 * 60 * 60 * 1000;
     if (timeFilter === "7d") return diff <= 7 * 24 * 60 * 60 * 1000;
     if (timeFilter === "30d") return diff <= 30 * 24 * 60 * 60 * 1000;
+
     return true;
   };
 
   const filtered = useMemo(() => {
-    const posts = dummyData.posts || [];
-    const communities = dummyData.communities || [];
-    const users = dummyData.users || [];
-
-    if (!q) {
-      return {
-        posts: [...posts].filter((p) => isWithinTime(p.timeAgo)),
-        communities: [...communities],
-        users: [...users],
-      };
-    }
-
     return {
-      posts: posts.filter(
-        (p) =>
-          ((p.title && p.title.toLowerCase().includes(q)) ||
-            (p.communityName && p.communityName.toLowerCase().includes(q))) &&
-          isWithinTime(p.timeAgo)
-      ),
-      communities: communities.filter((c) => c.name && c.name.toLowerCase().includes(q)),
-      users: users.filter(
-        (u) =>
-          (u.username && u.username.toLowerCase().includes(q)) ||
-          (u.displayName && u.displayName.toLowerCase().includes(q))
-      ),
+      posts: searchResults.posts.filter((p) => isWithinTime(p.createdAt)),
+      communities: searchResults.communities,
+      users: searchResults.users
     };
-  }, [isWithinTime, q]);
+  }, [searchResults, timeFilter]);
 
   const sortedList = useMemo(() => {
     const key = activeTab === "People" ? "users" : activeTab.toLowerCase();
@@ -82,11 +104,11 @@ export default function SearchResults() {
     if (key !== "posts") return [...list];
 
     if (sortBy === "newest") {
-      return [...list].sort((a, b) => parseTimeAgo(b.timeAgo) - parseTimeAgo(a.timeAgo));
+      return [...list].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     }
 
     if (sortBy === "oldest") {
-      return [...list].sort((a, b) => parseTimeAgo(a.timeAgo) - parseTimeAgo(b.timeAgo));
+      return [...list].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
     }
 
     return [...list];
@@ -103,12 +125,10 @@ export default function SearchResults() {
   return (
     <div className="sr-layout">
 
-      {/* LEFT SIDEBAR */}
       <div className="sr-sidebar">
         <LeftSidebar showStartCommunity={false} />
       </div>
 
-      {/* ORIGINAL PAGE — UNCHANGED */}
       <div className="sr-wrapper">
         <div className="sr-tabs">
           {["Posts", "Communities", "People"].map((tab) => (
@@ -118,7 +138,9 @@ export default function SearchResults() {
               onClick={() => setActiveTab(tab)}
             >
               {tab}
-              <span className="sr-tab-count">{filtered[tabKey(tab)]?.length ?? 0}</span>
+              <span className="sr-tab-count">
+                {filtered[tabKey(tab)]?.length ?? 0}
+              </span>
             </button>
           ))}
 
@@ -128,7 +150,6 @@ export default function SearchResults() {
             className="sr-sort-box"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            aria-label="Sort posts"
           >
             <option value="relevance">Relevance</option>
             <option value="newest">Newest</option>
@@ -139,7 +160,6 @@ export default function SearchResults() {
             className="sr-sort-box"
             value={timeFilter}
             onChange={(e) => setTimeFilter(e.target.value)}
-            aria-label="Filter by time"
           >
             <option value="all">All time</option>
             <option value="24h">Past 24h</option>
@@ -153,7 +173,7 @@ export default function SearchResults() {
             <div className="sr-results-scroll">
               {sortedList.length ? (
                 sortedList.map((item) => (
-                  <div className="sr-result-card" key={item.id}>
+                  <div className="sr-result-card" key={item._id || item.id}>
                     <SearchItem type={typeMap[activeTab]} data={item} />
                   </div>
                 ))
@@ -166,17 +186,12 @@ export default function SearchResults() {
           <div className="sr-right-column">
             <div className="sr-card">
               <h3>Communities</h3>
-              {dummyData.communities.slice(0, 5).map((c) => (
+
+              {(searchResults.communities || []).slice(0, 5).map((c) => (
                 <div
-                  key={c.id}
+                  key={c._id}
                   className="sr-side-item no-router-click"
                   onClick={() => console.log("clicked community:", c.name)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ")
-                      console.log("clicked community:", c.name);
-                  }}
                 >
                   <img
                     className="sr-side-icon"
@@ -184,9 +199,9 @@ export default function SearchResults() {
                     alt={`${c.name} avatar`}
                   />
                   <div>
-                    <div className="sr-side-title">r/{c.name}</div>
+                    <div className="sr-side-title">{c.name}</div>
                     <div className="sr-side-count">
-                      {Number(c.membersCount).toLocaleString()} members
+                      {Number(c.memberCount || 0).toLocaleString()} members
                     </div>
                   </div>
                 </div>
@@ -201,9 +216,11 @@ export default function SearchResults() {
                 <li>Use filters to narrow by time</li>
               </ul>
             </div>
+
           </div>
         </div>
       </div>
+
     </div>
   );
 }
