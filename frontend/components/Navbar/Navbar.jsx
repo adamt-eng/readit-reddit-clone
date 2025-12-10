@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaSearch, FaPlus, FaBell, FaUser, FaCog, FaSignOutAlt, FaMoon, FaSun, FaComment } from "react-icons/fa";
 import "./Navbar.css";
 
 export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleDarkMode, onLoginClick, onSignupClick }) {
+  const navigate = useNavigate()
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [searchText, setSearchText] = useState("");
   const profileMenuRef = useRef(null);
 
   const promptLogin = () => alert("Login to continue");
@@ -23,6 +25,15 @@ export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleD
   const handleOpenMessages = () => {
     if (!isLoggedIn) return promptLogin();
   };
+
+
+const handleSearch = () => {
+  const q = searchText.trim();
+  if (!q) return;
+
+  navigate(`/search?q=${encodeURIComponent(q)}`);
+};
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -75,11 +86,16 @@ export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleD
         <div className="nav-center">
           <div className="search-container">
             <input 
-              placeholder='Search Reddit'
+              placeholder="Search Reddit"
               className="nav-search"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSearch();
+              }}
             />
             <div className="search-icon">
-              <FaSearch />
+              <FaSearch onClick={handleSearch}/>
             </div>
           </div>
         </div>

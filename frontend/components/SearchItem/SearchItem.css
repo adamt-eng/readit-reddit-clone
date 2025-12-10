@@ -1,0 +1,125 @@
+/* ============================= */
+/* COMMON STRUCTURE */
+/* ============================= */
+
+.su-container,
+.sc-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+/* ============================= */
+/* AVATARS / ICONS */
+/* ============================= */
+
+.su-avatar,
+.sc-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.sp-icon {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+}
+
+/* ============================= */
+/* USERS */
+/* ============================= */
+
+.su-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.su-handle {
+  font-size: 13px;
+  color: #7c7c7c;
+}
+
+/* ============================= */
+/* POSTS */
+/* ============================= */
+
+.sp-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  color: #1a1a1b;
+  text-align: left;
+}
+
+.sp-left {
+  flex: 1;
+}
+
+.sp-meta {
+  font-size: 13px;
+  color: #7c7c7c;
+  margin-bottom: 4px;
+}
+
+.sp-title {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #1a1a1b;
+}
+
+.sp-sub {
+  font-size: 13px;
+  color: #7c7c7c;
+}
+
+.sp-thumb {
+  width: 80px;
+  height: 65px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+/* Post header layout */
+.info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  cursor: pointer;
+  border-radius: 6px;
+  text-align: left;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ============================= */
+/* COMMUNITIES */
+/* ============================= */
+
+.sc-container {
+  padding: 6px 0;
+  cursor: pointer;
+  border-radius: 6px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.sc-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1b;
+}
+
+.sc-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.sc-members {
+  color: #7c7c7c;
+  font-size: 13px;
+}

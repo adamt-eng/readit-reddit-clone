@@ -1,4 +1,8 @@
 /* components/Navbar/Navbar.css */
+:root {
+  --navbar-height: 56px;
+}
+
 .navbar {
   display: flex;
   align-items: center;
@@ -9,7 +13,8 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  height: 56px;
+  height: var(--navbar-height);
+
   transition: background-color 0.3s, border-color 0.3s;
 }
 
@@ -51,6 +56,7 @@
   border: 1px solid #edeff1;
   border-radius: 20px;
   background: #f6f7f8;
+  color: black;
   font-size: 14px;
   outline: none;
   border-color: #ff4500;

@@ -1,6 +1,6 @@
-import User from '../Models/UserModel.js';
+import User from '../Models/User.js';
 
-const getUserById = async (req, res) => {
+export const getUserById = async (req, res) => {
     try {
         const userId = req.params.id;
         const user = await User.findById(userId).select('-password'); // Exclude password field

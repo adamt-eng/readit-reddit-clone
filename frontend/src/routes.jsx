@@ -10,6 +10,7 @@ import DirectMessages from "../pages/Direct Messages/DirectMessages.jsx";
 import CreateCommunityModal from "../components/Community/CreateCommunityModal/CreateCommunityModal.jsx";
 import Login from "../pages/Authentication/Login.jsx";
 import Signup from "../pages/Authentication/Signup.jsx";
+import SearchResults from "../pages/SearchResults/SearchResults.jsx"
 
 export default function AppRoutes({
   darkMode,
@@ -178,7 +179,21 @@ export default function AppRoutes({
             )
           }
         />
+        <Route
+        path="/search"
+        element={
+          isLoggedIn ? (
+              <SearchResults />
+            ) : (
+              // Show guest home with login prompt
+              <GuestHomePage 
+                onLogin={onLogin} 
+                darkMode={darkMode} 
+              />
+            )
+        }></Route>
       </Routes>
+    
 
       {/* Community Modal */}
       {showCommunityModal && (
