@@ -3,9 +3,10 @@ import "./FormPostText.css";
 
 const MAX_TITLE_LENGTH = 300;
 
-export default function FormPostText() {
+export default function FormPostText({ selectedCommunity, userId }) {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleTitleChange = (e) => {
     if (e.target.value.length <= MAX_TITLE_LENGTH) {
@@ -13,12 +14,45 @@ export default function FormPostText() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const canPost =
+    selectedCommunity &&
+    title.trim().length > 0 &&
+    !isSubmitting;
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title.trim()) return;
-    // submit logic here
-    setTitle("");
-    setBody("");
+    if (!canPost) return;
+
+    try {
+      setIsSubmitting(true);
+
+      const res = await fetch("http://localhost:5000/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,                               // new ID flows in here automatically
+          title,
+          content: body,
+          type: "post",
+          communityId: selectedCommunity._id
+        })
+      });
+
+      if (!res.ok) {
+        alert("Failed to create post");
+        console.error(await res.text());
+        return;
+      }
+
+      alert("Post created!");
+      setTitle("");
+      setBody("");
+    } catch (err) {
+      console.error("POST ERROR:", err);
+      alert("Something went wrong");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -33,19 +67,28 @@ export default function FormPostText() {
           onChange={handleTitleChange}
           required
         />
+
         <span className="input-required">*</span>
-        <span className="title-count">{title.length}/{MAX_TITLE_LENGTH}</span>
+
+        <span className="title-count">
+          {title.length}/{MAX_TITLE_LENGTH}
+        </span>
       </div>
 
       <div className="textarea-wrap">
         <div className="textarea-toolbar">
           <button type="button" className="toolbar-btn" title="Bold"><b>B</b></button>
           <button type="button" className="toolbar-btn" title="Italic"><i>I</i></button>
-          {/* Add more formatting buttons as needed for UI only */}
         </div>
+
         <textarea
           className="textarea"
-          placeholder="Body text (optional)"
+          placeholder={
+            selectedCommunity
+              ? "Body text (optional)"
+              : "Select a community first"
+          }
+          disabled={!selectedCommunity}
           value={body}
           onChange={(e) => setBody(e.target.value)}
         />
@@ -55,10 +98,19 @@ export default function FormPostText() {
         <button className="btn" type="button" disabled>
           Save Draft
         </button>
-        <button className="btn primary" type="submit" disabled={!title.trim()}>
-          Post
+
+        <button
+          className={`btn primary ${!canPost ? "disabled" : ""}`}
+          type="submit"
+          disabled={!canPost}
+        >
+          {isSubmitting ? "Posting..." : "Post"}
         </button>
       </div>
+
+      {!selectedCommunity && (
+        <p className="hint-text">You must select a community to post</p>
+      )}
     </form>
   );
 }
