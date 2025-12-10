@@ -8,7 +8,7 @@ import AuthRouter from './Routers/AuthRouter.js';
 import CommunityRouter from "./Routers/CommunityRouter.js";
 import UserRouter from "./Routers/UserRouter.js";
 import PostRouter from "./Routers/PostRouter.js";
-
+import SearchRouter from "./Routers/SearchRouter.js"
 
 dotenv.config();
 const app = express();
@@ -35,6 +35,7 @@ app.use('/authentication', AuthRouter);
 app.use('/posts', PostRouter);
 //app.use('/comments', CommentRouter);
 app.use('/communities', CommunityRouter);
+app.use('/search',SearchRouter)
 //app.use('/votes', VoteRouter);
 //app.use('/memberships', MembershipRouter);
 //app.use('/notifications', NotificationRouter);

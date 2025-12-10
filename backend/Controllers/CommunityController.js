@@ -115,3 +115,29 @@ export const joinCommunity = async (req, res) => {
     res.status(500).json({ message: "Join failed" });
   }
 };
+
+
+/* ---------------- COMMUNITY SEARCH ---------------- */
+export async function searchCommunities(req, res) {
+  console.log("henaaa")
+  try {
+    const q = req.query.q?.trim().toLowerCase() || "";
+
+    if (!q) return res.json([]);
+
+    const communities = await Community.find({
+      name: { $regex: q, $options: "i" }
+    })
+      .select("name title description memberCount createdAt iconUrl bannerUrl")
+      .limit(20);
+
+    console.log(communities)
+    res.json(communities);
+  } catch (err) {
+    console.error("searchCommunities error:", err);
+    res.status(500).json({ error: "Server error while searching communities" });
+  }
+}
+
+
+
