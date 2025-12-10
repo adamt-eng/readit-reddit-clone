@@ -5,11 +5,11 @@ import Post from "../Models/Post.js";
 // Get communities where the user is a member and can post
 export const getPostableCommunities = async (req, res) => {
   try {
-    if (!req.user || !req.user.id) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
+    const { userId } = req.query; // TEMP
 
-    const userId = req.user.id;
+    if (!userId) {
+      return res.status(400).json({ message: "userId missing (temporary)" });
+    }
 
     const memberships = await Membership.find(
       { userId },
@@ -30,22 +30,21 @@ export const getPostableCommunities = async (req, res) => {
   }
 };
 
-// Create a new post
+// Create a new post (TEMP: userId from request body)
 export const createPost = async (req, res) => {
   try {
-    if (!req.user || !req.user.id) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
+    const { userId, title, content, type, communityId } = req.body;
 
-    const { title, content, type, communityId } = req.body;
+    if (!userId) {
+      return res.status(401).json({ message: "userId missing (temporary)" });
+    }
 
     if (!title || !communityId || !type) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // Make sure user is a member
     const membership = await Membership.findOne({
-      userId: req.user.id,
+      userId,
       communityId
     });
 
@@ -60,7 +59,7 @@ export const createPost = async (req, res) => {
       content,
       type,
       communityId,
-      authorId: req.user.id,
+      authorId: userId,
       createdAt: new Date()
     });
 
