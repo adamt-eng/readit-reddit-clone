@@ -42,7 +42,7 @@ app.use('/authentication', AuthRouter);
 app.use('/users', UserRouter);
 app.use('/posts', PostRouter);
 app.use('/communities', CommunityRouter);
-app.use('notifications',NotificationRouter);
+app.use('/notifications',NotificationRouter);
 app.use('/search', SearchRouter);
 app.use("/upload", UploadRouter);
 app.use('/ai-summary', AiSummaryRouter);
