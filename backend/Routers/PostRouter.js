@@ -6,7 +6,8 @@ import {
   searchPosts,
   getPostsByUser,
   getPostById,
-  upvotePost
+  upvotePost,
+  downvotePost
 } from "../Controllers/PostController.js";
 
 import { 
@@ -42,8 +43,10 @@ router.get("/:postId/comments", getCommentsForPost);
         POST VOTING
 ------------------------------ */
 
-// Upvote a post  <-- MUST be above /:postId
+// Upvote a post
 router.post("/:postId/upvote", upvotePost);
+// Downvote a post
+router.post("/:postId/downvote", downvotePost);
 
 
 /* -----------------------------
