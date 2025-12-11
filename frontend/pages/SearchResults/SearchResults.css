@@ -241,3 +241,86 @@
   z-index: 50;
   background: var(--bg);
 }
+
+
+/* ================================
+   DARK MODE OVERRIDES
+   Applied when <body> or wrapper has .appdark-mode
+=================================== */
+
+.appdark-mode {
+  --bg: #0f0f0f;
+  --card: #1a1a1b;
+  --border: #3a3a3c;
+  --text: #f6f6f6;
+  --muted: #a0a0a0;
+}
+
+/* Cards and hover effects */
+.appdark-mode .sr-result-card {
+  background: var(--card);
+  border-color: var(--border);
+}
+
+.appdark-mode .sr-result-card:hover {
+  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.05);
+}
+
+/* Empty message */
+.appdark-mode .sr-empty {
+  background: var(--card);
+  border-color: var(--border);
+  color: var(--muted);
+}
+
+/* Sidebar cards */
+.appdark-mode .sr-card {
+  background: var(--card);
+  border-color: var(--border);
+}
+
+/* Sidebar hover */
+.appdark-mode .sr-side-item.no-router-click:hover {
+  background: rgba(255,255,255,0.07);
+}
+
+/* Tabs */
+.appdark-mode .sr-tabs {
+  background: var(--bg);
+  border-bottom-color: var(--border);
+}
+
+.appdark-mode .sr-tab {
+  color: var(--muted);
+}
+
+.appdark-mode .sr-tab.active {
+  color: var(--text);
+  border-bottom: 3px solid var(--text);
+}
+
+/* Sort dropdown */
+.appdark-mode .sr-sort-box {
+  background: #1c1c1e;
+  border-color: var(--border);
+  color: var(--text);
+}
+
+/* Pagination */
+.appdark-mode .sr-page-arrow {
+  color: var(--text);
+}
+
+.appdark-mode .sr-page-number {
+  color: var(--text);
+}
+
+/* Loading */
+.appdark-mode .sr-loading {
+  color: var(--muted);
+}
+
+.appdark-mode .sr-spinner {
+  border-color: #444;
+  border-top-color: #ff4500;
+}

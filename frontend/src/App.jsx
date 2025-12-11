@@ -60,7 +60,7 @@ function App() {
   if (isLoading) return <div className="app-loading" />;
 
    return (
-    <div className={`app ${darkMode ? "dark-mode" : ""}`}>
+    <div className={`app${darkMode ? "dark-mode" : ""}`}>
       {/* NAVBAR always visible except when visiting actual auth pages */}
       {!isAuthPage && (
         <Navbar
@@ -78,7 +78,6 @@ function App() {
       <AppRoutes
         darkMode={darkMode}
         toggleDarkMode={toggleDarkMode}
-        currentUser={currentUser}
         onLogout={handleLogout}
         onLogin={handleLogin}
         isLoggedIn={isLoggedIn}
