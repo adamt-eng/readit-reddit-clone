@@ -63,3 +63,57 @@ export const searchUsers = async (req, res) => {
       .json({ error: "Server error while searching users" });
   }
 };
+
+export const updateUserProfile = async (req, res) => {
+  try {
+    const rawId = req.params.id || "";
+    const userId = rawId.trim();
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid user ID format" });
+    }
+
+    const { username, bio, avatarUrl } = req.body;
+
+    // Build the fields we allow to update
+    const updates = {};
+    if (typeof username === "string" && username.trim() !== "") {
+      updates.username = username.trim();
+    }
+    if (typeof bio === "string") {
+      updates.bio = bio;
+    }
+    if (typeof avatarUrl === "string") {
+      updates.avatarUrl = avatarUrl;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return res
+        .status(400)
+        .json({ message: "No valid fields to update (username/bio/avatarUrl)" });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updates },
+      { new: true, runValidators: true }
+    ).select("-password -passwordHash -__v");
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("updateUserProfile error:", error);
+
+    // handle duplicate username/email
+    if (error.code === 11000) {
+      return res
+        .status(409)
+        .json({ message: "Username or email already in use" });
+    }
+
+    return res.status(500).json({ message: "Server error" });
+  }
+};
