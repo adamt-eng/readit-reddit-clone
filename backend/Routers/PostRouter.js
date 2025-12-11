@@ -6,28 +6,52 @@ import {
   searchPosts,
   getPostsByUser,
   getPostById
-} from '../Controllers/PostController.js';
-import { getCommentsForPost } from "../Controllers/CommentController.js";
+} from "../Controllers/PostController.js";
+
+import { 
+  getCommentsForPost,
+  createComment
+} from "../Controllers/CommentController.js";
 
 const router = express.Router();
+
+/* -----------------------------
+   COMMUNITY & CREATE POST APIs
+------------------------------ */
 
 // Used by CreatePost page (dropdown)
 router.get("/communities", getPostableCommunities);
 
-// Used when user submits the post (TEMP: no auth)
+// Create a new post (TEMP no auth)
 router.post("/", createPost);
-// router.post("/", auth, createPost); // enable later
 
-// search posts (for global search page)
-router.get("/search", searchPosts);
 
-// get all posts by a user (for profile page)
-router.get("/user/:userId", getPostsByUser);
+/* -----------------------------
+           COMMENTS
+------------------------------ */
 
-// get comments for a post
+// Create a top-level comment under a post
+router.post("/:postId/comments", createComment);
+
+// Get all comments for a post
 router.get("/:postId/comments", getCommentsForPost);
 
-// get post by id (for post details page)
+
+/* -----------------------------
+       SEARCH & USER POSTS
+------------------------------ */
+
+router.get("/search", searchPosts);
+
+// Get all posts by a user
+router.get("/user/:userId", getPostsByUser);
+
+
+/* -----------------------------
+       SINGLE POST DETAILS
+------------------------------ */
+
+// Must be last!
 router.get("/:postId", getPostById);
 
 export default router;
