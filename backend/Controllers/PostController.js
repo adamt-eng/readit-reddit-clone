@@ -183,3 +183,26 @@ export const getPostById = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const upvotePost = async (req, res) => {
+  try {
+    const { postId } = req.params;
+
+    // Optionally: verify post exists (you can add later)
+
+    const updated = await Post.findByIdAndUpdate(
+      postId,
+      { $inc: { upvoteCount: 1 } },
+      { new: true } // return updated post
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    res.json(updated);
+  } catch (err) {
+    console.error("Error upvoting post:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
