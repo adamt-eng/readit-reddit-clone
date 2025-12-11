@@ -10,6 +10,7 @@ import UserRouter from "./Routers/UserRouter.js";
 import PostRouter from "./Routers/PostRouter.js";
 import SearchRouter from "./Routers/SearchRouter.js"
 import UploadRouter from "./Routers/UploadRouter.js";
+import AiSummaryRouter from "./Routers/AiSummaryRouter.js";
 
 dotenv.config();
 const app = express();
@@ -39,6 +40,7 @@ app.use('/posts', PostRouter);
 app.use('/communities', CommunityRouter);
 app.use('/search',SearchRouter)
 app.use("/upload", UploadRouter);
+app.use('/ai-summary', AiSummaryRouter);
 
 
 //app.use('/votes', VoteRouter);
