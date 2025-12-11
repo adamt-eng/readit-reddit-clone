@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Community from "../Models/Community.js";
 import Membership from "../Models/Membership.js";
 import Post from "../Models/Post.js";
@@ -137,18 +138,30 @@ export async function searchPosts(req, res) {
 }
 
 /* ---------- GET ALL POSTS BY USER (for profile) ---------- */
+/* ---------- GET ALL POSTS BY USER (for profile) ---------- */
 export const getPostsByUser = async (req, res) => {
   try {
-    const { userId } = req.params;
+    // raw id from URL may contain spaces/newlines
+    const rawId = req.params.userId || "";
+    const userId = rawId.trim();
+
+    // validate ObjectId first
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res
+        .status(400)
+        .json({ message: "Invalid user ID format", rawId });
+    }
 
     const posts = await Post.find({ authorId: userId })
       .sort({ createdAt: -1 })              // newest first
-      .populate('communityId', 'name title')
-      .select('-__v');
+      .populate("communityId", "name title")
+      .select("-__v");
 
     return res.status(200).json(posts);
   } catch (err) {
     console.error("getPostsByUser error:", err);
-    return res.status(500).json({ message: "Failed to load user posts" });
+    return res
+      .status(500)
+      .json({ message: "Failed to load user posts" });
   }
 };
