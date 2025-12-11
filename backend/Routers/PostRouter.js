@@ -7,6 +7,7 @@ import {
   getPostsByUser,
   getPostById
 } from '../Controllers/PostController.js';
+import { getCommentsForPost } from "../Controllers/CommentController.js";
 
 const router = express.Router();
 
@@ -18,14 +19,15 @@ router.post("/", createPost);
 // router.post("/", auth, createPost); // enable later
 
 // search posts (for global search page)
-router.get('/search', searchPosts);
+router.get("/search", searchPosts);
 
-// get all posts by a user  (for profile page)
-router.get('/user/:userId', getPostsByUser);
+// get all posts by a user (for profile page)
+router.get("/user/:userId", getPostsByUser);
+
+// get comments for a post
+router.get("/:postId/comments", getCommentsForPost);
 
 // get post by id (for post details page)
-router.get('/:postId', getPostById);
-
-
+router.get("/:postId", getPostById);
 
 export default router;
