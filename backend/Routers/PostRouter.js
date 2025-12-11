@@ -5,6 +5,7 @@ import {
   createPost,
   searchPosts,
   getPostsByUser,
+  getPostById
 } from '../Controllers/PostController.js';
 
 const router = express.Router();
@@ -21,6 +22,10 @@ router.get('/search', searchPosts);
 
 // get all posts by a user  (for profile page)
 router.get('/user/:userId', getPostsByUser);
+
+// get post by id (for post details page)
+router.get('/:postId', getPostById);
+
 
 
 export default router;
