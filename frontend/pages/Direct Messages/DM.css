@@ -34,7 +34,7 @@
 
 /* LEFT SIDEBAR */
 .chat-sidebar {
-  width: 260px;
+  width: 360px;
   background: var(--dm-bg-light);
   border-right: 1px solid var(--dm-bg-border);
   display: flex;
@@ -42,9 +42,13 @@
 }
 
 .chat-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   font-size: 16px;
   font-weight: 700;
-  padding: 16px;
+  padding: 12px 12px;
   border-bottom: 1px solid var(--dm-bg-border);
   color: var(--dm-text);
 }
@@ -52,7 +56,7 @@
 .chat-search {
   margin: 12px;
   padding: 10px 14px;
-  width: calc(100% - 48px);
+  width: calc(100% - 28px);
   border: 1px solid var(--dm-bg-border);
   border-radius: 20px;
   background: var(--dm-bg);
@@ -67,6 +71,7 @@
 /* Conversation List */
 .chat-list {
   overflow-y: auto;
+  padding: 6px 8px 12px 8px;
 }
 
 .chat-list-item {
@@ -95,6 +100,72 @@
   object-fit: cover;
 }
 
+/* New conversation form in header */
+.chat-new-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.chat-new-input {
+  padding: 6px 10px;
+  border-radius: 14px;
+  border: 1px solid var(--dm-bg-border);
+  background: var(--dm-bg);
+  color: var(--dm-text);
+  font-size: 13px;
+  width: 220px;
+}
+
+.chat-new-input:focus {
+  outline: none;
+  border-color: var(--reddit-main);
+}
+
+.chat-new-btn {
+  background: var(--reddit-main);
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chat-new-btn:hover {
+  background: var(--reddit-main-hover);
+}
+
+/* search dropdown */
+.chat-search-dropdown {
+  position: absolute;
+  top: 42px;
+  left: 0;
+  right: 0;
+  background: var(--dm-bg);
+  border: 1px solid var(--dm-bg-border);
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  z-index: 40;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.chat-search-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.chat-search-item:hover {
+  background: var(--dm-bg-hover);
+}
+
 .chat-list-name {
   font-weight: 700;
   color: var(--dm-text);
@@ -111,6 +182,11 @@
   display: flex;
   flex-direction: column;
   background: var(--dm-bg);
+}
+
+/* make messages area clearer */
+.chat-messages {
+  padding: 18px;
 }
 
 .chat-window-header {
