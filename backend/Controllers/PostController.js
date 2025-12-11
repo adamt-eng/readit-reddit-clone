@@ -206,3 +206,24 @@ export const upvotePost = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const downvotePost = async (req, res) => {
+  try {
+    const { postId } = req.params;
+
+    const updated = await Post.findByIdAndUpdate(
+      postId,
+      { $inc: { downvoteCount: 1 } },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    res.json(updated);
+  } catch (err) {
+    console.error("Error downvoting post:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
