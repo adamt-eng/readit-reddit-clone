@@ -15,6 +15,11 @@ export const signup = async (req, res) => {
     const { username, email, password } = req.body;
 
     // Check email
+    const existingUserName = await User.findOne({ username });
+    if (existingUserName)
+      return res.status(400).json({ message: "Username already in use" });
+
+    // Check email
     const existingEmail = await User.findOne({ email });
     if (existingEmail)
       return res.status(400).json({ message: "Email already in use" });
