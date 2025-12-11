@@ -135,3 +135,20 @@ export async function searchPosts(req, res) {
     res.status(500).json({ error: "Server error while searching posts" });
   }
 }
+
+/* ---------- GET ALL POSTS BY USER (for profile) ---------- */
+export const getPostsByUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const posts = await Post.find({ authorId: userId })
+      .sort({ createdAt: -1 })              // newest first
+      .populate('communityId', 'name title')
+      .select('-__v');
+
+    return res.status(200).json(posts);
+  } catch (err) {
+    console.error("getPostsByUser error:", err);
+    return res.status(500).json({ message: "Failed to load user posts" });
+  }
+};
