@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Notifications.css";
-import dummyData from "../../data/dummydata";
 import NotificationItem from "../../components/NotificationItem/NotificationItem";
-import LeftSidebar from "../../components/LeftSidebar/LeftSidebar"; 
+import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
+import axios from "axios";
 
-// Convert Date → "22m", "1h", "3d", etc
+// Format date → "22m", "1h", "3d", etc.
 function formatTimeAgo(date) {
   const diff = Date.now() - new Date(date).getTime();
 
@@ -23,23 +23,45 @@ function formatTimeAgo(date) {
   return `${Math.floor(mo / 12)}y`;
 }
 
-export default function Notifications({ darkMode, onStartCommunity }) {
-  const [notifications, setNotifications] = useState(
-    dummyData.notifications.map((n) => ({
-      ...n,
-      timeAgoFormatted: formatTimeAgo(n.createdAt),
-    }))
-  );
-
+export default function Notifications() {
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showEarlier, setShowEarlier] = useState(false);
 
+  // ===============================
+  // FETCH ALL NOTIFICATIONS
+  // ===============================
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/notifications"); ///changetoauth
+
+        const formatted = res.data.map((n) => ({
+          ...n,
+          timeAgoFormatted: formatTimeAgo(n.createdAt),
+        }));
+
+        setNotifications(formatted);
+      } catch (err) {
+        console.error("Failed to load notifications:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
+
+  // ===============================
+  // READ / UNREAD HANDLING
+  // ===============================
   const unread = notifications.filter((n) => !n.isRead);
   const read = notifications.filter((n) => n.isRead);
 
   const markAll = () => {
-    setNotifications(
-      notifications.map((n) => ({ ...n, isRead: true }))
-    );
+    setNotifications(notifications.map((n) => ({ ...n, isRead: true })));
+
+    axios.put("/api/notifications/mark-all-read").catch(() => {});
   };
 
   const markOne = (id) => {
@@ -48,20 +70,21 @@ export default function Notifications({ darkMode, onStartCommunity }) {
         n._id === id ? { ...n, isRead: true } : n
       )
     );
+
+    axios.put(`/api/notifications/${id}/read`).catch(() => {});
   };
 
+  // ===============================
+  // RENDER
+  // ===============================
   return (
-    <div className="page-container" style={{ display: "flex" }}>
+    <div className="page-container">
 
       {/* LEFT SIDEBAR */}
-      <LeftSidebar
-        darkMode={darkMode}
-        showStartCommunity={true}
-        onStartCommunity={onStartCommunity}
-      />
+      <LeftSidebar />
 
       {/* MAIN CONTENT */}
-      <div className="notifs-page" style={{ flex: 1 }}>
+      <div className="notifs-page">
 
         {/* Sticky Header */}
         <div className="notifs-header">
@@ -74,54 +97,58 @@ export default function Notifications({ darkMode, onStartCommunity }) {
           )}
         </div>
 
-        {/* Scrollable area */}
-        <div className="notifs-list">
+        {/* LOADING STATE */}
+        {loading ? (
+          <div className="no-new-message">Loading...</div>
+        ) : (
+          <div className="notifs-list">
 
-          {/* NEW SECTION */}
-          {unread.length > 0 ? (
-            <>
-              <h3 className="section-title">New</h3>
+            {/* NEW NOTIFICATIONS */}
+            {unread.length > 0 ? (
+              <>
+                <h3 className="section-title">New</h3>
 
-              {unread.map((n) => (
-                <NotificationItem
-                  key={n._id}
-                  data={n}
-                  onRead={() => markOne(n._id)}
-                />
-              ))}
-            </>
-          ) : (
-            <div className="no-new-message">You’re all caught up 🎉</div>
-          )}
+                {unread.map((n) => (
+                  <NotificationItem
+                    key={n._id}
+                    data={n}
+                    onRead={() => markOne(n._id)}
+                  />
+                ))}
+              </>
+            ) : (
+              <div className="no-new-message">You're all caught up 🎉</div>
+            )}
 
-          {/* EARLIER BUTTON */}
-          {read.length > 0 && (
-            <button
-              className="expand-earlier-btn"
-              onClick={() => setShowEarlier(!showEarlier)}
-            >
-              {showEarlier
-                ? "Hide earlier notifications ▲"
-                : "Show earlier notifications ▼"}
-            </button>
-          )}
+            {/* EXPAND EARLIER */}
+            {read.length > 0 && (
+              <button
+                className="expand-earlier-btn"
+                onClick={() => setShowEarlier(!showEarlier)}
+              >
+                {showEarlier
+                  ? "Hide earlier notifications ▲"
+                  : "Show earlier notifications ▼"}
+              </button>
+            )}
 
-          {/* EARLIER SECTION */}
-          {showEarlier && read.length > 0 && (
-            <>
-              <h3 className="section-title">Earlier</h3>
+            {/* EARLIER NOTIFICATIONS */}
+            {showEarlier && read.length > 0 && (
+              <>
+                <h3 className="section-title">Earlier</h3>
 
-              {read.map((n) => (
-                <NotificationItem
-                  key={n._id}
-                  data={n}
-                  onRead={() => markOne(n._id)}
-                />
-              ))}
-            </>
-          )}
+                {read.map((n) => (
+                  <NotificationItem
+                    key={n._id}
+                    data={n}
+                    onRead={() => markOne(n._id)}
+                  />
+                ))}
+              </>
+            )}
 
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

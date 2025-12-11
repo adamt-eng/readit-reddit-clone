@@ -92,12 +92,24 @@ export async function createNotification({ userId, type, payload }) {
 // -----------------------------
 export const getNotifications = async (req, res) => {
   try {
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+    // 1) Delete notifications older than 1 month
+    await Notification.deleteMany({
+      userId: req.user.id,
+      createdAt: { $lt: oneMonthAgo }
+    });
+
+    // 2) Return only notifications from the past month
     const notifications = await Notification.find({
       userId: req.user.id,
+      createdAt: { $gte: oneMonthAgo }
     }).sort({ createdAt: -1 });
 
     res.status(200).json(notifications);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Failed to get notifications" });
   }
 };
