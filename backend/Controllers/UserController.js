@@ -1,18 +1,23 @@
 import User from '../Models/User.js';
 
 export const getUserById = async (req, res) => {
-    try {
-        const userId = req.params.id;
-        const user = await User.findById(userId).select('-password'); // Exclude password field
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error });
-    }
-    if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-    }
-    res.status(200).json(user);
+  try {
+    const userId = req.params.id;
 
-    
+    const user = await User.findById(userId)
+      .select('-passwordHash -__v'); // hide password + version
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // this will have: username, email, bio, avatarUrl, createdAt, karma, ...
+    return res.status(200).json(user);
+
+  } catch (error) {
+    console.error("getUserById error:", error);
+    return res.status(500).json({ message: 'Server error', error });
+  }
 }
 
 
