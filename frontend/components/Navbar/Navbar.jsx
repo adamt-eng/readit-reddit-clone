@@ -7,6 +7,8 @@ export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleD
   const navigate = useNavigate()
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [notisCount,setNotisCount]=useState(0);
+  
   const profileMenuRef = useRef(null);
 
   const promptLogin = () => alert("Login to continue");
