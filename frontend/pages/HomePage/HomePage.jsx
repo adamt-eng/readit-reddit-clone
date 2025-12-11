@@ -28,14 +28,8 @@ const HomePage = ({onLogout, darkMode, onStartCommunity }) => {
   //sockets for notifications
     useEffect(() => {
     if (!user?._id) return;
-
     console.log("Registering user on socket:", user._id);
     socket.emit("register", user._id);
-
-    return () => {
-      console.log("Cleaning up socket for:", user._id);
-      socket.emit("unregister", user._id);
-    };
   }, []);
 
   // Initialize viewMode from localStorage
