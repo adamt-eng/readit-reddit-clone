@@ -5,7 +5,9 @@ import {
   createPost,
   searchPosts,
   getPostsByUser,
-  getPostById
+  getPostById,
+  upvotePost,
+  downvotePost
 } from "../Controllers/PostController.js";
 
 import { 
@@ -19,7 +21,7 @@ const router = express.Router();
    COMMUNITY & CREATE POST APIs
 ------------------------------ */
 
-// Used by CreatePost page (dropdown)
+// Communities dropdown for CreatePost page
 router.get("/communities", getPostableCommunities);
 
 // Create a new post (TEMP no auth)
@@ -38,6 +40,16 @@ router.get("/:postId/comments", getCommentsForPost);
 
 
 /* -----------------------------
+        POST VOTING
+------------------------------ */
+
+// Upvote a post
+router.post("/:postId/upvote", upvotePost);
+// Downvote a post
+router.post("/:postId/downvote", downvotePost);
+
+
+/* -----------------------------
        SEARCH & USER POSTS
 ------------------------------ */
 
@@ -51,7 +63,7 @@ router.get("/user/:userId", getPostsByUser);
        SINGLE POST DETAILS
 ------------------------------ */
 
-// Must be last!
+// Must stay last!
 router.get("/:postId", getPostById);
 
 export default router;
