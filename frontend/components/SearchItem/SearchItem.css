@@ -123,3 +123,46 @@
   color: #7c7c7c;
   font-size: 13px;
 }
+
+
+/* ========================================= */
+/*           DARK MODE OVERRIDES             */
+/* ========================================= */
+
+.appdark-mode .su-handle,
+.appdark-mode .sp-meta,
+.appdark-mode .sp-sub,
+.appdark-mode .sc-members {
+  color: var(--muted); /* softer gray */
+}
+
+.appdark-mode .su-name,
+.appdark-mode .sc-title,
+.appdark-mode .sp-title,
+.appdark-mode .sp-container {
+  color: var(--text);
+}
+
+/* Post thumbnail */
+.appdark-mode .sp-thumb {
+  filter: brightness(0.85);
+}
+
+/* Generic containers */
+.appdark-mode .sc-container:hover,
+.appdark-mode .info:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+/* Prevent inherited dark-link blue */
+.appdark-mode .info,
+.appdark-mode .sc-container {
+  color: var(--text);
+}
+
+/* Avatar borders (if any appear visually too bright) */
+.appdark-mode .su-avatar,
+.appdark-mode .sc-icon,
+.appdark-mode .sp-icon {
+  background: #2a2a2a;
+}
