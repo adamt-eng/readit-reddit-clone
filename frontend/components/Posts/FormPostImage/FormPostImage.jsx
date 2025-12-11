@@ -1,12 +1,15 @@
 import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./FormPostImage.css";
 
 const MAX_TITLE_LENGTH = 300;
 
-export default function FormPostImage() {
+export default function FormPostImage({ selectedCommunity, userId }) {
   const [title, setTitle] = useState("");
   const [image, setImage] = useState(null);
   const fileInputRef = useRef(null);
+
+  const navigate = useNavigate();
 
   const handleFileDrop = (e) => {
     e.preventDefault();
@@ -21,8 +24,30 @@ export default function FormPostImage() {
     e.preventDefault();
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!selectedCommunity || !title.trim() || !image) return;
+
+    const formData = new FormData();
+    formData.append("file", image);
+    formData.append("title", title);
+    formData.append("communityId", selectedCommunity._id);
+    formData.append("userId", userId);
+
+    const res = await fetch("http://localhost:5000/upload/image-post", {
+      method: "POST",
+      body: formData
+    });
+
+    const newPost = await res.json();
+
+    // redirect
+    navigate(`/posts/${newPost._id}`);
+  };
+
   return (
-    <form className="form-image" autoComplete="off">
+    <form className="form-image" onSubmit={handleSubmit} autoComplete="off">
       <div className="input-wrap">
         <input
           className="input"
@@ -36,24 +61,15 @@ export default function FormPostImage() {
         <span className="input-required">*</span>
         <span className="title-count">{title.length}/{MAX_TITLE_LENGTH}</span>
       </div>
+
       <div
         className="dropzone"
         onClick={() => fileInputRef.current?.click()}
         onDrop={handleFileDrop}
         onDragOver={handleDragOver}
       >
-        <span className="dropzone-text">
-          Drag and Drop or upload media{" "}
-          <span className="dropzone-icon" role="img" aria-label="upload">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="9.5" stroke="#D7DADC"/>
-              <path d="M12 8v6m0 0l2.5-2.5M12 14l-2.5-2.5" stroke="#878A8C" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-          </span>
-        </span>
-        {image && (
-          <div className="image-preview">{image.name}</div>
-        )}
+        <span className="dropzone-text">Drag and Drop or upload media</span>
+        {image && <div className="image-preview">{image.name}</div>}
         <input
           type="file"
           accept="image/*,video/*"
@@ -62,15 +78,9 @@ export default function FormPostImage() {
           onChange={handleFileChange}
         />
       </div>
+
       <div className="btn-row">
-        <button className="btn" type="button" disabled>
-          Save Draft
-        </button>
-        <button
-          className="btn primary"
-          type="submit"
-          disabled={!title.trim() || !image}
-        >
+        <button className="btn primary" type="submit" disabled={!title.trim() || !image}>
           Post
         </button>
       </div>
