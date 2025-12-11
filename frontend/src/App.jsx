@@ -29,6 +29,32 @@ function App() {
     karma: 1247,
   };
 
+/*   // Try to load a real user from the backend for local testing
+  // for DM testing -- adam
+  // DMS WILL ONLY WORK EITHER WITH THIS OR WITH AUTH!!!!!!!!!
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const res = await axios.get(
+          "http://localhost:5000/users/search?q=a&page=1&limit=1"
+        );
+        const users = res.data && res.data.results ? res.data.results : [];
+        if (users.length) {
+          setCurrentUser(users[0]);
+          setIsLoggedIn(true);
+        } else {
+          setCurrentUser(mockUser);
+        }
+      } catch (err) {
+        console.error("Failed to load user from backend, falling back to mock:", err);
+        setCurrentUser(mockUser);
+      }
+    }
+
+    loadUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); */
+
   useLayoutEffect(() => {
     const savedDarkMode = localStorage.getItem("darkMode");
     const isDark = savedDarkMode === "true";
@@ -81,6 +107,7 @@ function App() {
         onLogout={handleLogout}
         onLogin={handleLogin}
         isLoggedIn={isLoggedIn}
+        currentUser={currentUser}
       />
 
       {/* Auth Modal */}
