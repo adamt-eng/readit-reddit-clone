@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import LeftSidebar from "../../LeftSidebar/LeftSidebar";
 import PostTabs from "../PostTabs/PostTabs";
 import FormPostText from "../FormPostText/FormPostText";
@@ -10,18 +10,22 @@ import "./CreatePost.css";
 export default function CreatePost({ isDark }) {
   const [activeTab, setActiveTab] = useState("post");
 
-  // NEW state
   const [communities, setCommunities] = useState([]);
   const [selectedCommunity, setSelectedCommunity] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
 
-  // Fetch communities on mount
+  const dropdownRef = useRef(null);
+
+  // TEMP USER
+  const TEMP_USER_ID = "6938a02cea96c570c169d837";
+
+  // Fetch communities
   useEffect(() => {
     const fetchCommunities = async () => {
       try {
-        const res = await fetch("http://localhost:5000/posts/communities", {
-          credentials: "include"
-        });
+        const res = await fetch(
+          `http://localhost:5000/posts/communities?userId=${TEMP_USER_ID}`
+        );
         const data = await res.json();
         setCommunities(data);
       } catch (err) {
@@ -32,84 +36,111 @@ export default function CreatePost({ isDark }) {
     fetchCommunities();
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
+
   return (
     <div className={`createpost-page-wrapper ${isDark ? "dark" : ""}`}>
-      {/* Sidebar */}
       <LeftSidebar />
 
-      {/* Main content area */}
       <div className="createpost-page">
         <div className="create-post-wrapper">
           <div className="create-post-container">
+
             {/* Header */}
             <div className="create-post-header">
               <div className="create-post-title">Create post</div>
               <div className="drafts-link">Drafts</div>
             </div>
 
-            {/* Community selector */}
-            <div className="create-post-controls">
+            {/* Community Selector */}
+            <div className="create-post-controls" ref={dropdownRef}>
               <button
                 className="community-selector"
-                onClick={() => setShowDropdown(!showDropdown)}
                 type="button"
+                onClick={() => setShowDropdown((prev) => !prev)}
               >
                 <span className="community-avatar" />
-                <span>
+                <span className="community-selector-text">
                   {selectedCommunity
                     ? selectedCommunity.name
                     : "Select a community"}
                 </span>
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 18 18"
-                  className="dropdown-icon"
-                >
-                  <path
-                    d="M5 7l4 4 4-4"
-                    stroke="#878A8C"
-                    strokeWidth="2"
-                    fill="none"
-                  />
-                </svg>
+                <span className={`dropdown-arrow ${showDropdown ? "open" : ""}`}>
+                  ▾
+                </span>
               </button>
-            </div>
 
-            {/* Simple dropdown list */}
-            {showDropdown && (
-              <div style={{ marginBottom: "12px" }}>
-                {communities.map((c) => (
-                  <div
-                    key={c._id}
-                    style={{
-                      cursor: "pointer",
-                      padding: "6px 8px"
-                    }}
-                    onClick={() => {
-                      setSelectedCommunity(c);
-                      setShowDropdown(false);
-                    }}
-                  >
-                    {c.name}
-                  </div>
-                ))}
-              </div>
-            )}
+              {showDropdown && (
+                <div className="community-dropdown">
+                  {communities.length === 0 && (
+                    <div className="community-empty">
+                      No communities available
+                    </div>
+                  )}
+
+                  {communities.map((c) => {
+                    const isSelected = selectedCommunity?._id === c._id;
+
+                    return (
+                      <div
+                        key={c._id}
+                        className={`community-option ${
+                          isSelected ? "selected" : ""
+                        }`}
+                        onClick={() => {
+                          setSelectedCommunity(c);
+                          setShowDropdown(false);
+                        }}
+                      >
+                        <span className="community-avatar small" />
+                        <div className="community-text">
+                          <div className="community-name">{c.name}</div>
+                          {c.title && (
+                            <div className="community-title">{c.title}</div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
             {/* Tabs */}
             <PostTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
             {/* Tab content */}
             {activeTab === "post" && (
-              <FormPostText selectedCommunity={selectedCommunity} />
+              <FormPostText
+                selectedCommunity={selectedCommunity}
+                userId={TEMP_USER_ID}
+              />
             )}
+
             {activeTab === "image" && (
-              <FormPostImage selectedCommunity={selectedCommunity} />
+              <FormPostImage
+                selectedCommunity={selectedCommunity}
+                userId={TEMP_USER_ID}
+              />
             )}
+
             {activeTab === "link" && (
-              <FormPostLink selectedCommunity={selectedCommunity} />
+              <FormPostLink
+                selectedCommunity={selectedCommunity}
+                userId={TEMP_USER_ID}
+              />
             )}
+
           </div>
         </div>
 

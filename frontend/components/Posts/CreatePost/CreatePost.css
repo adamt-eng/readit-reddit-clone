@@ -4,8 +4,8 @@
 .createpost-page-wrapper {
   display: flex;
   width: 100%;
-  min-height: 100vh;       /* full viewport height */
-  background-color: #f6f7f8; /* light mode background */
+  min-height: 100vh;
+  background-color: #f6f7f8;
 }
 
 .createpost-page-wrapper.dark {
@@ -13,7 +13,9 @@
   color: #d7dadc;
 }
 
-/* Sidebar */
+/* ================================
+   SIDEBAR
+================================ */
 .left-sidebar {
   width: 260px;
   flex-shrink: 0;
@@ -30,33 +32,34 @@
   border-right: 1px solid #343536;
 }
 
-/* Main content area */
+/* ================================
+   MAIN CONTENT
+================================ */
 .createpost-page {
   flex: 1;
   display: flex;
   justify-content: center;
-  align-items: flex-start;  /* align to top */
+  align-items: flex-start;
   padding: 24px 16px;
   gap: 24px;
 }
 
 /* ================================
-   CREATE POST WRAPPER & CARD
+   CREATE POST CARD
 ================================ */
 .create-post-wrapper {
   display: flex;
-  justify-content: center;      /* horizontal centering */
   flex-direction: column;
   align-items: center;
   width: 100%;
   max-width: 740px;
-  margin-top: 50px;             /* push card up */
+  margin-top: 50px;
 }
 
 .create-post-container {
   width: 100%;
-  background: #ffffff;
   padding: 24px;
+  background: #ffffff;
   border-radius: 12px;
   border: 1px solid #edeff1;
   box-shadow: 0 2px 4px rgba(44, 56, 74, 0.05);
@@ -67,7 +70,9 @@
   border-color: #343536;
 }
 
-/* Header */
+/* ================================
+   HEADER
+================================ */
 .create-post-header {
   display: flex;
   justify-content: space-between;
@@ -85,32 +90,34 @@
 }
 
 .drafts-link {
-  color: #878a8c;
   font-weight: 500;
   cursor: pointer;
+  color: #878a8c;
 }
 
 .dark .drafts-link {
   color: #818384;
 }
 
-/* Community selector */
+/* ================================
+   COMMUNITY SELECTOR
+================================ */
 .create-post-controls {
-  margin: 18px 0 10px 0;
-  display: flex;
-  gap: 12px;
+  position: relative;
+  margin: 18px 0 10px;
 }
 
 .community-selector {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 14px;
   background: #f6f7f8;
   border-radius: 9999px;
   border: 1px solid #edeff1;
-  color: #1a1a1b;
   cursor: pointer;
+  color: #1a1a1b;
 }
 
 .dark .community-selector {
@@ -126,16 +133,107 @@
   background: #ccc;
 }
 
+.community-avatar.small {
+  width: 24px;
+  height: 24px;
+}
+
 .dark .community-avatar {
   background: #505050;
 }
 
-.dropdown-icon {
-  margin-left: 6px;
+.community-selector-text {
+  flex: 1;
+  text-align: left;
+}
+
+.dropdown-arrow {
+  font-size: 0.8rem;
+  transition: transform 0.15s ease;
+}
+
+.dropdown-arrow.open {
+  transform: rotate(180deg);
 }
 
 /* ================================
-   DARK MODE — INPUTS, BUTTONS, SVG
+   COMMUNITY DROPDOWN
+================================ */
+.community-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 100%;
+  max-height: 280px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #edeff1;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 20;
+  animation: dropdownFade 0.15s ease-out;
+}
+
+.dark .community-dropdown {
+  background: #1a1a1b;
+  border-color: #343536;
+}
+
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.community-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.community-option:hover {
+  background: #f6f7f8;
+}
+
+.dark .community-option:hover {
+  background: #272729;
+}
+
+.community-option.selected {
+  background: rgba(0, 121, 211, 0.12);
+}
+
+.community-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.community-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.community-title {
+  font-size: 0.8rem;
+  color: #878a8c;
+}
+
+.community-empty {
+  padding: 16px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #878a8c;
+}
+
+/* ================================
+   DARK MODE INPUTS
 ================================ */
 .dark input,
 .dark textarea,
@@ -145,26 +243,21 @@
   color: #d7dadc;
 }
 
+.dark .input-wrap,
+.dark .textarea-wrap {
+  background: #272729;
+  border-color: #343536;
+  color: #d7dadc;
+}
+
 .dark svg path {
   stroke: #d7dadc;
 }
-.dark .input-wrap {
-  background-color: #272729;
-  color: #d7dadc;
-  border-color: #343536;
-}
-.dark .textarea-wrap{
-  background-color: #272729;
-  color: #d7dadc;
-  border-color: #343536;
-}
-
 
 /* ================================
-   ASIDE (if needed)
+   ASIDE
 ================================ */
 .createpost-aside {
-  flex-shrink: 0;
   width: 260px;
+  flex-shrink: 0;
 }
-
