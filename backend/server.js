@@ -15,6 +15,7 @@ import UploadRouter from "./Routers/UploadRouter.js";
 import AiSummaryRouter from "./Routers/AiSummaryRouter.js";
 import NotificationRouter from './Routers/NotificationRouter.js';
 import CommentRouter from './Routers/CommentRouter.js';
+// import DMRouter from "./Routers/DMRouter.js";
 
 dotenv.config();
 const app = express();
@@ -94,6 +95,9 @@ io.on("connection", (socket) => {
     }
   });
 });
+
+
+// app.use('/dm', DMRouter({ io, onlineUsers }));
 
 
 /* ------------ START SERVER ------------ */
