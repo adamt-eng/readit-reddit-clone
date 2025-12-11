@@ -1,9 +1,13 @@
+// Routers/UserRouter.js
 import express from 'express';
-import {getUserById} from '../Controllers/UserController.js'
+import { getUserById, searchUsers } from '../Controllers/UserController.js';
 
 const router = express.Router();
 
-router.get('/:id', getUserById);
+// /users/search?q=...
+router.get('/search', searchUsers);
 
+// /users/:id
+router.get('/:id', getUserById);
 
 export default router;
