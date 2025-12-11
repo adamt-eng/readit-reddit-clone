@@ -168,7 +168,7 @@ export default function AppRoutes({
           path="/messages"
           element={
             isLoggedIn ? (
-              <DirectMessages darkMode={darkMode} />
+              <DirectMessages darkMode={darkMode} currentUser={currentUser} />
             ) : (
               // Show guest home with login prompt
               <GuestHomePage 
