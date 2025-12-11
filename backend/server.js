@@ -9,9 +9,11 @@ import CommunityRouter from "./Routers/CommunityRouter.js";
 import UserRouter from "./Routers/UserRouter.js";
 import PostRouter from "./Routers/PostRouter.js";
 import SearchRouter from "./Routers/SearchRouter.js"
+import UploadRouter from "./Routers/UploadRouter.js";
 
 dotenv.config();
 const app = express();
+app.use("/uploads", express.static("uploads"));
 const PORT = process.env.PORT || 5000;
 
 app.use(cookieParser());
@@ -36,6 +38,9 @@ app.use('/posts', PostRouter);
 //app.use('/comments', CommentRouter);
 app.use('/communities', CommunityRouter);
 app.use('/search',SearchRouter)
+app.use("/upload", UploadRouter);
+
+
 //app.use('/votes', VoteRouter);
 //app.use('/memberships', MembershipRouter);
 //app.use('/notifications', NotificationRouter);
