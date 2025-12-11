@@ -18,7 +18,7 @@ export const getUserById = async (req, res) => {
         .json({ message: "Invalid user ID format", rawId });
     }
 
-    const user = await User.findById(userId).select("-passwordHash -__v");
+    const user = await User.findById(userId).select("-password -passwordHash -__v");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -51,7 +51,7 @@ export const searchUsers = async (req, res) => {
     const total = await User.countDocuments(query);
 
     const users = await User.find(query)
-      .select("-passwordHash -__v")   // hide password hash
+      .select("-password -passwordHash -__v")   // hide password hash
       .skip((page - 1) * limit)
       .limit(limit);
 
