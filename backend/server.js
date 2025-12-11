@@ -13,7 +13,8 @@ import PostRouter from "./Routers/PostRouter.js";
 import SearchRouter from "./Routers/SearchRouter.js"
 import UploadRouter from "./Routers/UploadRouter.js";
 import AiSummaryRouter from "./Routers/AiSummaryRouter.js";
-import NotificationRouter from './Routers/NotificationRouter.js'
+import NotificationRouter from './Routers/NotificationRouter.js';
+import CommentRouter from './Routers/CommentRouter.js';
 
 dotenv.config();
 const app = express();
@@ -46,6 +47,7 @@ app.use('/notifications',NotificationRouter);
 app.use('/search', SearchRouter);
 app.use("/upload", UploadRouter);
 app.use('/ai-summary', AiSummaryRouter);
+app.use('/comments', CommentRouter);
 
 /* ------------ MONGO CONNECTION ------------ */
 
