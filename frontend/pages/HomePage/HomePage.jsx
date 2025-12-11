@@ -5,7 +5,7 @@ import TrendingPosts from "../../components/Posts/TrendingPosts/TrendingPosts";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 import RecentPosts from "../../components/Posts/RecentPosts/RecentPosts";
 
-const HomePage = ({  onLogout, darkMode, onStartCommunity }) => {
+const HomePage = ({ user, onLogout, darkMode, onStartCommunity }) => {
   // Initialize viewMode from localStorage
   const [viewMode, setViewMode] = useState(() => {
     try {

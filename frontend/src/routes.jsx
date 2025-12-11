@@ -16,6 +16,7 @@ import CommunityPage from "../pages/CommunityPage/CommunityPage.jsx"
 export default function AppRoutes({
   darkMode,
   toggleDarkMode,
+  currentUser,
   onLogout,
   onLogin,
   isLoggedIn,
@@ -34,6 +35,7 @@ export default function AppRoutes({
           element={
             isLoggedIn ? (
               <HomePage
+                user={currentUser}
                 onLogout={onLogout}
                 darkMode={darkMode}
                 onStartCommunity={openCommunityModal}
@@ -59,6 +61,7 @@ export default function AppRoutes({
             ) : (
               // Redirect to home if already logged in
               <HomePage
+                user={currentUser}
                 onLogout={onLogout}
                 darkMode={darkMode}
                 onStartCommunity={openCommunityModal}
@@ -75,6 +78,7 @@ export default function AppRoutes({
               <UserProfilePage
                 isDark={darkMode}
                 toggleDarkMode={toggleDarkMode}
+                currentUser={currentUser}
               />
             ) : (
               // Show guest home with login prompt
@@ -111,6 +115,7 @@ export default function AppRoutes({
               <EditProfilePage
                 isDark={darkMode}
                 toggleDarkMode={toggleDarkMode}
+                currentUser={currentUser}
               />
             ) : (
               // Show guest home with login prompt
@@ -130,6 +135,7 @@ export default function AppRoutes({
               <CreatePost
                 isDark={darkMode}
                 toggleDarkMode={toggleDarkMode}
+                currentUser={currentUser}
               />
             ) : (
               // Show guest home with login prompt
@@ -166,6 +172,7 @@ export default function AppRoutes({
             ) : (
               // Redirect to home if already logged in
               <HomePage
+                user={currentUser}
                 onLogout={onLogout}
                 darkMode={darkMode}
                 onStartCommunity={openCommunityModal}
@@ -182,6 +189,7 @@ export default function AppRoutes({
             ) : (
               // Redirect to home if already logged in
               <HomePage
+                user={currentUser}
                 onLogout={onLogout}
                 darkMode={darkMode}
                 onStartCommunity={openCommunityModal}
