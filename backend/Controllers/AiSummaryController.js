@@ -5,7 +5,7 @@ import { InferenceClient } from "@huggingface/inference";
 
 const { Types } = mongoose;
 
-const hfToken = process.env.HF_TOKEN;
+const hfToken = process.env.HF_TOKEN ?? "nooooooooo";
 if (!hfToken) throw new Error("HF_TOKEN is required");
 
 const hfClient = new InferenceClient(hfToken);
