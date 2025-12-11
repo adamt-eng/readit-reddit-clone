@@ -196,3 +196,32 @@ export const deleteAllNotifications = async (req, res) => {
     res.status(500).json({ message: "Failed to delete all notifications" });
   }
 };
+
+// -----------------------------
+// GET /notifications/unread-count
+// Returns unread notifications count (only last 1 month)
+// -----------------------------
+export const getUnreadCount = async (req, res) => {
+  try {
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+    // 1) Remove old notifications
+    await Notification.deleteMany({
+      userId: req.user.id, // change to auth
+      createdAt: { $lt: oneMonthAgo }
+    });
+
+    // 2) Count unread notifications from last month
+    const unreadCount = await Notification.countDocuments({
+      userId: req.user.id, // change to auth
+      isRead: false,
+      createdAt: { $gte: oneMonthAgo }
+    });
+
+    res.status(200).json({ unreadCount });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to get unread count" });
+  }
+};
