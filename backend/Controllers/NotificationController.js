@@ -99,13 +99,13 @@ export const getNotifications = async (req, res) => {
 
     // 1) Delete notifications older than 1 month
     await Notification.deleteMany({
-      userId: req.params.id,
+      userId: req.params.id,   //changetoauth
       createdAt: { $lt: oneMonthAgo}
     });
 
     // 2) Return only notifications from the past month
     const notifications = await Notification.find({
-      userId: req.user.id,
+      userId: req.params.id, //changetoauth
       createdAt: { $gte: oneMonthAgo }
     }).sort({ createdAt: -1 });
 
