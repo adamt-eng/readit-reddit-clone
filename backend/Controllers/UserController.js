@@ -31,7 +31,7 @@ export async function searchUsers(req, res) {
     const total = await User.countDocuments(query);
 
     const users = await User.find(query)
-      .select("username avatarUrl karma")
+      .select("-password")
       .skip((page - 1) * limit)
       .limit(Number(limit));
 

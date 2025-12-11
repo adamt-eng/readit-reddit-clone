@@ -11,6 +11,7 @@ import CreateCommunityModal from "../components/Community/CreateCommunityModal/C
 import Login from "../pages/Authentication/Login.jsx";
 import Signup from "../pages/Authentication/Signup.jsx";
 import SearchResults from "../pages/SearchResults/SearchResults.jsx"
+import CommunityPage from "../pages/CommunityPage/CommunityPage.jsx"
 
 export default function AppRoutes({
   darkMode,
@@ -78,6 +79,23 @@ export default function AppRoutes({
                 isDark={darkMode}
                 toggleDarkMode={toggleDarkMode}
                 currentUser={currentUser}
+              />
+            ) : (
+              // Show guest home with login prompt
+              <GuestHomePage 
+                onLogin={onLogin} 
+                darkMode={darkMode} 
+              />
+            )
+          }
+        />
+
+        {/* User profile - protected route */}
+        <Route
+          path="/community/:communityName"
+          element={
+            isLoggedIn ? (
+              <CommunityPage
               />
             ) : (
               // Show guest home with login prompt
@@ -193,17 +211,7 @@ export default function AppRoutes({
             )
         }></Route>
       </Routes>
-    
-
-      {/* Community Modal */}
-      {showCommunityModal && (
-        <CreateCommunityModal 
-          onClose={closeCommunityModal}  
-          darkMode={darkMode}
-          isLoggedIn={isLoggedIn}
-          onLogin={onLogin}
-        />
-      )}
+  
     </>
   );
 }

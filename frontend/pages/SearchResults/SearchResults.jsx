@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+
 import axios from "axios";
 
 import "./SearchResults.css";
@@ -11,8 +13,8 @@ const API_URL = "http://localhost:5000";
 
 export default function SearchResults() {
   const [activeTab, setActiveTab] = useState("Posts");
-  const [sortBy, setSortBy] = useState("relevance"); // relevance | newest | oldest
-  const [timeFilter, setTimeFilter] = useState("all"); // all | 24h | 7d | 30d
+  const [sortBy, setSortBy] = useState("relevance");
+  const [timeFilter, setTimeFilter] = useState("all");
 
   const [searchResults, setSearchResults] = useState({
     posts: [],
@@ -20,14 +22,19 @@ export default function SearchResults() {
     communities: []
   });
 
-  const [topCommunities, setTopCommunities] = useState([]);
+  // store total for each type
+  const [totalCount, setTotalCount] = useState({
+    posts: 0,
+    users: 0,
+    communities: 0
+  });
 
+  const [topCommunities, setTopCommunities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // ---------- PAGINATION ----------
+  // pagination
   const [page, setPage] = useState(1);
   const limit = 20;
-  const [total, setTotal] = useState(0);
 
   const [params] = useSearchParams();
   const navigate = useNavigate();
@@ -37,8 +44,13 @@ export default function SearchResults() {
 
   const q = query.trim().toLowerCase();
 
+  // determine key
+  const tabKey = (tab) => (tab === "People" ? "users" : tab.toLowerCase());
+  const typeMap = { Posts: "post", Communities: "community", People: "user" };
+  const list = searchResults[tabKey(activeTab)];
 
-  // ---------- FETCH TOP COMMUNITIES (STATIC) ----------
+
+  // ---------- FETCH TOP COMMUNITIES ----------
   useEffect(() => {
     async function fetchTopComms() {
       try {
@@ -48,7 +60,6 @@ export default function SearchResults() {
         console.error("Top communities load error:", err);
       }
     }
-
     fetchTopComms();
   }, []);
 
@@ -73,14 +84,19 @@ export default function SearchResults() {
           })
         ]);
 
+        // update results
         setSearchResults({
           posts: postsRes.data.results || [],
           users: usersRes.data.results || [],
           communities: communitiesRes.data.results || []
         });
 
-        // Only posts return meaningful total (like Reddit)
-        setTotal(postsRes.data.total || 0);
+        // update total counts
+        setTotalCount({
+          posts: postsRes.data.total || 0,
+          users: usersRes.data.total || 0,
+          communities: communitiesRes.data.total || 0
+        });
 
       } catch (err) {
         console.error("Search error:", err);
@@ -93,12 +109,6 @@ export default function SearchResults() {
   }, [q, page, sortBy, timeFilter]);
 
 
-  // ---------- SELECT LIST ----------
-  const tabKey = (tab) => (tab === "People" ? "users" : tab.toLowerCase());
-  const typeMap = { Posts: "post", Communities: "community", People: "user" };
-  const list = searchResults[tabKey(activeTab)];
-
-
   return (
     <div className="sr-layout">
 
@@ -107,6 +117,7 @@ export default function SearchResults() {
       </div>
 
       <div className="sr-wrapper">
+
         {/* ---------- TABS + FILTER CONTROLS ---------- */}
         <div className="sr-tabs">
           {["Posts", "Communities", "People"].map((tab) => (
@@ -119,13 +130,15 @@ export default function SearchResults() {
               }}
             >
               {tab}
-              <span className="sr-tab-count">{list?.length ?? 0}</span>
+              <span className="sr-tab-count">
+                {totalCount[tabKey(tab)]}
+              </span>
             </button>
           ))}
 
           <div className="sr-flex-spacer" />
 
-          {/* SORT POSTS ONLY */}
+          {/* SORT (posts only) */}
           <select
             disabled={activeTab !== "Posts"}
             className="sr-sort-box"
@@ -140,7 +153,7 @@ export default function SearchResults() {
             <option value="oldest">Oldest</option>
           </select>
 
-          {/* TIME FILTER ONLY FOR POSTS */}
+          {/* TIME FILTER (posts only) */}
           <select
             disabled={activeTab !== "Posts"}
             className="sr-sort-box"
@@ -159,48 +172,51 @@ export default function SearchResults() {
 
         {/* ---------- RESULTS + SIDEBAR ---------- */}
         <div className="sr-content-container">
+
           <div className="sr-left-column">
-            <div className="sr-results-scroll">
 
-              {/* LOADING */}
-              {isLoading ? (
-                <div className="sr-loading">
-                  <div className="sr-spinner"></div>
-                  <span>Searching...</span>
+          {/* SCROLL AREA */}
+          <div className="sr-results-scroll">
+            {isLoading ? (
+              <div className="sr-loading">
+                <div className="sr-spinner"></div>
+                <span>Searching...</span>
+              </div>
+            ) : list?.length ? (
+              list.map((item) => (
+                <div className="sr-result-card" key={item._id || item.id}>
+                  <SearchItem type={typeMap[activeTab]} data={item} />
                 </div>
-              ) : list?.length ? (
-                list.map((item) => (
-                  <div className="sr-result-card" key={item._id || item.id}>
-                    <SearchItem type={typeMap[activeTab]} data={item} />
-                  </div>
-                ))
-              ) : (
-                <div className="sr-empty">No results found.</div>
-              )}
-
-              {/* ---------- PAGINATION (POSTS ONLY) ---------- */}
-              {activeTab === "Posts" && !isLoading && (
-                <div className="sr-pagination">
-                  <button
-                    disabled={page === 1}
-                    onClick={() => setPage(page - 1)}
-                  >
-                    Previous
-                  </button>
-
-                  <span>Page {page}</span>
-
-                  <button
-                    disabled={page * limit >= total}
-                    onClick={() => setPage(page + 1)}
-                  >
-                    Next
-                  </button>
-                </div>
-              )}
-
-            </div>
+              ))
+            ) : (
+              <div className="sr-empty">No results found.</div>
+            )}
           </div>
+
+          {/* FIXED PAGINATION BAR */}
+          {!isLoading && (
+            <div className="sr-pagination-fixed">
+              <FiChevronLeft
+                className={`sr-page-arrow ${page === 1 ? "disabled" : ""}`}
+                onClick={() => page > 1 && setPage(page - 1)}
+              />
+
+              <span className="sr-page-number">{page}</span>
+
+              <FiChevronRight
+                className={`sr-page-arrow ${
+                  page * limit >= totalCount[tabKey(activeTab)] ? "disabled" : ""
+                }`}
+                onClick={() =>
+                  page * limit < totalCount[tabKey(activeTab)] && setPage(page + 1)
+                }
+              />
+            </div>
+          )}
+
+          </div>
+
+
 
           {/* ---------- RIGHT SIDEBAR ---------- */}
           <div className="sr-right-column">
@@ -219,7 +235,9 @@ export default function SearchResults() {
                     alt={`${c.name} avatar`}
                   />
                   <div>
-                    <div className="sr-side-title">r/{c.name}</div>
+                    <div className="sr-side-title">
+                      {c.name.startsWith("r/") ? c.name : "r/" + c.name}
+                    </div>
                     <div className="sr-side-count">
                       {Number(c.memberCount || 0).toLocaleString()} members
                     </div>

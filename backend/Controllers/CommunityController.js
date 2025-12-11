@@ -135,7 +135,6 @@ export async function searchCommunities(req, res) {
     const total = await Community.countDocuments(query);
 
     const communities = await Community.find(query)
-      .select("name title description memberCount iconUrl")
       .skip((page - 1) * limit)
       .limit(Number(limit));
 

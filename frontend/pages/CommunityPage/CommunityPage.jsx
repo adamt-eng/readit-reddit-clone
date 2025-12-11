@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import "./CommunityPage.css";
 import { useParams } from "react-router-dom";
 
-import CommunityHeader from "../../components/CommunityHeader/CommunityHeader.jsx";
+import CommunityHeader from "../../components/Community/CommunityHeader/CommunityHeader.jsx";
 import SortBar from "../../components/SortBar/SortBar.jsx";
-import PostList from "../../components/PostList/PostList.jsx";
-import CommunitySidebar from "../../components/CommunitySidebar/CommunitySidebar.jsx";
+import PostList from "../../components/Posts/PostList/PostList.jsx";
+import CommunitySidebar from "../../components/Community/CommunitySideBar/CommunitySidebar.jsx";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar.jsx";
-import CreateCommunityModal from "../../components/CreateCommunityModal/CreateCommunityModal.jsx";
+import CreateCommunityModal from "../../components/Community/CreateCommunityModal/CreateCommunityModal.jsx";
 
 function CommunityPage() {
   const { name } = useParams();

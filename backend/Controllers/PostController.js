@@ -117,7 +117,7 @@ export async function searchPosts(req, res) {
       .limit(limit);
 
     const formatted = posts.map((p) => ({
-      id: p._id,
+      _id: p._id,
       title: p.title,
       content: p.content,
       communityName: p.communityId?.name || "",

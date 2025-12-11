@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import "./SearchItem.css";
 
 function formatTimeAgo(dateString) {
@@ -23,10 +24,13 @@ function formatTimeAgo(dateString) {
 
 export default function SearchItem({ type, data }) {
 
-  // ---------- COMMUNITY ----------
+  /** -----------------------------------------------------
+   * COMMUNITY RESULT
+   * navigates to: /community/:id
+   * ----------------------------------------------------- */
   if (type === "community") {
     return (
-      <div className="sc-container">
+      <Link to={`/community/${data.name}`} className="sc-container">
         <img
           src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(data.name)}`}
           alt="community icon"
@@ -34,21 +38,26 @@ export default function SearchItem({ type, data }) {
         />
 
         <div className="sc-info">
-          <div className="sc-title">r/{data.name}</div>
+          <div className="sc-title">
+            {data.name.startsWith("r/") ? data.name : "r/" + data.name}
+          </div>
           <div className="sc-members">
             {(data.memberCount ?? 0).toLocaleString()} members
           </div>
         </div>
-      </div>
+      </Link>
     );
   }
 
-  // ---------- POST ----------
+  /** -----------------------------------------------------
+   * POST RESULT
+   * navigates to: /post/:id
+   * ----------------------------------------------------- */
   if (type === "post") {
     const timeAgo = formatTimeAgo(data.createdAt);
 
     return (
-      <div className="sp-container">
+      <Link to={`/post/${data._id}`} className="sp-container">
         <div className="sp-left">
           <div className="info">
             <img
@@ -57,7 +66,9 @@ export default function SearchItem({ type, data }) {
               className="sp-icon"
             />
             <div className="sp-meta">
-              r/{data.communityName} • {timeAgo}
+              {data.communityName.startsWith("r/") ? data.communityName : "r/" + data.communityName}
+              {" • "}
+              {timeAgo}
             </div>
           </div>
 
@@ -72,14 +83,17 @@ export default function SearchItem({ type, data }) {
         {data.media?.url && (
           <img className="sp-thumb" src={data.media.url} alt="" />
         )}
-      </div>
+      </Link>
     );
   }
 
-  // ---------- USER ----------
+  /** -----------------------------------------------------
+   * USER RESULT
+   * navigates to: /user/:id
+   * ----------------------------------------------------- */
   if (type === "user") {
     return (
-      <div className="su-container">
+      <Link to={`/user/${data.username}`} className="su-container">
         <img
           className="su-avatar"
           src={data.avatarUrl || `https://api.dicebear.com/7.x/thumbs/svg?seed=${data.username}`}
@@ -90,7 +104,7 @@ export default function SearchItem({ type, data }) {
           <div className="su-name">u/{data.username}</div>
           <div className="su-handle">@{data.username}</div>
         </div>
-      </div>
+      </Link>
     );
   }
 
