@@ -39,7 +39,7 @@ export const createComment = async (req, res) => {
     }
 
     // TEMP — replace with req.user._id when auth is added
-    const userId = "67bbb24fa69019915c7fb2c4";
+    const userId = "6938a02cea96c570c169d837";
 
     const comment = await Comment.create({
       postId,
@@ -54,6 +54,38 @@ export const createComment = async (req, res) => {
     res.status(201).json(comment);
   } catch (err) {
     console.error("Error creating comment:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const replyToComment = async (req, res) => {
+  try {
+    const { commentId } = req.params;
+    const { content } = req.body;
+
+    if (!content || !content.trim()) {
+      return res.status(400).json({ message: "Content is required" });
+    }
+
+    const parent = await Comment.findById(commentId);
+    if (!parent) {
+      return res.status(404).json({ message: "Parent comment not found" });
+    }
+
+    const userId = "6938a02cea96c570c169d837";
+
+    const reply = await Comment.create({
+      postId: parent.postId,
+      parentId: commentId,
+      authorId: userId,
+      content
+    });
+
+    await Post.findByIdAndUpdate(parent.postId, { $inc: { commentCount: 1 } });
+
+    res.status(201).json(reply);
+  } catch (err) {
+    console.error("Error replying to comment:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
