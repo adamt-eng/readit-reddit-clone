@@ -2,7 +2,8 @@ import express from 'express';
 import auth from "../Middleware/AuthMiddleware.js";
 import { 
     replyToComment,
-    upvoteComment
+    upvoteComment,
+    downvoteComment
  } from "../Controllers/CommentController.js";
 
 const router = express.Router();
