@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./FormPostText.css";
 
 const MAX_TITLE_LENGTH = 300;
@@ -7,6 +8,8 @@ export default function FormPostText({ selectedCommunity, userId }) {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleTitleChange = (e) => {
     if (e.target.value.length <= MAX_TITLE_LENGTH) {
@@ -30,7 +33,7 @@ export default function FormPostText({ selectedCommunity, userId }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId,                               // new ID flows in here automatically
+          userId,
           title,
           content: body,
           type: "post",
@@ -44,9 +47,11 @@ export default function FormPostText({ selectedCommunity, userId }) {
         return;
       }
 
-      alert("Post created!");
-      setTitle("");
-      setBody("");
+      const newPost = await res.json();
+
+      // ⭐ REDIRECT TO POST PAGE ⭐
+      navigate(`/posts/${newPost._id}`);
+
     } catch (err) {
       console.error("POST ERROR:", err);
       alert("Something went wrong");
@@ -67,20 +72,13 @@ export default function FormPostText({ selectedCommunity, userId }) {
           onChange={handleTitleChange}
           required
         />
-
         <span className="input-required">*</span>
-
         <span className="title-count">
           {title.length}/{MAX_TITLE_LENGTH}
         </span>
       </div>
 
       <div className="textarea-wrap">
-        <div className="textarea-toolbar">
-          <button type="button" className="toolbar-btn" title="Bold"><b>B</b></button>
-          <button type="button" className="toolbar-btn" title="Italic"><i>I</i></button>
-        </div>
-
         <textarea
           className="textarea"
           placeholder={
@@ -98,7 +96,6 @@ export default function FormPostText({ selectedCommunity, userId }) {
         <button className="btn" type="button" disabled>
           Save Draft
         </button>
-
         <button
           className={`btn primary ${!canPost ? "disabled" : ""}`}
           type="submit"
@@ -107,10 +104,6 @@ export default function FormPostText({ selectedCommunity, userId }) {
           {isSubmitting ? "Posting..." : "Post"}
         </button>
       </div>
-
-      {!selectedCommunity && (
-        <p className="hint-text">You must select a community to post</p>
-      )}
     </form>
   );
 }
