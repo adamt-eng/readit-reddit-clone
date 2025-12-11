@@ -113,3 +113,25 @@ export const upvoteComment = async (req, res) => {
   }
 };
 
+// Downvote a comment
+export const downvoteComment = async (req, res) => {
+  try {
+    const { commentId } = req.params;
+
+    const updated = await Comment.findByIdAndUpdate(
+      commentId,
+      { $inc: { downvoteCount: 1 } },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    res.json(updated);
+  } catch (err) {
+    console.error("Error downvoting comment:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
