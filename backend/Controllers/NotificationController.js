@@ -199,7 +199,7 @@ export const deleteAllNotifications = async (req, res) => {
 
 // -----------------------------
 // GET /notifications/unread-count
-// Returns unread notifications count (only last 1 month)
+// Returns unread notifications count 
 // -----------------------------
 export const getUnreadCount = async (req, res) => {
   try {
@@ -208,13 +208,13 @@ export const getUnreadCount = async (req, res) => {
 
     // 1) Remove old notifications
     await Notification.deleteMany({
-      userId: req.user.id, // change to auth
+      userId: req.params.id, // change to auth
       createdAt: { $lt: oneMonthAgo }
     });
 
     // 2) Count unread notifications from last month
     const unreadCount = await Notification.countDocuments({
-      userId: req.user.id, // change to auth
+      userId: req.params.id, // change to auth
       isRead: false,
       createdAt: { $gte: oneMonthAgo }
     });
