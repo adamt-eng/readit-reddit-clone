@@ -1,140 +1,237 @@
-/* eslint-disable no-unused-vars */
-import React, { useState } from "react";
-import Post from "../Post/Post";
-
-const initialPost = {
-  id: "abc123",
-  community: "TheWeeknd",
-  author: "TheSiriHansYouEnjoy",
-  timeAgo: "4d ago",
-  title: "Name a better 5 song run by Abel I'll wait",
-  text: "Starboy → Party Monster → False Alarm → Reminder → Rockin'",
-  image: "",
-  votes: 640,
-  commentsCount: 3
-};
-
-const initialComments = [
-  {
-    id: "c1",
-    author: "commenter1",
-    body: "Amazing post! That whole album was a masterpiece.",
-    timeAgo: "3d ago",
-    votes: 50,
-    userVote: 0,
-    replies: [
-      {
-        id: "c1r1",
-        author: "anotherUser",
-        body: "Totally agree. The production is insane.",
-        timeAgo: "3d ago",
-        votes: 12,
-        userVote: 0,
-        replies: []
-      }
-    ]
-  },
-  {
-    id: "c2",
-    author: "music_lover_99",
-    body: "House of Balloons trilogy still hits different though.",
-    timeAgo: "2d ago",
-    votes: 28,
-    userVote: 0,
-    replies: []
-  }
-];
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import Post from "../components/Posts/Post/Post.jsx";
 
 export default function PostPage() {
-  const [post, setPost] = useState(initialPost);
-  const [comments, setComments] = useState(initialComments);
+  const { postId } = useParams();
 
-  // ← NEW: Handle post upvote
-  const handleUpvote = (postId) => {
-    setPost(prev => ({ ...prev, votes: prev.votes + 1 }));
-  };
+  const [post, setPost] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // ← NEW: Handle post downvote
-  const handleDownvote = (postId) => {
-    setPost(prev => ({ ...prev, votes: prev.votes - 1 }));
-  };
+  // ---------------------------
+  // Fetch POST + COMMENTS
+  // ---------------------------
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/posts/${postId}`);
+        const data = await res.json();
 
-  // ← NEW: Handle new comment
-  const handleComment = (postId, text) => {
-    const newComment = {
-      id: `c${Date.now()}`,
-      author: "current_user",
-      body: text,
-      timeAgo: "just now",
-      votes: 1,
-      userVote: 0,
-      replies: []
+        // Map backend fields to frontend expected structure
+        setPost({
+          id: data._id,
+          community: data.communityId?.name,
+          author: data.authorId?.username,
+          timeAgo: new Date(data.createdAt).toLocaleDateString(),
+          title: data.title,
+          text: data.content,
+          image: data.media?.url,
+          votes: data.upvoteCount - data.downvoteCount,
+          commentsCount: data.commentCount
+        });
+      } catch (err) {
+        console.error("Error fetching post:", err);
+      }
     };
-    setComments(prev => [...prev, newComment]);
-    setPost(prev => ({ ...prev, commentsCount: prev.commentsCount + 1 }));
-  };
 
-  // ← NEW: Handle comment voting (recursive to support nested replies)
-  const handleVote = (commentId, voteType) => {
-    const updateVote = (comments) => {
-      return comments.map(comment => {
-        if (comment.id === commentId) {
-          const currentVote = comment.userVote || 0;
-          const newVote = currentVote === voteType ? 0 : voteType;
-          return {
-            ...comment,
-            votes: comment.votes - currentVote + newVote,
-            userVote: newVote
-          };
-        }
-        if (comment.replies) {
-          return { ...comment, replies: updateVote(comment.replies) };
-        }
-        return comment;
+    const fetchComments = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/posts/${postId}/comments`);
+        const data = await res.json();
+
+        // Comments already come nested
+        const mapped = mapComments(data);
+        setComments(mapped);
+      } catch (err) {
+        console.error("Error fetching comments:", err);
+      }
+    };
+
+    const mapComments = (arr) =>
+      arr.map((c) => ({
+        id: c._id,
+        author: c.authorId, // replace later when you populate user
+        body: c.content,
+        timeAgo: new Date(c.createdAt).toLocaleDateString(),
+        votes: c.upvoteCount - c.downvoteCount,
+        userVote: 0,
+        replies: mapComments(c.replies || [])
+      }));
+
+    const load = async () => {
+      await fetchPost();
+      await fetchComments();
+      setLoading(false);
+    };
+
+    load();
+  }, [postId]);
+
+  // ---------------------------
+  // Upvote Post
+  // ---------------------------
+  const handleUpvote = async () => {
+    try {
+      await fetch(`http://localhost:5000/posts/${postId}/upvote`, {
+        method: "POST"
       });
-    };
-    setComments(updateVote(comments));
+
+      setPost((prev) => ({
+        ...prev,
+        votes: prev.votes + 1
+      }));
+    } catch (err) {
+      console.error("Error upvoting:", err);
+    }
   };
 
-  // ← NEW: Handle replies (recursive to support nested replies)
-  const handleReply = (commentId, text) => {
-    const addReply = (comments) => {
-      return comments.map(comment => {
-        if (comment.id === commentId) {
-          const newReply = {
-            id: `r${Date.now()}`,
-            author: "current_user",
-            body: text,
-            timeAgo: "just now",
-            votes: 1,
-            userVote: 0,
-            replies: []
-          };
-          return {
-            ...comment,
-            replies: [...(comment.replies || []), newReply]
-          };
-        }
-        if (comment.replies) {
-          return { ...comment, replies: addReply(comment.replies) };
-        }
-        return comment;
+  // ---------------------------
+  // Downvote Post
+  // ---------------------------
+  const handleDownvote = async () => {
+    try {
+      await fetch(`http://localhost:5000/posts/${postId}/downvote`, {
+        method: "POST"
       });
-    };
-    setComments(addReply(comments));
+
+      setPost((prev) => ({
+        ...prev,
+        votes: prev.votes - 1
+      }));
+    } catch (err) {
+      console.error("Error downvoting:", err);
+    }
   };
+
+  // ---------------------------
+  // Create Comment
+  // ---------------------------
+  const handleComment = async (postId, text) => {
+    try {
+      const res = await fetch(`http://localhost:5000/posts/${postId}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: text })
+      });
+
+      const newComment = await res.json();
+
+      // Add to list
+      setComments((prev) => [
+        ...prev,
+        {
+          id: newComment._id,
+          author: newComment.authorId,
+          body: newComment.content,
+          timeAgo: new Date(newComment.createdAt).toLocaleDateString(),
+          votes: 0,
+          userVote: 0,
+          replies: []
+        }
+      ]);
+
+      setPost((prev) => ({
+        ...prev,
+        commentsCount: prev.commentsCount + 1
+      }));
+    } catch (err) {
+      console.error("Error posting comment:", err);
+    }
+  };
+
+  // ---------------------------
+  // Comment voting (recursive)
+  // ---------------------------
+  const handleVoteComment = async (commentId, type) => {
+    try {
+      await fetch(`http://localhost:5000/comments/${commentId}/${type}`, {
+        method: "POST"
+      });
+
+      const updateVotes = (list) =>
+        list.map((c) => {
+          if (c.id === commentId) {
+            const delta = type === "upvote" ? 1 : -1;
+            return { ...c, votes: c.votes + delta };
+          }
+          if (c.replies) {
+            return { ...c, replies: updateVotes(c.replies) };
+          }
+          return c;
+        });
+
+      setComments(updateVotes);
+    } catch (err) {
+      console.error("Error voting comment:", err);
+    }
+  };
+
+  // ---------------------------
+  // Reply to Comment
+  // ---------------------------
+  const handleReply = async (commentId, text) => {
+    try {
+      const res = await fetch(
+        `http://localhost:5000/comments/${commentId}/reply`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: text })
+        }
+      );
+
+      const reply = await res.json();
+
+      const addReply = (arr) =>
+        arr.map((c) => {
+          if (c.id === commentId) {
+            return {
+              ...c,
+              replies: [
+                ...c.replies,
+                {
+                  id: reply._id,
+                  author: reply.authorId,
+                  body: reply.content,
+                  timeAgo: new Date(reply.createdAt).toLocaleDateString(),
+                  votes: 0,
+                  userVote: 0,
+                  replies: []
+                }
+              ]
+            };
+          }
+          if (c.replies) return { ...c, replies: addReply(c.replies) };
+          return c;
+        });
+
+      setComments(addReply);
+      setPost((prev) => ({
+        ...prev,
+        commentsCount: prev.commentsCount + 1
+      }));
+    } catch (err) {
+      console.error("Error replying:", err);
+    }
+  };
+
+  // ---------------------------
+  // LOADING STATE
+  // ---------------------------
+  if (loading || !post) return <div>Loading...</div>;
 
   return (
-    <div>
-      <Post 
-        post={post} 
-        comments={comments}
-        onUpvote={handleUpvote}      
-        onDownvote={handleDownvote}  
-        onComment={handleComment}    
-        onVote={handleVote}          
-        onReply={handleReply}        
-      />
-    </div>
+    <Post
+      post={post}
+      comments={comments}
+      onUpvote={handleUpvote}
+      onDownvote={handleDownvote}
+      onComment={handleComment}
+      onVote={(id, type) =>
+        handleVoteComment(id, type === 1 ? "upvote" : "downvote")
+      }
+      onReply={handleReply}
+    />
   );
 }
