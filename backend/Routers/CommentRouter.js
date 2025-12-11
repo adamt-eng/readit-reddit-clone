@@ -9,5 +9,5 @@ const router = express.Router();
 
 router.post("/:commentId/reply", replyToComment);
 router.post("/:commentId/upvote", upvoteComment);
-
+router.post("/:commentId/downvote", downvoteComment);
 export default router;
