@@ -6,13 +6,15 @@ import {
   markAllAsRead,
   deleteNotification,
   deleteAllNotifications,
+  getUnreadCount,
 } from "../Controllers/NotificationController.js";
+
 
 const router = express.Router();
 
 router.get("/:id",  getNotifications);
 router.get("/unread", getUnreadNotifications);
-
+router.get("/count",getUnreadCount);
 router.patch("/:id/read", markAsRead);
 router.patch("/read-all",  markAllAsRead);
 
