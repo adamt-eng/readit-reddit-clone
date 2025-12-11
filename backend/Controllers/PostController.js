@@ -138,7 +138,6 @@ export async function searchPosts(req, res) {
 }
 
 /* ---------- GET ALL POSTS BY USER (for profile) ---------- */
-/* ---------- GET ALL POSTS BY USER (for profile) ---------- */
 export const getPostsByUser = async (req, res) => {
   try {
     // raw id from URL may contain spaces/newlines
@@ -163,5 +162,24 @@ export const getPostsByUser = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Failed to load user posts" });
+  }
+};
+
+export const getPostById = async (req, res) => {
+  try {
+    const { postId } = req.params;
+
+    const post = await Post.findById(postId)
+      .populate("authorId", "username avatar")
+      .populate("communityId", "name");
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    res.json(post);
+  } catch (err) {
+    console.error("Error fetching post", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
