@@ -4,8 +4,37 @@ import "./HomePage.css";
 import TrendingPosts from "../../components/Posts/TrendingPosts/TrendingPosts";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 import RecentPosts from "../../components/Posts/RecentPosts/RecentPosts";
+import { io } from "socket.io-client";
 
-const HomePage = ({ user, onLogout, darkMode, onStartCommunity }) => {
+const socket = io("http://localhost:5000");
+
+
+const HomePage = ({onLogout, darkMode, onStartCommunity }) => {
+  const [user,setUser]=useState()
+  useEffect(() => {
+    async function fetchTopComms() {
+      try {
+        const res = await axios.get(`http://localhost:5000/user/:69345c85481669617584618c`); //changtoauth
+        setUser(res.data)
+      } catch (err) {
+        console.error("Error while loading user:", err);
+      }
+    }
+  }, []);
+
+  //sockets for notifications
+    useEffect(() => {
+    if (!user?._id) return;
+
+    console.log("Registering user on socket:", user._id);
+    socket.emit("register", user._id);
+
+    return () => {
+      console.log("Cleaning up socket for:", user._id);
+      socket.emit("unregister", user._id);
+    };
+  }, []);
+
   // Initialize viewMode from localStorage
   const [viewMode, setViewMode] = useState(() => {
     try {

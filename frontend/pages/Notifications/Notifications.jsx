@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./Notifications.css";
 import dummyData from "../../data/dummydata";
 import NotificationItem from "../../components/NotificationItem/NotificationItem";
+import LeftSidebar from "../../components/LeftSidebar/LeftSidebar"; 
 
 // Convert Date → "22m", "1h", "3d", etc
 function formatTimeAgo(date) {
@@ -22,7 +23,7 @@ function formatTimeAgo(date) {
   return `${Math.floor(mo / 12)}y`;
 }
 
-export default function Notifications() {
+export default function Notifications({ darkMode, onStartCommunity }) {
   const [notifications, setNotifications] = useState(
     dummyData.notifications.map((n) => ({
       ...n,
@@ -50,66 +51,77 @@ export default function Notifications() {
   };
 
   return (
-    <div className="notifs-page">
+    <div className="page-container" style={{ display: "flex" }}>
 
-      {/* Sticky Header */}
-      <div className="notifs-header">
-        <h2>Notifications</h2>
+      {/* LEFT SIDEBAR */}
+      <LeftSidebar
+        darkMode={darkMode}
+        showStartCommunity={true}
+        onStartCommunity={onStartCommunity}
+      />
 
-        {unread.length > 0 && (
-          <button className="header-btn" onClick={markAll}>
-            Mark all as read
-          </button>
-        )}
-      </div>
+      {/* MAIN CONTENT */}
+      <div className="notifs-page" style={{ flex: 1 }}>
 
-      {/* EVERYTHING SCROLLS INSIDE THIS ONE LIST */}
-      <div className="notifs-list">
+        {/* Sticky Header */}
+        <div className="notifs-header">
+          <h2>Notifications</h2>
 
-        {/* NEW SECTION */}
-        {unread.length > 0 ? (
-          <>
-            <h3 className="section-title">New</h3>
+          {unread.length > 0 && (
+            <button className="header-btn" onClick={markAll}>
+              Mark all as read
+            </button>
+          )}
+        </div>
 
-            {unread.map((n) => (
-              <NotificationItem
-                key={n._id}
-                data={n}
-                onRead={() => markOne(n._id)}
-              />
-            ))}
-          </>
-        ) : (
-          <div className="no-new-message">You’re all caught up 🎉</div>
-        )}
+        {/* Scrollable area */}
+        <div className="notifs-list">
 
-        {/* EARLIER BUTTON — INSIDE THE LIST (FIXES THE GAP) */}
-        {read.length > 0 && (
-          <button
-            className="expand-earlier-btn"
-            onClick={() => setShowEarlier(!showEarlier)}
-          >
-            {showEarlier
-              ? "Hide earlier notifications ▲"
-              : "Show earlier notifications ▼"}
-          </button>
-        )}
+          {/* NEW SECTION */}
+          {unread.length > 0 ? (
+            <>
+              <h3 className="section-title">New</h3>
 
-        {/* EARLIER SECTION */}
-        {showEarlier && read.length > 0 && (
-          <>
-            <h3 className="section-title">Earlier</h3>
+              {unread.map((n) => (
+                <NotificationItem
+                  key={n._id}
+                  data={n}
+                  onRead={() => markOne(n._id)}
+                />
+              ))}
+            </>
+          ) : (
+            <div className="no-new-message">You’re all caught up 🎉</div>
+          )}
 
-            {read.map((n) => (
-              <NotificationItem
-                key={n._id}
-                data={n}
-                onRead={() => markOne(n._id)}
-              />
-            ))}
-          </>
-        )}
+          {/* EARLIER BUTTON */}
+          {read.length > 0 && (
+            <button
+              className="expand-earlier-btn"
+              onClick={() => setShowEarlier(!showEarlier)}
+            >
+              {showEarlier
+                ? "Hide earlier notifications ▲"
+                : "Show earlier notifications ▼"}
+            </button>
+          )}
 
+          {/* EARLIER SECTION */}
+          {showEarlier && read.length > 0 && (
+            <>
+              <h3 className="section-title">Earlier</h3>
+
+              {read.map((n) => (
+                <NotificationItem
+                  key={n._id}
+                  data={n}
+                  onRead={() => markOne(n._id)}
+                />
+              ))}
+            </>
+          )}
+
+        </div>
       </div>
     </div>
   );

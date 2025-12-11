@@ -12,6 +12,8 @@ import Login from "../pages/Authentication/Login.jsx";
 import Signup from "../pages/Authentication/Signup.jsx";
 import SearchResults from "../pages/SearchResults/SearchResults.jsx"
 import CommunityPage from "../pages/CommunityPage/CommunityPage.jsx"
+import Notifications from "../pages/Notifications/Notifications.jsx"
+
 
 export default function AppRoutes({
   darkMode,
@@ -35,7 +37,6 @@ export default function AppRoutes({
           element={
             isLoggedIn ? (
               <HomePage
-                user={currentUser}
                 onLogout={onLogout}
                 darkMode={darkMode}
                 onStartCommunity={openCommunityModal}
@@ -106,7 +107,22 @@ export default function AppRoutes({
             )
           }
         />
-
+         {/*  Notis - protected route */}
+        <Route
+          path="/notifications"
+          element={
+            isLoggedIn ? (
+              <Notifications
+              />
+            ) : (
+              // Show guest home with login prompt
+              <GuestHomePage 
+                onLogin={onLogin} 
+                darkMode={darkMode} 
+              />
+            )
+          }
+        />
         {/* Edit profile - protected route */}
         <Route
           path="/edit-profile"

@@ -30,7 +30,32 @@ export const getUserById = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+//get my profile
+// ----------------------------------------
+// GET USER BY ID  -->  GET /users/:id
+// ----------------------------------------
+export const getProfile = async (req, res) => {
+  try {
+    const rawId = req.user.id || "";
+    // if id is not a valid ObjectId => return 400, not CastError
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res
+        .status(400)
+        .json({ message: "Invalid user ID format", rawId });
+    }
 
+    const user = await User.findById(userId).select("-password -passwordHash -__v");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json(user);
+  } catch (error) {
+    console.error("getUserById error:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
 
 // ----------------------------------------
 // SEARCH USERS  -->  GET /users/search?q=...
