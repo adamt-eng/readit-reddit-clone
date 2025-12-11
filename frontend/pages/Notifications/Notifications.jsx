@@ -4,6 +4,8 @@ import NotificationItem from "../../components/NotificationItem/NotificationItem
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 import axios from "axios";
 
+const socket = io("http://localhost:5000");
+
 // Format date → "22m", "1h", "3d", etc.
 function formatTimeAgo(date) {
   const diff = Date.now() - new Date(date).getTime();
@@ -31,7 +33,12 @@ export default function Notifications() {
   // ===============================
   // FETCH ALL NOTIFICATIONS
   // ===============================
+ 
   useEffect(() => {
+     socket.on("notification",(notification)=>
+      {
+          setNotifications((prev) => [notification, ...prev]);
+      })
     const fetchNotifications = async () => {
       try {
         const res = await axios.get("http://localhost:5000/notifications/69345c85481669617584618c"); ///changetoauth
