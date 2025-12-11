@@ -31,7 +31,7 @@ app.use('/authentication', AuthRouter);
 
 //app.use(auth()); commented till all apis are working and tested to add authentication later
 
-//app.use('/users', UserRouter);
+app.use('/users', UserRouter);
 app.use('/posts', PostRouter);
 //app.use('/comments', CommentRouter);
 app.use('/communities', CommunityRouter);
