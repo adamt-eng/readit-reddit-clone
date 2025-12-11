@@ -13,7 +13,7 @@ import PostRouter from "./Routers/PostRouter.js";
 import SearchRouter from "./Routers/SearchRouter.js"
 import UploadRouter from "./Routers/UploadRouter.js";
 import AiSummaryRouter from "./Routers/AiSummaryRouter.js";
-import { fakeAuth } from './Middleware/FakeAuth.js';
+import NotificationRouter from './Routers/NotificationRouter.js'
 
 dotenv.config();
 const app = express();
@@ -38,11 +38,11 @@ app.use(
 app.use('/authentication', AuthRouter);
 
 // app.use(auth()); // add later after testing
-app.use(fakeAuth());
 
 app.use('/users', UserRouter);
 app.use('/posts', PostRouter);
 app.use('/communities', CommunityRouter);
+app.use('notifications',NotificationRouter);
 app.use('/search', SearchRouter);
 app.use("/upload", UploadRouter);
 app.use('/ai-summary', AiSummaryRouter);

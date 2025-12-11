@@ -34,7 +34,7 @@ export default function Notifications() {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/notifications"); ///changetoauth
+        const res = await axios.get("http://localhost:5000/notifications/69345c85481669617584618c"); ///changetoauth
 
         const formatted = res.data.map((n) => ({
           ...n,

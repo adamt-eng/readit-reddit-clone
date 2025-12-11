@@ -91,14 +91,16 @@ export async function createNotification({ userId, type, payload }) {
 // Returns all notifications for the logged-in user
 // -----------------------------
 export const getNotifications = async (req, res) => {
+    console.log("fetch");
+    
   try {
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
     // 1) Delete notifications older than 1 month
     await Notification.deleteMany({
-      userId: req.user.id,
-      createdAt: { $lt: oneMonthAgo }
+      userId: req.params.id,
+      createdAt: { $lt: oneMonthAgo}
     });
 
     // 2) Return only notifications from the past month

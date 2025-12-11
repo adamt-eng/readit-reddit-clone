@@ -8,8 +8,7 @@ import User from '../Models/User.js';
 export const getUserById = async (req, res) => {
   try {
     // raw id from URL, may contain spaces or \n from copy-paste
-    const rawId = req.params.id || "";
-    const userId = rawId.trim();   // <-- remove \n, spaces
+    const userId = req.params.id || "";
 
     // if id is not a valid ObjectId => return 400, not CastError
     if (!mongoose.Types.ObjectId.isValid(userId)) {

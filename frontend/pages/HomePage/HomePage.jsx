@@ -5,6 +5,7 @@ import TrendingPosts from "../../components/Posts/TrendingPosts/TrendingPosts";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 import RecentPosts from "../../components/Posts/RecentPosts/RecentPosts";
 import { io } from "socket.io-client";
+import axios from "axios";
 
 const socket = io("http://localhost:5000");
 
@@ -12,14 +13,16 @@ const socket = io("http://localhost:5000");
 const HomePage = ({onLogout, darkMode, onStartCommunity }) => {
   const [user,setUser]=useState()
   useEffect(() => {
-    async function fetchTopComms() {
+    async function fetchUser() {
       try {
-        const res = await axios.get(`http://localhost:5000/user/:69345c85481669617584618c`); //changtoauth
+        const res = await axios.get(`http://localhost:5000/users/69345c85481669617584618c`); //changtoauth
         setUser(res.data)
+        console.log(res.data);
       } catch (err) {
         console.error("Error while loading user:", err);
       }
     }
+    fetchUser()
   }, []);
 
   //sockets for notifications
