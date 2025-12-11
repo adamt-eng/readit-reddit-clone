@@ -12,9 +12,9 @@ import {
 
 const router = express.Router();
 
-router.get("/:id",  getNotifications);
+router.get("/:id",  getNotifications);//changetoauh
 router.get("/unread", getUnreadNotifications);
-router.get("/count",getUnreadCount);
+router.get("/count/:id",getUnreadCount);//changetoauh
 router.patch("/:id/read", markAsRead);
 router.patch("/read-all",  markAllAsRead);
 

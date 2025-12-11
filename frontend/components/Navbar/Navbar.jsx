@@ -1,14 +1,19 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaSearch, FaPlus, FaBell, FaUser, FaCog, FaSignOutAlt, FaMoon, FaSun, FaComment } from "react-icons/fa";
+import axios from "axios"
+import { io } from "socket.io-client";
+
 import "./Navbar.css";
+
+const socket = io("http://localhost:5000");
 
 export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleDarkMode, onLoginClick, onSignupClick }) {
   const navigate = useNavigate()
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [notisCount,setNotisCount]=useState(0);
-  
+
   const profileMenuRef = useRef(null);
 
   const promptLogin = () => alert("Login to continue");
@@ -38,6 +43,12 @@ const handleSearch = () => {
 
 
   useEffect(() => {
+    axios.get("http://localhost:5000/notifications/count").then((res)=>
+    {
+      setNotisCount(res.data.unreadCount)
+    }).catch((err)=>{
+      console.log("Error while fetching count: ",err);
+    })
     const handleClickOutside = (event) => {
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
         setShowProfileMenu(false);
