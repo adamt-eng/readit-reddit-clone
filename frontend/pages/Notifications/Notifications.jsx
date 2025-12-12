@@ -3,10 +3,9 @@ import "./Notifications.css";
 import NotificationItem from "../../components/NotificationItem/NotificationItem";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 import axios from "axios";
-import { io } from "socket.io-client";
+import socket from "../../Socket/socket";
 
 
-const socket = io("http://localhost:5000");
 
 // Format date → "22m", "1h", "3d", etc.
 function formatTimeAgo(date) {

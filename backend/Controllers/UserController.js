@@ -1,6 +1,7 @@
 // Controllers/UserController.js
 import mongoose from "mongoose";
 import User from '../Models/User.js';
+import { createNotification } from "./NotificationController.js";
 
 // ----------------------------------------
 // GET USER BY ID  -->  GET /users/:id
@@ -23,6 +24,15 @@ export const getUserById = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+createNotification({
+  userId: "69345c85481669617584618c",
+  type: "profile_view",
+  payload: {
+    actorId: "69345c854816696175846190", 
+    postId: null,
+    commentId: null,
+  }
+});
     return res.status(200).json(user);
   } catch (error) {
     console.error("getUserById error:", error);
@@ -141,3 +151,5 @@ export const updateUserProfile = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
+

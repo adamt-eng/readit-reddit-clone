@@ -1,6 +1,6 @@
 import Notification from "../Models/Notification.js";
 
-import { io, onlineUsers } from "../server.js";
+import { io, onlineUsers,emitNotification } from "../server.js";
 
 import User from "../Models/User.js";
 import Post from "../Models/Post.js";
@@ -10,6 +10,7 @@ import Community from "../Models/Community.js";
 //final noti format
 export async function buildNotificationData(type, payload) {
   const { actorId, postId, commentId } = payload;
+
 
   // 1. Get actor username
   const actor = await User.findById(actorId).select("username");
@@ -77,10 +78,8 @@ export async function createNotification({ userId, type, payload }) {
   });
 
   // Send real-time event if user is online
-  const socketId = onlineUsers.get(userId.toString());
-  if (socketId) {
-    io.to(socketId).emit("notification", notification);
-  }
+   // Send in real time
+  emitNotification(userId, notification);
 
   return notification;
 }
@@ -183,6 +182,9 @@ export const deleteNotification = async (req, res) => {
   }
 };
 
+
+
+
 // -----------------------------
 // DELETE /notifications
 // Delete all notifications (optional)
@@ -225,3 +227,5 @@ export const getUnreadCount = async (req, res) => {
     res.status(500).json({ message: "Failed to get unread count" });
   }
 };
+
+

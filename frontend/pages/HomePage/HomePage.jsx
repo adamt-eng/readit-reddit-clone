@@ -4,10 +4,8 @@ import "./HomePage.css";
 import TrendingPosts from "../../components/Posts/TrendingPosts/TrendingPosts";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 import RecentPosts from "../../components/Posts/RecentPosts/RecentPosts";
-import { io } from "socket.io-client";
 import axios from "axios";
 
-const socket = io("http://localhost:5000");
 
 
 const HomePage = ({onLogout, darkMode, onStartCommunity }) => {
@@ -25,12 +23,9 @@ const HomePage = ({onLogout, darkMode, onStartCommunity }) => {
     fetchUser()
   }, []);
 
-  //sockets for notifications
-    useEffect(() => {
-    if (!user?._id) return;
-    console.log("Registering user on socket:", user._id);
-    socket.emit("register", user._id);
-  }, []);
+
+
+
 
   // Initialize viewMode from localStorage
   const [viewMode, setViewMode] = useState(() => {

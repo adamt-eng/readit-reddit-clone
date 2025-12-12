@@ -2,11 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaSearch, FaPlus, FaBell, FaUser, FaCog, FaSignOutAlt, FaMoon, FaSun, FaComment } from "react-icons/fa";
 import axios from "axios"
-import { io } from "socket.io-client";
+import socket from "../../Socket/socket";
 
 import "./Navbar.css";
 
-const socket = io("http://localhost:5000");
 
 export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleDarkMode, onLoginClick, onSignupClick }) {
   const navigate = useNavigate()
@@ -42,22 +41,43 @@ const handleSearch = () => {
 };
 
 
-  useEffect(() => {
-    axios.get("http://localhost:5000/notifications/count").then((res)=>
-    {
-      setNotisCount(res.data.unreadCount)
-    }).catch((err)=>{
-      console.log("Error while fetching count: ",err);
+// FETCH INITIAL COUNT
+useEffect(() => {
+  axios
+    .get("http://localhost:5000/notifications/count/69345c85481669617584618c")
+    .then((res) => {
+      console.log("Initial unread:", res.data.unreadCount);
+      setNotisCount(res.data.unreadCount);
     })
-    const handleClickOutside = (event) => {
-      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
-        setShowProfileMenu(false);
-      }
-    };
+    .catch((err) => {
+      console.log("Error fetching count:", err);
+    });
+}, []);
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+
+// REAL-TIME SOCKET UPDATES
+useEffect(() => {
+  if (!user || !user._id) return;
+
+  console.log("Registering socket for:", user._id);
+  socket.emit("register", user._id);
+
+}, [user?._id]);
+
+// LISTEN FOR LIVE NOTIFICATIONS
+useEffect(() => {
+  function handleNotif(notification) {
+    console.log("Realtime notification received:", notification);
+    setNotisCount(prev => prev + 1);
+  }
+
+  socket.on("notification", handleNotif);
+
+  return () => {
+    socket.off("notification", handleNotif);
+  };
+}, []);
+
 
   const handleDropdownItemClick = (action) => {
     setShowProfileMenu(false);
@@ -136,7 +156,9 @@ const handleSearch = () => {
 
           <Link to="/notifications" className="nav-icon-btn" title="Notifications">
             <FaBell className={`nav-icon ${darkMode ? "dark-mode-icon" : ""}`} />
-            <span className="notification-badge">3</span>
+            {notisCount > 0 && (
+              <span className="notification-badge">{notisCount}</span>
+            )}
           </Link>
 
           <div className="profile-menu-container" ref={profileMenuRef}>
