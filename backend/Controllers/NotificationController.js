@@ -1,6 +1,6 @@
 import Notification from "../Models/Notification.js";
 
-import { io, onlineUsers,emitNotification } from "../server.js";
+import { onlineUsers} from "../server.js";
 
 import User from "../Models/User.js";
 import Post from "../Models/Post.js";
@@ -77,9 +77,7 @@ export async function createNotification({ userId, type, payload }) {
     createdAt: new Date(),
   });
 
-  // Send real-time event if user is online
-   // Send in real time
-  emitNotification(userId, notification);
+  //hetreereer
 
   return notification;
 }
