@@ -1,11 +1,11 @@
-/* eslint-disable react-hooks/set-state-in-effect */
-import { useState, useLayoutEffect } from "react";
+import { useState, useLayoutEffect, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar/Navbar.jsx";
 import GuestHomePage from "../pages/GuestHomePage/GuestHomePage.jsx";
 import AppRoutes from "./routes.jsx";
 import AuthModal from "../pages/Authentication/AuthModal.jsx";
 import "./App.css";
+import axios from "axios"
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(true);
@@ -29,14 +29,14 @@ function App() {
     karma: 1247,
   };
 
-/*   // Try to load a real user from the backend for local testing
+  // Try to load a real user from the backend for local testing
   // for DM testing -- adam
   // DMS WILL ONLY WORK EITHER WITH THIS OR WITH AUTH!!!!!!!!!
-  useEffect(() => {
+/*   useEffect(() => {
     async function loadUser() {
       try {
         const res = await axios.get(
-          "http://localhost:5000/users/search?q=a&page=1&limit=1"
+          "http://localhost:5000/users/search?q=b&page=1&limit=1"
         );
         const users = res.data && res.data.results ? res.data.results : [];
         if (users.length) {
@@ -45,6 +45,10 @@ function App() {
         } else {
           setCurrentUser(mockUser);
         }
+
+        const currentPort = window.location.port;
+        console.log(`Attempting to load user from backend to port number ${currentPort ?? "aaa"}...`);
+        
       } catch (err) {
         console.error("Failed to load user from backend, falling back to mock:", err);
         setCurrentUser(mockUser);
