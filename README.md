@@ -15,23 +15,11 @@ This project includes:
 - Create and browse communities
 - Create text, link & image posts
 - Vote, comment, join/leave communities
-- Direct Messaging
-- Notifications
+- Direct Messaging (using sockets!!)
+- Notifications (using sockets!!)
+- AI-generated summaries for posts!! (using hugging face!!)
 - Search (posts, users, communities)
 - Light / Dark mode theme
-
----
-
-## 📂 Project Structure
-
-```
-
-/backend   → Server-side API (Express)
-/frontend  → Client UI (React, Vite)
-
-```
-
-Backend and frontend are separated to make deployment easier and development cleaner.
 
 ---
 
@@ -44,21 +32,22 @@ Make sure you have these installed:
 
 Then install dependencies:
 
-```
-
-npm install
-npm install react-icons
-
-````
-
-You must run these inside the `frontend` folder.
-
-Example:
-
 ```bash
 cd frontend
 npm install
 npm install react-icons
+npm install multer
+npm install @huggingface/inference
+````
+
+Example:
+
+```bash
+cd backend
+npm install
+npm install react-icons
+npm install multer
+npm install @huggingface/inference
 ````
 
 ---
@@ -68,8 +57,6 @@ npm install react-icons
 ### Start Backend
 
 ```bash
-cd backend
-npm install
 npm start
 ```
 
@@ -81,7 +68,6 @@ Server will run on:
 ### Start Frontend
 
 ```bash
-cd frontend
 npm run dev
 ```
 
@@ -97,15 +83,4 @@ Frontend will run on:
 | Frontend | React, Vite, CSS Modules     |
 | Routing  | React Router                 |
 | Backend  | Node.js, Express.js          |
-| Database | MongoDB (future integration) |
-
----
-
-## 📌 Status
-
-✔ UI pages merged
-✔ Project structure organized
-⚙ Routing integration in progress
-⚙ API connections and authentication upcoming
-
----
+| Database | MongoDB                      |
