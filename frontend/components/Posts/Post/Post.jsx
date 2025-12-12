@@ -5,21 +5,45 @@ import PostActions from "./PostActions/PostActions";
 import CommentForm from "./CommentForm/CommentForm";
 import Comment from "../../Comment/Comment"; 
 
-export default function Post({ post, comments = [], onUpvote, onDownvote, onComment, onVote, onReply }) {
+
+export default function Post({
+  post,
+  comments = [],
+  onUpvote,
+  onDownvote,
+  onComment,
+  onVote,
+  onReply,
+  isSummaryMode,
+  isSummarizing,
+  onGenerateSummary,
+  onShowOriginal
+}) {
   return (
     <div className="post-card">
       <PostHeader post={post} />
       <PostContent post={post} />
-      <PostActions post={post} onUpvote={onUpvote} onDownvote={onDownvote} />
+
+      <PostActions
+        post={post}
+        onUpvote={onUpvote}
+        onDownvote={onDownvote}
+        isSummaryMode={isSummaryMode}
+        isSummarizing={isSummarizing}
+        onGenerateSummary={onGenerateSummary}
+        onShowOriginal={onShowOriginal}
+      />
+
       <CommentForm postId={post.id} onComment={onComment} />
+
       <div className="comments-list">
-        {comments.map(comment => (
+        {comments.map((comment) => (
           <Comment
             key={comment.id}
             comment={comment}
             postId={post.id}
-            onVote={onVote}     
-            onReply={onReply}    
+            onVote={onVote}
+            onReply={onReply}
           />
         ))}
       </div>

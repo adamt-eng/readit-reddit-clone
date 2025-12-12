@@ -3,22 +3,19 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import cookieParser from "cookie-parser";
-import http from "http";    
-
-// Routers
+import http from "http";               
+import { Server } from "socket.io";   
 import auth from './Middleware/AuthMiddleware.js';
 import AuthRouter from './Routers/AuthRouter.js';
 import CommunityRouter from "./Routers/CommunityRouter.js";
 import UserRouter from "./Routers/UserRouter.js";
 import PostRouter from "./Routers/PostRouter.js";
-import SearchRouter from "./Routers/SearchRouter.js";
+import SearchRouter from "./Routers/SearchRouter.js"
 import UploadRouter from "./Routers/UploadRouter.js";
 import AiSummaryRouter from "./Routers/AiSummaryRouter.js";
 import NotificationRouter from './Routers/NotificationRouter.js';
 import CommentRouter from './Routers/CommentRouter.js';
-
-// ONLY NECESSARY IMPORT
-import { initSocket } from "./socket.js";
+import DMRouter from "./Routers/DMRouter.js";
 
 dotenv.config();
 const app = express();
@@ -27,6 +24,7 @@ const PORT = process.env.PORT || 5000;
 /* ------------ EXPRESS MIDDLEWARE ------------ */
 
 app.use("/uploads", express.static("uploads"));
+
 app.use(cookieParser());
 app.use(express.json());
 
@@ -40,7 +38,9 @@ app.use(
 /* ------------ ROUTERS ------------ */
 
 app.use('/authentication', AuthRouter);
-//app.use(auth());
+
+// app.use(auth()); // add later after testing
+
 app.use('/users', UserRouter);
 app.use('/posts', PostRouter);
 app.use('/communities', CommunityRouter);
@@ -56,18 +56,48 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.log("MongoDB connection error:", err));
 
+
+
 /* ===========================================
-   SOCKET.IO SERVER — ONLY PART YOU WANTED FIXED
+   SOCKET.IO SERVER (REAL-TIME LAYER)
    =========================================== */
 
-const server = http.createServer(app);
+const server = http.createServer(app);  
 
-//REPLACE ALL OLD SOCKET CODE WITH THIS ONE LINE:
-export const socketSystem = initSocket(server);
+export const io = new Server(server, {
+  cors: {
+    origin: ["http://localhost:5173", "http://localhost:5174"],
+    credentials: true
+  }
+});
 
-export const io = socketSystem.io;
-export const onlineUsers = socketSystem.onlineUsers;
-export const emitNotification = socketSystem.emitNotification;
+// Map<userId, socketId>
+export const onlineUsers = new Map();
+
+io.on("connection", (socket) => {
+  console.log("Socket connected:", socket.id);
+
+  // frontend: socket.emit("register", userId)
+  socket.on("register", (userId) => {
+    onlineUsers.set(userId, socket.id);
+    console.log(`User ${userId} is online`);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Socket disconnected:", socket.id);
+
+    // remove from online users
+    for (let [userId, sockId] of onlineUsers.entries()) {
+      if (sockId === socket.id) {
+        onlineUsers.delete(userId);
+        console.log(`User ${userId} is offline`);
+      }
+    }
+  });
+});
+
+
+app.use('/dm', DMRouter({ io, onlineUsers }));
 
 
 /* ------------ START SERVER ------------ */

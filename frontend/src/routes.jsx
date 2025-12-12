@@ -10,10 +10,12 @@ import DirectMessages from "../pages/Direct Messages/DirectMessages.jsx";
 import CreateCommunityModal from "../components/Community/CreateCommunityModal/CreateCommunityModal.jsx";
 import Login from "../pages/Authentication/Login.jsx";
 import Signup from "../pages/Authentication/Signup.jsx";
-import SearchResults from "../pages/SearchResults/SearchResults.jsx"
-import CommunityPage from "../pages/CommunityPage/CommunityPage.jsx"
-import Notifications from "../pages/Notifications/Notifications.jsx"
+import SearchResults from "../pages/SearchResults/SearchResults.jsx";
+import CommunityPage from "../pages/CommunityPage/CommunityPage.jsx";
+import Notifications from "../pages/Notifications/Notifications.jsx";
 
+// ⭐ ONLY NEW IMPORT YOU NEEDED
+import PostPage from "../pages/PostPage.jsx";
 
 export default function AppRoutes({
   darkMode,
@@ -42,10 +44,7 @@ export default function AppRoutes({
                 onStartCommunity={openCommunityModal}
               />
             ) : (
-              <GuestHomePage 
-                onLogin={onLogin} 
-                darkMode={darkMode} 
-              />
+              <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
             )
           }
         />
@@ -55,12 +54,8 @@ export default function AppRoutes({
           path="/guest"
           element={
             !isLoggedIn ? (
-              <GuestHomePage 
-                onLogin={onLogin} 
-                darkMode={darkMode} 
-              />
+              <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
             ) : (
-              // Redirect to home if already logged in
               <HomePage
                 user={currentUser}
                 onLogout={onLogout}
@@ -71,7 +66,7 @@ export default function AppRoutes({
           }
         />
 
-        {/* User profile - protected route */}
+        {/* User profile */}
         <Route
           path="/user/:username"
           element={
@@ -82,48 +77,36 @@ export default function AppRoutes({
                 currentUser={currentUser}
               />
             ) : (
-              // Show guest home with login prompt
-              <GuestHomePage 
-                onLogin={onLogin} 
-                darkMode={darkMode} 
-              />
+              <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
             )
           }
         />
 
-        {/* User profile - protected route */}
+        {/* Community Page */}
         <Route
           path="/community/:communityName"
           element={
             isLoggedIn ? (
-              <CommunityPage
-              />
+              <CommunityPage />
             ) : (
-              // Show guest home with login prompt
-              <GuestHomePage 
-                onLogin={onLogin} 
-                darkMode={darkMode} 
-              />
+              <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
             )
           }
         />
-         {/*  Notis - protected route */}
+
+        {/* Notifications */}
         <Route
           path="/notifications"
           element={
             isLoggedIn ? (
-              <Notifications
-              />
+              <Notifications />
             ) : (
-              // Show guest home with login prompt
-              <GuestHomePage 
-                onLogin={onLogin} 
-                darkMode={darkMode} 
-              />
+              <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
             )
           }
         />
-        {/* Edit profile - protected route */}
+
+        {/* Edit profile */}
         <Route
           path="/edit-profile"
           element={
@@ -134,16 +117,12 @@ export default function AppRoutes({
                 currentUser={currentUser}
               />
             ) : (
-              // Show guest home with login prompt
-              <GuestHomePage 
-                onLogin={onLogin} 
-                darkMode={darkMode} 
-              />
+              <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
             )
           }
         />
 
-        {/* Create post - protected route */}
+        {/* Create post */}
         <Route
           path="/create-post"
           element={
@@ -154,39 +133,30 @@ export default function AppRoutes({
                 currentUser={currentUser}
               />
             ) : (
-              // Show guest home with login prompt
-              <GuestHomePage 
-                onLogin={onLogin} 
-                darkMode={darkMode} 
-              />
+              <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
             )
           }
         />
 
-        {/* Direct messages - protected route */}
+        {/* Direct Messages */}
         <Route
           path="/messages"
           element={
             isLoggedIn ? (
-              <DirectMessages darkMode={darkMode} />
+              <DirectMessages darkMode={darkMode} currentUser={currentUser} />
             ) : (
-              // Show guest home with login prompt
-              <GuestHomePage 
-                onLogin={onLogin} 
-                darkMode={darkMode} 
-              />
+              <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
             )
           }
         />
 
-        {/* Authentication pages */}
+        {/* Login */}
         <Route
           path="/login"
           element={
             !isLoggedIn ? (
               <Login onLogin={onLogin} darkMode={darkMode} />
             ) : (
-              // Redirect to home if already logged in
               <HomePage
                 user={currentUser}
                 onLogout={onLogout}
@@ -196,14 +166,14 @@ export default function AppRoutes({
             )
           }
         />
-        
-        <Route 
-          path="/signup" 
+
+        {/* Signup */}
+        <Route
+          path="/signup"
           element={
             !isLoggedIn ? (
               <Signup darkMode={darkMode} onSignup={onLogin} />
             ) : (
-              // Redirect to home if already logged in
               <HomePage
                 user={currentUser}
                 onLogout={onLogout}
@@ -213,21 +183,32 @@ export default function AppRoutes({
             )
           }
         />
+
+        {/* Search */}
         <Route
-        path="/search"
-        element={
-          isLoggedIn ? (
+          path="/search"
+          element={
+            isLoggedIn ? (
               <SearchResults />
             ) : (
-              // Show guest home with login prompt
-              <GuestHomePage 
-                onLogin={onLogin} 
-                darkMode={darkMode} 
-              />
+              <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
             )
-        }></Route>
+          }
+        />
+
+        {/* ⭐ THE ONLY ROUTE YOU WERE MISSING */}
+        <Route
+          path="/posts/:postId"
+          element={
+            isLoggedIn ? (
+              <PostPage />
+            ) : (
+              <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
+            )
+          }
+        />
+
       </Routes>
-  
     </>
   );
 }
