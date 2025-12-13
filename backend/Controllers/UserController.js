@@ -9,7 +9,8 @@ import { createNotification } from "./NotificationController.js";
 export const getUserById = async (req, res) => {
   try {
     // raw id from URL, may contain spaces or \n from copy-paste
-    const userId = req.params.id || "";
+    const rawId = req.params.id || "";
+    const userId = rawId.trim();
 
     // if id is not a valid ObjectId => return 400, not CastError
     if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -45,23 +46,18 @@ createNotification({
 // ----------------------------------------
 export const getProfile = async (req, res) => {
   try {
-    const rawId = req.user.id || "";
-    // if id is not a valid ObjectId => return 400, not CastError
+    const userId = (req.user?.id || "").trim();
+
     if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res
-        .status(400)
-        .json({ message: "Invalid user ID format", rawId });
+      return res.status(400).json({ message: "Invalid user ID format", rawId: userId });
     }
 
     const user = await User.findById(userId).select("-password -passwordHash -__v");
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
 
     return res.status(200).json(user);
   } catch (error) {
-    console.error("getUserById error:", error);
+    console.error("getProfile error:", error);
     return res.status(500).json({ message: "Server error" });
   }
 };
@@ -151,5 +147,49 @@ export const updateUserProfile = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
+// ----------------------------------------
+// UPDATE MY PROFILE  -->  PATCH /users/me
+// Requires auth middleware (sets req.user.id)
+// ----------------------------------------
+export const updateMyProfile = async (req, res) => {
+  try {
+    const userId = (req.user?.id || "").trim();
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid user ID format", rawId: userId });
+    }
+
+    const { username, bio, avatarUrl } = req.body;
+
+    const updates = {};
+    if (typeof username === "string" && username.trim() !== "") updates.username = username.trim();
+    if (typeof bio === "string") updates.bio = bio;
+    if (typeof avatarUrl === "string") updates.avatarUrl = avatarUrl;
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ message: "No valid fields to update (username/bio/avatarUrl)" });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updates },
+      { new: true, runValidators: true }
+    ).select("-password -passwordHash -__v");
+
+    if (!updatedUser) return res.status(404).json({ message: "User not found" });
+
+    return res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("updateMyProfile error:", error);
+
+    if (error.code === 11000) {
+      return res.status(409).json({ message: "Username or email already in use" });
+    }
+
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 
 
