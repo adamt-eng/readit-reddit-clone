@@ -221,12 +221,12 @@
 }
 
 /* Dark mode specific styles for all icons */
-.dark-mode .dropdown-icon {
+.appdark-mode .dropdown-icon {
   color: #ffffff !important; /* Force white color in dark mode */
 }
 
-.dark-mode .nav-icon,
-.dark-mode .dark-mode-icon {
+.appdark-mode .nav-icon,
+.appdark-mode .appdark-mode-icon {
   color: #ffffff !important; /* Force white color for all nav icons in dark mode */
 }
 
@@ -273,81 +273,81 @@
 }
 
 /* Dark mode styles */
-.dark-mode .navbar {
+.appdark-mode .navbar {
   background: #1a1a1b;
   border-bottom-color: #343536;
 }
 
-.dark-mode .nav-search {
+.appdark-mode .nav-search {
   background: #272729;
   border-color: #ff4500;
   color: #d7dadc;
 }
 
-.dark-mode .nav-search:focus {
+.appdark-mode .nav-search:focus {
   background: #1a1a1b;
   border-color: #d7dadc;
 }
 
-.dark-mode .nav-icon-btn {
+.appdark-mode .nav-icon-btn {
   color: #d7dadc;
 }
 
-.dark-mode .nav-icon-btn:hover {
+.appdark-mode .nav-icon-btn:hover {
   background: #272729;
 }
 
-.dark-mode .create-post-btn {
+.appdark-mode .create-post-btn {
   background: none;
   
 }
 
-.dark-mode .create-post-btn:hover {
+.appdark-mode .create-post-btn:hover {
   background: none;
 }
 
-.dark-mode .profile-btn:hover {
+.appdark-mode .profile-btn:hover {
   background: #272729;
 }
 
-.dark-mode .profile-dropdown {
+.appdark-mode .profile-dropdown {
   background: #1a1a1b;
   border-color: #343536;
   color: #d7dadc;
 }
 
-.dark-mode .profile-dropdown .dropdown-item {
+.appdark-mode .profile-dropdown .dropdown-item {
   color: #d7dadc;
 }
 
-.dark-mode .profile-dropdown .dropdown-item:hover {
+.appdark-mode .profile-dropdown .dropdown-item:hover {
   background: #272729;
 }
 
-.dark-mode .profile-dropdown .dropdown-divider {
+.appdark-mode .profile-dropdown .dropdown-divider {
   background: #343536;
 }
 
-.dark-mode .profile-name {
+.appdark-mode .profile-name {
   color: #d7dadc;
 }
 
-.dark-mode .login-btn,
-.dark-mode .signup-btn {
+.appdark-mode .login-btn,
+.appdark-mode .signup-btn {
   border-color: #ff4500;
   color: #ff4500;
 }
 
-.dark-mode .login-btn:hover {
+.appdark-mode .login-btn:hover {
   background: #272729;
 }
 
-.dark-mode .signup-btn {
+.appdark-mode .signup-btn {
   background: #ff4500;
   color: white;
 }
 
-.dark-mode .signup-btn:hover {
+.appdark-mode .signup-btn:hover {
   background: #e03c00;
 }
 
