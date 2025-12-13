@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Community from "../Models/Community.js";
 import Membership from "../Models/Membership.js";
 import Post from "../Models/Post.js";
+import Vote from "../Models/Votes.js";
 
 // Get communities where the user is a member and can post
 export const getPostableCommunities = async (req, res) => {
