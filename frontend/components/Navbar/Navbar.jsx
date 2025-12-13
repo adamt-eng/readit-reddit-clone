@@ -161,7 +161,7 @@ useEffect(() => {
             onClick={handleCreatePost} 
             title="Create Post"
           >
-            <FaPlus className={darkMode ? "dark-mode-icon" : ""} />
+            <FaPlus  />
             <span className="create-text">Create</span>
           </Link>
 
@@ -171,11 +171,11 @@ useEffect(() => {
             onClick={handleOpenMessages}
             title="Direct Messages"
           >
-            <FaComment className={`nav-icon ${darkMode ? "dark-mode-icon" : ""}`} />
+            <FaComment />
           </Link>
 
           <Link to="/notifications" className="nav-icon-btn" title="Notifications">
-            <FaBell className={`nav-icon ${darkMode ? "dark-mode-icon" : ""}`} />
+            <FaBell  />
             {notisCount > 0 && (
               <span className="notification-badge">{notisCount}</span>
             )}
@@ -195,7 +195,7 @@ useEffect(() => {
 
 
               <span className="profile-name">{user?.username}</span>
-              <svg className={`dropdown-icon ${showProfileMenu ? 'open' : ''} ${darkMode ? 'dark-mode' : ''}`} fill="currentColor" viewBox="0 0 20 20">
+              <svg className={`dropdown-icon ${showProfileMenu ? 'open' : ''}`} fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
               </svg>
             </button>
