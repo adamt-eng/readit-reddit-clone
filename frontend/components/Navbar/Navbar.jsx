@@ -5,6 +5,7 @@ import axios from "axios"
 import socket from "../../Socket/socket";
 
 import "./Navbar.css";
+import profileFallback from "../../assets/profile.png";
 
 
 export default function Navbar({ setIsLoggedIn,setCurrentUser,user, isLoggedIn, darkMode, onToggleDarkMode, onLoginClick, onSignupClick }) {
@@ -118,6 +119,8 @@ useEffect(() => {
     }, 100);
   };
 
+  
+
   if (isLoggedIn) {
     return (
       <div className="navbar">
@@ -181,10 +184,15 @@ useEffect(() => {
           <div className="profile-menu-container" ref={profileMenuRef}>
             <button className="profile-btn" onClick={toggleProfileMenu}>
               <img
-              src={user?.avatarUrl ? `http://localhost:5000${user.avatarUrl}` : "../../assets/profile.png"}
-              alt="Profile"
-              className="profile-avatar"
-              />
+  src={user?.avatarUrl ? `http://localhost:5000${user.avatarUrl}` : profileFallback}
+  alt="Profile"
+  className="profile-avatar"
+  onError={(e) => {
+    e.currentTarget.src = profileFallback;
+  }}
+/>
+
+
 
               <span className="profile-name">{user?.username}</span>
               <svg className={`dropdown-icon ${showProfileMenu ? 'open' : ''} ${darkMode ? 'dark-mode' : ''}`} fill="currentColor" viewBox="0 0 20 20">
