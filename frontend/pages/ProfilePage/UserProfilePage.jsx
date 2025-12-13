@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import LeftSidebar from "../LeftSidebar/LeftSidebar";
-import ProfileHeader from "./ProfileHeader";
-import ProfileTabs from "./ProfileTabs";
-import ProfileContent from "./ProfileContent";
-import ProfileSidebar from "./ProfileSidebar";
+import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
+import ProfileHeader from "../../components/profile/ProfileHeader";
+import ProfileTabs from "../../components/profile/ProfileTabs";
+import ProfileContent from "../../components/profile/ProfileContent";
+import ProfileSidebar from "../../components/profile/ProfileSidebar";
 
-import "./styles/profile.css";
-import "./styles/header.css";
-import "./styles/tabs.css";
-import "./styles/content.css";
-import "./styles/sidebar.css";
-import "./styles/dark.css";
+import "../../components/profile/styles/profile.css";
+import "../../components/profile/styles/header.css";
+import "../../components/profile/styles/tabs.css";
+import "../../components/profile/styles/content.css";
+import "../../components/profile/styles/sidebar.css";
+import "../../components/profile/styles/dark.css";
 
 const API_BASE = "http://localhost:5000";
 

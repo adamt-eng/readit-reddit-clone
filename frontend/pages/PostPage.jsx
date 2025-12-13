@@ -17,7 +17,7 @@ export default function PostPage() {
   // LOAD POST + COMMENTS
   useEffect(() => {
     const fetchPost = async () => {
-      const res = await fetch(`http://localhost:5000/posts/${postId}`);
+      const res = await fetch(`http://localhost:5000/posts/${postId}`,{withCredentials:true});
       const data = await res.json();
 
       setPost({

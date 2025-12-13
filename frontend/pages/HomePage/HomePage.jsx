@@ -41,7 +41,7 @@ const HomePage = ({ darkMode, onStartCommunity }) => {
   useEffect(() => {
     async function fetchUser() {
       try {
-        const res = await axios.get(`http://localhost:5000/users/69345c85481669617584618c`); // change to auth later
+        const res = await axios.get(`http://localhost:5000/users/me`,{withCredentials:true}); // change to auth later
         setUser(res.data);
         console.log(res.data);
       } catch (err) {
@@ -103,7 +103,6 @@ const HomePage = ({ darkMode, onStartCommunity }) => {
         
         const res = await axios.get(`http://localhost:5000/posts/feed`, {
           params: {
-            userId: userId,
             sort: sortByParam,
             limit: 50
           }

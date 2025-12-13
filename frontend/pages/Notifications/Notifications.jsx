@@ -42,7 +42,7 @@ export default function Notifications() {
       })
     const fetchNotifications = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/notifications/69345c85481669617584618c"); ///changetoauth
+        const res = await axios.get("http://localhost:5000/notifications/69345c85481669617584618c",{withCredentials:true}); ///changetoauth
 
         const formatted = res.data.map((n) => ({
           ...n,

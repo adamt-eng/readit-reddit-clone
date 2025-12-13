@@ -25,8 +25,9 @@
 
   app.use("/uploads", express.static("uploads"));
 
-  app.use(cookieParser());
-  app.use(express.json());
+
+app.use(express.json());
+app.use(cookieParser());  
 
   app.use(
     cors({
@@ -39,7 +40,7 @@
 
   app.use('/authentication', AuthRouter);
 
-  // app.use(auth()); // add later after testing
+  app.use(auth); // add later after testing
 
   app.use('/users', UserRouter);
   app.use('/posts', PostRouter);

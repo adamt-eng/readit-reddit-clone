@@ -238,7 +238,8 @@ const hoursSinceCreation = (createdAt) => {
 /* ---------- PERSONALIZED FEED ALGORITHM ---------- */
 export const getPersonalizedFeed = async (req, res) => {
   try {
-    const { userId, page = 1, limit = 20, sort = "best" } = req.query;
+    let userId = req.user.id
+    const { page = 1, limit = 20, sort = "best" } = req.query;
     const pageNum = Number(page);
     const limitNum = Number(limit);
     const skip = (pageNum - 1) * limitNum;

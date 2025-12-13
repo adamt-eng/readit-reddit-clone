@@ -75,13 +75,13 @@ export default function SearchResults() {
         const [postsRes, usersRes, communitiesRes] = await Promise.all([
           axios.get(`${API_URL}/search/posts`, {
             params: { q, page, limit, sort: sortBy, time: timeFilter }
-          }),
+          },{withCredentials:true}),
           axios.get(`${API_URL}/search/users`, {
             params: { q, page, limit }
-          }),
+          },{withCredentials:true}),
           axios.get(`${API_URL}/search/communities`, {
             params: { q, page, limit }
-          })
+          },{withCredentials:true})
         ]);
 
         // update results
