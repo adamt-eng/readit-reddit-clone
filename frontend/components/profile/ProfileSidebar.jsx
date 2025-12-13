@@ -30,7 +30,7 @@ export default function ProfileSidebar({ user, currentUser }) {
 
         {/* ✅ Only show Edit Profile on YOUR OWN profile */}
         {isMyProfile && (
-          <Link to={`/edit-profile/${user._id}`}>
+          <Link to="/edit-profile">
             <button className="edit-profile-sidebar-btn">Edit Profile</button>
           </Link>
         )}
