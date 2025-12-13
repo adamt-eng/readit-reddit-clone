@@ -22,6 +22,7 @@ export default function AppRoutes({
   toggleDarkMode,
   currentUser,
   onLogin,
+  setCurrentUser,
   isLoggedIn,
 }) {
   const [showCommunityModal, setShowCommunityModal] = useState(false);
@@ -111,6 +112,7 @@ export default function AppRoutes({
       <EditProfilePage
         isDark={darkMode}
         toggleDarkMode={toggleDarkMode}
+        setCurrentUser={setCurrentUser} 
       />
     ) : (
       <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
