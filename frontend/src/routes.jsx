@@ -68,7 +68,7 @@ export default function AppRoutes({
 
         {/* User profile */}
         <Route
-          path="/user/:username"
+          path="/user/:id"
           element={
             isLoggedIn ? (
               <UserProfilePage
@@ -108,7 +108,7 @@ export default function AppRoutes({
 
         {/* Edit profile */}
         <Route
-          path="/edit-profile"
+          path="/edit-profile/:id"
           element={
             isLoggedIn ? (
               <EditProfilePage

@@ -1,75 +1,92 @@
-import React from 'react';
-import LeftSidebar from '../LeftSidebar/LeftSidebar';
-//import ProfileBanner from './ProfileBanner';
-import ProfileHeader from './ProfileHeader';
-import ProfileTabs from './ProfileTabs';
-import ProfileContent from './ProfileContent';
-import ProfileSidebar from './ProfileSidebar';
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import LeftSidebar from "../LeftSidebar/LeftSidebar";
+import ProfileHeader from "./ProfileHeader";
+import ProfileTabs from "./ProfileTabs";
+import ProfileContent from "./ProfileContent";
+import ProfileSidebar from "./ProfileSidebar";
 
-// Import styles
-import './styles/profile.css';
-import './styles/header.css';
-import './styles/tabs.css';
-import './styles/content.css';
-import './styles/sidebar.css';
-import './styles/dark.css';
+import "./styles/profile.css";
+import "./styles/header.css";
+import "./styles/tabs.css";
+import "./styles/content.css";
+import "./styles/sidebar.css";
+import "./styles/dark.css";
 
-// Accept props from App.jsx
+const API_BASE = "http://localhost:5000";
+
 export default function UserProfilePage({ isDark, toggleDarkMode }) {
-  const [activeTab, setActiveTab] = React.useState('Overview');
+  const { id: userId } = useParams();   // 🔑 ID from URL
+  const [activeTab, setActiveTab] = useState("Overview");
 
-  const user = {
-    username: 'Moist_Barber_9724',
-    karma: 1,
-    cakeDay: 'November 2024',
-    followers: 0,
-    contributions: 0,
-    redditAge: '0 d',
-    gold: 0,
-  };
+  const [user, setUser] = useState(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const res = await fetch(`${API_BASE}/users/${userId}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || "User not found");
+        }
+
+        setUser(data);
+      } catch (err) {
+        console.error(err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadUser();
+  }, [userId]);
+
+  if (loading) return <div>Loading profile...</div>;
 
   return (
     <>
-      {/* Dark Mode Toggle Button — same on every page */}
       <button
         onClick={toggleDarkMode}
-        aria-label="Toggle dark mode"
         style={{
-          position: 'fixed',
-          top: '70px',
-          right: '20px',
+          position: "fixed",
+          top: "70px",
+          right: "20px",
           zIndex: 10000,
-          padding: '10px 16px',
-          borderRadius: '999px',
-          background: isDark ? '#d7dadc' : '#1a1a1b',
-          color: isDark ? '#000' : '#fff',
-          border: 'none',
-          fontWeight: 'bold',
-          fontSize: '14px',
-          cursor: 'pointer',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
         }}
       >
-        {isDark ? 'Light Mode' : 'Dark Mode'}
+        {isDark ? "Light Mode" : "Dark Mode"}
       </button>
 
       <div className="profile-page-wrapper">
         <LeftSidebar />
 
         <div className="profile-page">
-          {/* <ProfileBanner /> */}
-          
           <div className="profile-container">
             <main className="profile-main">
-              <ProfileHeader user={user} />
-             <div className="profile-tabs-wrapper">
-              <ProfileTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-                </div>
-              <ProfileContent activeTab={activeTab} />
+              {error && <div style={{ color: "red" }}>{error}</div>}
+
+              {user && <ProfileHeader user={user} />}
+
+              <ProfileTabs
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+              />
+
+              <ProfileContent
+                activeTab={activeTab}
+                user={user}
+              />
             </main>
 
             <aside className="profile-aside">
-              <ProfileSidebar user={user} />
+              {user && <ProfileSidebar user={user} />}
             </aside>
           </div>
         </div>
