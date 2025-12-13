@@ -14,7 +14,7 @@ import SearchResults from "../pages/SearchResults/SearchResults.jsx";
 import CommunityPage from "../pages/CommunityPage/CommunityPage.jsx";
 import Notifications from "../pages/Notifications/Notifications.jsx";
 
-// ⭐ ONLY NEW IMPORT YOU NEEDED
+
 import PostPage from "../pages/PostPage.jsx";
 
 export default function AppRoutes({

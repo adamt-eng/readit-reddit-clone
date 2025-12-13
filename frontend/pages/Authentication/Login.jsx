@@ -1,13 +1,31 @@
 import "./Auth.css";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useState } from "react";
 
 export default function Login({ onLogin, darkMode, inModal, switchMode }) {
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onLogin();
-    navigate("/");
+    setError("");
+
+    try {
+      const res = await axios.post(
+        "http://localhost:5000/authentication/login",
+        { email, password },
+        { withCredentials: true } // VERY IMPORTANT
+      );
+      onLogin();
+
+      navigate("/");
+    } catch (err) {
+      setError(err.response?.data?.message || "Login failed");
+    }
   };
 
   return (
@@ -33,18 +51,40 @@ export default function Login({ onLogin, darkMode, inModal, switchMode }) {
           <h1>Welcome Back</h1>
           <p>Log in to your Reddit account</p>
 
-          <input className="auth-input" type="email" placeholder="Email" />
-          <input className="auth-input" type="password" placeholder="Password" />
+          {error && <p className="auth-error">{error}</p>}
+
+          <input
+            className="auth-input"
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+
+          <input
+            className="auth-input"
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
 
           <button className="auth-btn" type="submit">
             Log In
           </button>
 
-          <p className="auth-small">Forgot your password?</p>
           <p className="auth-small">
             New to Reddit?{" "}
             {inModal ? (
-              <button type="button" className="auth-link-switch" onClick={switchMode}>Sign up</button>
+              <button
+                type="button"
+                className="auth-link-switch"
+                onClick={switchMode}
+              >
+                Sign up
+              </button>
             ) : (
               <a href="/signup">Sign up</a>
             )}

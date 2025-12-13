@@ -53,7 +53,7 @@ useEffect(() => {
     .catch((err) => {
       console.log("Error fetching count:", err);
     });
-}, [user?._id]);
+}, []);
 
 
 // REAL-TIME SOCKET UPDATES

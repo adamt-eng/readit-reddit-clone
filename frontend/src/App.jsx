@@ -8,7 +8,7 @@ import "./App.css";
 import axios from "axios"
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -60,32 +60,14 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); */
 
-  // ✅ Load a real user from backend for local testing
-  useEffect(() => {
-    async function loadUser() {
-      try {
-        const res = await axios.get(
-          "http://localhost:5000/users/search?q=john&page=1&limit=1"
-        );
+ 
+useEffect(() => {
+  setCurrentUser(mockUser);
+}, []);
+//remove
+        
 
-        const users = res.data?.results || [];
-        if (users.length) {
-          setCurrentUser(users[0]);   // ✅ has _id
-          setIsLoggedIn(true);
-        } else {
-          setCurrentUser(mockUser);
-          setIsLoggedIn(true);
-        }
-      } catch (err) {
-        console.error("Failed to load user from backend, using mock:", err);
-        setCurrentUser(mockUser);
-        setIsLoggedIn(true);
-      }
-    }
-
-    loadUser();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+   
 
   useLayoutEffect(() => {
     const savedDarkMode = localStorage.getItem("darkMode");

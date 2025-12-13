@@ -39,7 +39,7 @@ export default function AuthModal({ mode, onClose, onLogin, darkMode, setShowAut
             switchMode={switchMode}
           />
         ) : (
-          <Signup darkMode={darkMode} inModal switchMode={switchMode} />
+          <Signup onLogin={onLogin} darkMode={darkMode} inModal switchMode={switchMode} />
         )}
       </div>
     </div>
