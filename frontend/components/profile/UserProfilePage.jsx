@@ -15,8 +15,8 @@ import "./styles/dark.css";
 
 const API_BASE = "http://localhost:5000";
 
-export default function UserProfilePage({ isDark, toggleDarkMode }) {
-  const { id: userId } = useParams();   // 🔑 ID from URL
+export default function UserProfilePage({ isDark, toggleDarkMode, currentUser }) {
+  const { id: userId } = useParams(); // ✅ this is the param name in routes: /user/:id
   const [activeTab, setActiveTab] = useState("Overview");
 
   const [user, setUser] = useState(null);
@@ -29,17 +29,23 @@ export default function UserProfilePage({ isDark, toggleDarkMode }) {
         setLoading(true);
         setError("");
 
-        const res = await fetch(`${API_BASE}/users/${userId}`);
-        const data = await res.json();
+        // ✅ use userId (NOT id)
+        const url =
+          userId === "me"
+            ? `${API_BASE}/users/me`
+            : `${API_BASE}/users/${userId}`;
 
-        if (!res.ok) {
-          throw new Error(data.message || "User not found");
-        }
+        const res = await fetch(url, {
+          credentials: "include", // ✅ send cookie
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Failed to fetch user");
 
         setUser(data);
       } catch (err) {
         console.error(err);
-        setError(err.message);
+        setError(err.message || "Failed to fetch");
       } finally {
         setLoading(false);
       }
@@ -54,11 +60,21 @@ export default function UserProfilePage({ isDark, toggleDarkMode }) {
     <>
       <button
         onClick={toggleDarkMode}
+        aria-label="Toggle dark mode"
         style={{
           position: "fixed",
           top: "70px",
           right: "20px",
           zIndex: 10000,
+          padding: "10px 16px",
+          borderRadius: "999px",
+          background: isDark ? "#d7dadc" : "#1a1a1b",
+          color: isDark ? "#000" : "#fff",
+          border: "none",
+          fontWeight: "bold",
+          fontSize: "14px",
+          cursor: "pointer",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
         }}
       >
         {isDark ? "Light Mode" : "Dark Mode"}
@@ -74,19 +90,14 @@ export default function UserProfilePage({ isDark, toggleDarkMode }) {
 
               {user && <ProfileHeader user={user} />}
 
-              <ProfileTabs
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-              />
+              <ProfileTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
-              <ProfileContent
-                activeTab={activeTab}
-                user={user}
-              />
+              <ProfileContent activeTab={activeTab} user={user} />
             </main>
 
             <aside className="profile-aside">
-              {user && <ProfileSidebar user={user} />}
+              {/* ✅ pass currentUser so sidebar can decide if it's "my profile" */}
+              {user && <ProfileSidebar user={user} currentUser={currentUser} />}
             </aside>
           </div>
         </div>
