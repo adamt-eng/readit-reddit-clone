@@ -4,7 +4,7 @@ import { Routes, Route } from "react-router-dom";
 import HomePage from "../pages/HomePage/HomePage.jsx";
 import GuestHomePage from "../pages/GuestHomePage/GuestHomePage.jsx";
 import UserProfilePage from "../pages/ProfilePage/UserProfilePage.jsx";
-import EditProfilePage from "../components/profile/EditProfile/EditProfilePage.jsx";
+import EditProfilePage from "../pages/EditProfile/EditProfilePage.jsx";
 import CreatePost from "../components/Posts/CreatePost/CreatePost.jsx";
 import DirectMessages from "../pages/Direct Messages/DirectMessages.jsx";
 import CreateCommunityModal from "../components/Community/CreateCommunityModal/CreateCommunityModal.jsx";

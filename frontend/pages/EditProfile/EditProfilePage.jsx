@@ -1,9 +1,9 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import LeftSidebar from "../../LeftSidebar/LeftSidebar";
+import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 import "./EditProfilePage.css";
-import defaultAvatar from "../../../assets/default-avatar.png";
+import defaultAvatar from "../../assets/default-avatar.png";
 
 export default function EditProfilePage({ isDark, toggleDarkMode, setCurrentUser  }) {
   const navigate = useNavigate();
