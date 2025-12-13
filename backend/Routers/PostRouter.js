@@ -7,7 +7,8 @@ import {
   getPostsByUser,
   getPostById,
   upvotePost,
-  downvotePost
+  downvotePost,
+  getPersonalizedFeed
 } from "../Controllers/PostController.js";
 
 import { 
@@ -26,6 +27,14 @@ router.get("/communities", getPostableCommunities);
 
 // Create a new post (TEMP no auth)
 router.post("/", createPost);
+
+/* -----------------------------
+      PERSONALIZED FEED
+------------------------------ */
+
+// Get personalized feed (supports guest mode with no userId)
+router.get("/feed", getPersonalizedFeed);
+
 
 
 /* -----------------------------

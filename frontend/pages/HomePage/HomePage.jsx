@@ -1,32 +1,55 @@
-/* eslint-disable no-unused-vars */
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./HomePage.css";
+
 import TrendingPosts from "../../components/Posts/TrendingPosts/TrendingPosts";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 import RecentPosts from "../../components/Posts/RecentPosts/RecentPosts";
+
 import CreateCommunityModal from "../../components/Community/CreateCommunityModal/CreateCommunityModal";
+import { io } from "socket.io-client";
 import axios from "axios";
 
 
+const socket = io("http://localhost:5000");
+
+// Helper function to format time ago
+const formatTimeAgo = (dateString) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now - date;
+  const minutes = Math.floor(diffMs / (1000 * 60));
+  const hours = Math.floor(diffMs / (1000 * 60 * 60));
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const months = Math.floor(days / 30);
+  const years = Math.floor(days / 365);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days < 30) return `${days}d ago`;
+  if (months < 12) return `${months}mo ago`;
+  return `${years}y ago`;
+};
 
 const HomePage = ({onLogout, darkMode, onStartCommunity }) => {
-  const [user,setUser]=useState()
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+  const [isLoadingPosts, setIsLoadingPosts] = useState(true);
+
+  // Fetch user on component mount
   useEffect(() => {
     async function fetchUser() {
       try {
-        const res = await axios.get(`http://localhost:5000/users/69345c85481669617584618c`); //changtoauth
-        setUser(res.data)
+        const res = await axios.get(`http://localhost:5000/users/69345c85481669617584618c`); // change to auth later
+        setUser(res.data);
         console.log(res.data);
       } catch (err) {
         console.error("Error while loading user:", err);
       }
     }
-    fetchUser()
+    fetchUser();
   }, []);
-
-
-
-
 
   // Initialize viewMode from localStorage
   const [viewMode, setViewMode] = useState(() => {
@@ -51,8 +74,97 @@ const HomePage = ({onLogout, darkMode, onStartCommunity }) => {
     }
   });
 
+  // Initialize expandedPosts (for compact view) from localStorage
+  const [expandedPosts, setExpandedPosts] = useState(() => {
+    try {
+      const savedExpandedPosts = localStorage.getItem('expandedPosts');
+      if (savedExpandedPosts) {
+        const parsedPosts = JSON.parse(savedExpandedPosts);
+        return Array.isArray(parsedPosts) ? parsedPosts : [];
+      }
+    } catch (error) {
+      console.error('Error loading expanded posts from localStorage:', error);
+    }
+    return [];
+  });
+
+  // Fetch personalized feed from API
+  useEffect(() => {
+    async function fetchFeed() {
+      try {
+        setIsLoadingPosts(true);
+        const userId = user?._id || null;
+        const sortByParam = sortBy === "Best" ? "best" : 
+                          sortBy === "Hot" ? "hot" : 
+                          sortBy === "New" ? "new" : 
+                          sortBy === "Top" ? "top" : "best";
+        
+        console.log("Fetching feed with userId:", userId, "sort:", sortByParam);
+        
+        const res = await axios.get(`http://localhost:5000/posts/feed`, {
+          params: {
+            userId: userId,
+            sort: sortByParam,
+            limit: 50
+          }
+        });
+
+        console.log("Feed API response:", res.data);
+
+        // Transform API response to match frontend format
+        const transformedPosts = res.data.posts.map((p) => ({
+          id: p._id,
+          _id: p._id,
+          community: p.community || "",
+          user: p.user || "",
+          userAvatar: p.userAvatar || "/profile.png",
+          title: p.title || "",
+          content: p.content || "",
+          upvotes: p.upvotes || 0,
+          comments: p.comments || 0,
+          time: formatTimeAgo(p.createdAt),
+          userVote: 0,
+          image: p.media?.url || null,
+          isExpanded: expandedPosts.includes(p._id),
+          commentsList: [],
+          type: p.type || "text"
+        }));
+
+        // Apply saved votes from localStorage
+        try {
+          const savedPostVotes = localStorage.getItem('postVotes');
+          if (savedPostVotes) {
+            const postVotes = JSON.parse(savedPostVotes);
+            transformedPosts.forEach(post => {
+              const savedVote = postVotes[post.id];
+              if (savedVote !== undefined) {
+                post.userVote = savedVote;
+                post.upvotes = post.upvotes + savedVote;
+              }
+            });
+          }
+        } catch (error) {
+          console.error('Error loading votes from localStorage:', error);
+        }
+
+        console.log("Transformed posts:", transformedPosts.length);
+        setPosts(transformedPosts);
+      } catch (err) {
+        console.error("Error fetching feed:", err);
+        setPosts([]); // Set empty array on error instead of keeping old posts
+      } finally {
+        setIsLoadingPosts(false);
+      }
+    }
+
+    // Only fetch feed if we have a user (or null for guest mode)
+    // The API handles both cases (with userId or without)
+    fetchFeed();
+  }, [user?._id, sortBy, expandedPosts]);
+
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [commentInputs, setCommentInputs] = useState({});
+  const [posts, setPosts] = useState([]);
 
   // Initialize expandedPostId from localStorage
   const [expandedPostId, setExpandedPostId] = useState(() => {
@@ -66,20 +178,6 @@ const HomePage = ({onLogout, darkMode, onStartCommunity }) => {
       console.error('Error loading expanded post from localStorage:', error);
     }
     return null;
-  });
-
-  // Initialize expandedPosts (for compact view) from localStorage
-  const [expandedPosts, setExpandedPosts] = useState(() => {
-    try {
-      const savedExpandedPosts = localStorage.getItem('expandedPosts');
-      if (savedExpandedPosts) {
-        const parsedPosts = JSON.parse(savedExpandedPosts);
-        return Array.isArray(parsedPosts) ? parsedPosts : [];
-      }
-    } catch (error) {
-      console.error('Error loading expanded posts from localStorage:', error);
-    }
-    return [];
   });
 
   // Initialize joinedCommunities from localStorage
@@ -142,183 +240,6 @@ const HomePage = ({onLogout, darkMode, onStartCommunity }) => {
       return updatedComment;
     });
   };
-
-  const [posts, setPosts] = useState(() => {
-    const defaultPosts = [
-      { 
-        id: 1,
-        community: "programming", 
-        user: "dev_guru", 
-        userAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-        title: "Just launched my new React project - would love feedback!", 
-        content: "After 6 months of development, I've finally launched my React-based project management tool. Built with TypeScript, Redux, and Styled Components.",
-        upvotes: 1242, 
-        comments: 89,
-        time: "2 hours ago",
-        userVote: 0,
-        image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-        isExpanded: false,
-        commentsList: [
-          {
-            id: 1,
-            author: "react_master",
-            avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-            content: "This looks amazing! Can you share the repo?",
-            upvotes: 234,
-            userVote: 0,
-            time: "1 hour ago",
-            replies: [
-              {
-                id: 2,
-                author: "dev_guru",
-                avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-                content: "Sure! Here's the GitHub link: github.com/devguru/project",
-                upvotes: 89,
-                userVote: 0,
-                time: "45 min ago",
-                replies: []
-              }
-            ]
-          },
-          {
-            id: 3,
-            author: "css_lover",
-            avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-            content: "The UI is so clean! What did you use for styling?",
-            upvotes: 156,
-            userVote: 0,
-            time: "30 min ago",
-            replies: []
-          }
-        ]
-      },
-      { 
-        id: 2,
-        community: "reactjs", 
-        user: "react_fan", 
-        userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-        title: "React 19 features we're all excited about", 
-        content: "The React team has been teasing some amazing features for the next major release. Here's what we know so far...",
-        upvotes: 856, 
-        comments: 234,
-        time: "5 hours ago",
-        userVote: 0,
-        image: "https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-        isExpanded: false,
-        commentsList: [
-          {
-            id: 4,
-            author: "web_dev",
-            avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-            content: "The compiler optimizations sound promising! Can't wait to see the performance improvements.",
-            upvotes: 42,
-            userVote: 0,
-            time: "3 hours ago",
-            replies: []
-          }
-        ]
-      },
-      { 
-        id: 3,
-        community: "webdev", 
-        user: "css_wizard", 
-        userAvatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-        title: "CSS Grid vs Flexbox: When to use which?", 
-        content: "A comprehensive guide to help you decide when to reach for Grid and when Flexbox is the better choice for your layout needs.",
-        upvotes: 421, 
-        comments: 67,
-        time: "1 day ago",
-        userVote: 0,
-        image: null,
-        isExpanded: false,
-        commentsList: []
-      },
-      { 
-        id: 4,
-        community: null, 
-        user: user?.username || "current_user", 
-        userAvatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-        title: "My first React component - looking for code review!", 
-        content: "I've been learning React for a few weeks and just built my first custom component. It's a reusable modal that handles animations and accessibility. Would appreciate any feedback on the code structure and best practices!",
-        upvotes: 42, 
-        comments: 8,
-        time: "30 minutes ago",
-        userVote: 0,
-        image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-        isExpanded: false,
-        isUserPost: true,
-        commentsList: [
-          {
-            id: 5,
-            author: "senior_dev",
-            avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-            content: "Great start! The component structure looks clean. One suggestion: consider using React Portals for the modal to avoid z-index issues.",
-            upvotes: 15,
-            userVote: 0,
-            time: "15 minutes ago",
-            replies: [
-              {
-                id: 6,
-                author: user?.username || "current_user",
-                avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-                content: "Thanks for the tip! I'll look into React Portals - that sounds like a better approach.",
-                upvotes: 3,
-                userVote: 0,
-                time: "5 minutes ago",
-                replies: []
-              }
-            ]
-          }
-        ]
-      }
-    ];
-
-    try {
-      const savedPostVotes = localStorage.getItem('postVotes');
-      const savedCommentVotes = localStorage.getItem('commentVotes');
-      const savedExpandedPosts = localStorage.getItem('expandedPosts');
-      
-      // Apply saved expanded posts state
-      let postsWithExpandedState = defaultPosts;
-      if (savedExpandedPosts) {
-        const expandedPostIds = JSON.parse(savedExpandedPosts);
-        postsWithExpandedState = defaultPosts.map(post => ({
-          ...post,
-          isExpanded: expandedPostIds.includes(post.id)
-        }));
-      }
-
-      if (savedPostVotes || savedCommentVotes) {
-        const postVotes = savedPostVotes ? JSON.parse(savedPostVotes) : {};
-        const commentVotes = savedCommentVotes ? JSON.parse(savedCommentVotes) : {};
-
-        // Apply saved post votes
-        const updatedPosts = postsWithExpandedState.map(post => {
-          const savedVote = postVotes[post.id];
-          if (savedVote !== undefined) {
-            return {
-              ...post,
-              userVote: savedVote,
-              upvotes: post.upvotes + savedVote
-            };
-          }
-          return post;
-        });
-
-        // Apply saved comment votes recursively
-        return updatedPosts.map(post => ({
-          ...post,
-          commentsList: applyCommentVotes(post.commentsList, commentVotes)
-        }));
-      }
-
-      return postsWithExpandedState;
-    } catch (error) {
-      console.error('Error loading votes from localStorage:', error);
-    }
-
-    return defaultPosts;
-  });
 
   const sortOptions = ["Best", "Hot", "New", "Top", "Rising"];
 
@@ -453,11 +374,27 @@ const HomePage = ({onLogout, darkMode, onStartCommunity }) => {
     localStorage.removeItem('recentPosts');
   };
 
-  // Handle post click - add to recent posts
+  // Handle post click - add to recent posts and navigate
   const handlePostClick = (postId) => {
+    console.log("Clicked post ID:", postId);
+    
+    // Validate postId is not "feed" and looks like ObjectId
+    if (postId === "feed") {
+      console.error("Invalid postId 'feed' clicked");
+      return;
+    }
+    
+    // Check if it looks like MongoDB ObjectId
+    const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(postId);
+    if (!isValidObjectId) {
+      console.error("Invalid postId format:", postId);
+      return;
+    }
+    
     const post = posts.find(p => p.id === postId);
     if (post) {
       addToRecentPosts(post);
+      navigate(`/posts/${postId}`); // Use plural "posts" to match route
     }
   };
 
@@ -600,10 +537,24 @@ const HomePage = ({onLogout, darkMode, onStartCommunity }) => {
     });
   };
 
-  // Toggle comments visibility
+  // Toggle comments visibility - navigate to post page
   const toggleComments = (postId) => {
-    const newExpandedPostId = expandedPostId === postId ? null : postId;
-    setExpandedPostId(newExpandedPostId);
+    console.log("Toggle comments for post:", postId);
+    
+    // Validate postId is not "feed" and looks like ObjectId
+    if (postId === "feed") {
+      console.error("Invalid postId 'feed' for toggleComments");
+      return;
+    }
+    
+    // Check if it looks like MongoDB ObjectId
+    const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(postId);
+    if (!isValidObjectId) {
+      console.error("Invalid postId format for toggleComments:", postId);
+      return;
+    }
+    
+    navigate(`/posts/${postId}`); // Use plural "posts" to match route
   };
 
   // Handle comment input change
@@ -736,8 +687,8 @@ const HomePage = ({onLogout, darkMode, onStartCommunity }) => {
       {/* Use LeftSidebar component with start community button */}
       <LeftSidebar
         darkMode={darkMode}
-        showStartCommunity={true}
-        onStartCommunity={onStartCommunity}   // <-- pass it down
+        showStartCommunity={!!user}
+        onStartCommunity={onStartCommunity}
       />
 
       {/* Main Feed */}
@@ -802,6 +753,7 @@ const HomePage = ({onLogout, darkMode, onStartCommunity }) => {
           recentPosts={recentPosts}
           onClearRecentPosts={clearRecentPosts}
           showRecentPosts={true}
+          isLoading={isLoadingPosts}
         />
       </div>
 
