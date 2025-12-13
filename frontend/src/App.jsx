@@ -140,6 +140,7 @@ useEffect(() => {
         onLogin={handleLogin}
         isLoggedIn={isLoggedIn}
         currentUser={currentUser}
+        setCurrentUser={setCurrentUser} 
       />
 
       {/* Auth Modal */}
