@@ -43,7 +43,7 @@ export const signup = async (req, res) => {
     });
 
     const token = createToken({ id: user._id });
-
+    console.log(token)
     res.cookie("auth", token, {
       httpOnly: true,
       secure: false,

@@ -61,23 +61,7 @@ function App() {
   }, []); */
 
  
-useEffect(() => {
-    const loadMe = async () => {
-      try {
-        const res = await axios.get("http://localhost:5000/users/me", {
-          withCredentials: true,
-        });
 
-        setCurrentUser(res.data);
-        setIsLoggedIn(true);
-      } catch (err) {
-        setCurrentUser(null);
-        setIsLoggedIn(false);
-      }
-    };
-
-    loadMe();
-  }, []);
 
   
 
@@ -101,7 +85,6 @@ useEffect(() => {
       const res = await axios.get("http://localhost:5000/users/me", {
         withCredentials: true,
       });
-
       setCurrentUser(res.data);
       setIsLoggedIn(true);
     } catch (err) {

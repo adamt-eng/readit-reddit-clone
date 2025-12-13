@@ -5,7 +5,7 @@ import ProfileHeader from "../../components/profile/ProfileHeader";
 import ProfileTabs from "../../components/profile/ProfileTabs";
 import ProfileContent from "../../components/profile/ProfileContent";
 import ProfileSidebar from "../../components/profile/ProfileSidebar";
-
+import axios from "axios";
 import "../../components/profile/styles/profile.css";
 import "../../components/profile/styles/header.css";
 import "../../components/profile/styles/tabs.css";
@@ -15,7 +15,7 @@ import "../../components/profile/styles/dark.css";
 
 const API_BASE = "http://localhost:5000";
 
-export default function UserProfilePage({ isDark, toggleDarkMode, currentUser }) {
+export default function UserProfilePage({ isDark, toggleDarkMode,currentUser}) {
   const { id: userId } = useParams(); // ✅ this is the param name in routes: /user/:id
   const [activeTab, setActiveTab] = useState("Overview");
 
@@ -23,63 +23,45 @@ export default function UserProfilePage({ isDark, toggleDarkMode, currentUser })
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function loadUser() {
-      try {
-        setLoading(true);
-        setError("");
 
-        // ✅ use userId (NOT id)
-        const url =
-          userId === "me"
-            ? `${API_BASE}/users/me`
-            : `${API_BASE}/users/${userId}`;
 
-        const res = await fetch(url, {
-          credentials: "include", // ✅ send cookie
-        });
+useEffect(() => {
+  async function loadUser() {
+    try {
+      setLoading(true);
+      setError("");
 
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Failed to fetch user");
+      const url =
+        userId === "me"
+          ? `${API_BASE}/users/me`
+          : `${API_BASE}/users/${userId}`;
 
-        setUser(data);
-      } catch (err) {
-        console.error(err);
-        setError(err.message || "Failed to fetch");
-      } finally {
-        setLoading(false);
-      }
+      const res = await axios.get(url, {
+        withCredentials: true, // ✅ send cookie
+      });
+
+      setUser(res.data);
+    } catch (err) {
+      console.error(err);
+
+      setError(
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to fetch"
+      );
+    } finally {
+      setLoading(false);
     }
+  }
 
-    loadUser();
-  }, [userId]);
+  loadUser();
+}, [userId]);
+
 
   if (loading) return <div>Loading profile...</div>;
 
   return (
     <>
-      <button
-        onClick={toggleDarkMode}
-        aria-label="Toggle dark mode"
-        style={{
-          position: "fixed",
-          top: "70px",
-          right: "20px",
-          zIndex: 10000,
-          padding: "10px 16px",
-          borderRadius: "999px",
-          background: isDark ? "#d7dadc" : "#1a1a1b",
-          color: isDark ? "#000" : "#fff",
-          border: "none",
-          fontWeight: "bold",
-          fontSize: "14px",
-          cursor: "pointer",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-        }}
-      >
-        {isDark ? "Light Mode" : "Dark Mode"}
-      </button>
-
       <div className="profile-page-wrapper">
         <LeftSidebar />
 

@@ -43,7 +43,7 @@ app.use(cookieParser());
 
 
   app.use('/users',auth, UserRouter);
-  app.use('/posts',auth, PostRouter);
+  app.use('/posts', PostRouter);
   app.use('/communities',auth, CommunityRouter);
   app.use('/notifications',auth,NotificationRouter);
   app.use('/search',auth, SearchRouter);

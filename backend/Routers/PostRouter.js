@@ -23,10 +23,10 @@ const router = express.Router();
 ------------------------------ */
 
 // Communities dropdown for CreatePost page
-router.get("/communities", getPostableCommunities);
+router.get("/communities",auth, getPostableCommunities);
 
 // Create a new post (TEMP no auth)
-router.post("/", createPost);
+router.post("/",auth, createPost);
 
 /* -----------------------------
       PERSONALIZED FEED
@@ -42,10 +42,10 @@ router.get("/feed", getPersonalizedFeed);
 ------------------------------ */
 
 // Create a top-level comment under a post
-router.post("/:postId/comments", createComment);
+router.post("/:postId/comments",auth, createComment);
 
 // Get all comments for a post
-router.get("/:postId/comments", getCommentsForPost);
+router.get("/:postId/comments",auth, getCommentsForPost);
 
 
 /* -----------------------------
@@ -53,19 +53,19 @@ router.get("/:postId/comments", getCommentsForPost);
 ------------------------------ */
 
 // Upvote a post
-router.post("/:postId/upvote", upvotePost);
+router.post("/:postId/upvote",auth, upvotePost);
 // Downvote a post
-router.post("/:postId/downvote", downvotePost);
+router.post("/:postId/downvote",auth, downvotePost);
 
 
 /* -----------------------------
        SEARCH & USER POSTS
 ------------------------------ */
 
-router.get("/search", searchPosts);
+router.get("/search",auth, searchPosts);
 
 // Get all posts by a user
-router.get("/user/:userId", getPostsByUser);
+router.get("/user/:userId",auth, getPostsByUser);
 
 
 /* -----------------------------
@@ -73,6 +73,6 @@ router.get("/user/:userId", getPostsByUser);
 ------------------------------ */
 
 // Must stay last!
-router.get("/:postId", getPostById);
+router.get("/:postId",auth, getPostById);
 
 export default router;
