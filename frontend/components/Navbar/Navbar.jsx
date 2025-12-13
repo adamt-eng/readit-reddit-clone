@@ -7,7 +7,7 @@ import socket from "../../Socket/socket";
 import "./Navbar.css";
 
 
-export default function Navbar({ user, onLogout, isLoggedIn, darkMode, onToggleDarkMode, onLoginClick, onSignupClick }) {
+export default function Navbar({ setIsLoggedIn,setCurrentUser,user, isLoggedIn, darkMode, onToggleDarkMode, onLoginClick, onSignupClick }) {
   const navigate = useNavigate()
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -40,6 +40,22 @@ const handleSearch = () => {
   navigate(`/search?q=${encodeURIComponent(q)}`);
 };
 
+const handleLogout = async () => {
+  try {
+    await axios.post(
+      "http://localhost:5000/authentication/logout",
+      {},
+      { withCredentials: true }
+    );
+  } catch (err) {
+    console.error("Logout error:", err);
+  } finally {
+    setIsLoggedIn(false);
+    setCurrentUser(null);
+    setNotisCount(0);
+    navigate("/");
+  }
+};
 
 // FETCH INITIAL COUNT
 useEffect(() => {
@@ -94,7 +110,7 @@ useEffect(() => {
           onToggleDarkMode();
           break;
         case 'logout':
-          onLogout();
+          handleLogout();
           break;
         default:
           break;

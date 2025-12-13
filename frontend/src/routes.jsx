@@ -21,7 +21,6 @@ export default function AppRoutes({
   darkMode,
   toggleDarkMode,
   currentUser,
-  onLogout,
   onLogin,
   isLoggedIn,
 }) {
@@ -39,7 +38,6 @@ export default function AppRoutes({
           element={
             isLoggedIn ? (
               <HomePage
-                onLogout={onLogout}
                 darkMode={darkMode}
                 onStartCommunity={openCommunityModal}
               />
@@ -58,7 +56,6 @@ export default function AppRoutes({
             ) : (
               <HomePage
                 user={currentUser}
-                onLogout={onLogout}
                 darkMode={darkMode}
                 onStartCommunity={openCommunityModal}
               />
@@ -159,7 +156,6 @@ export default function AppRoutes({
             ) : (
               <HomePage
                 user={currentUser}
-                onLogout={onLogout}
                 darkMode={darkMode}
                 onStartCommunity={openCommunityModal}
               />
@@ -176,7 +172,6 @@ export default function AppRoutes({
             ) : (
               <HomePage
                 user={currentUser}
-                onLogout={onLogout}
                 darkMode={darkMode}
                 onStartCommunity={openCommunityModal}
               />

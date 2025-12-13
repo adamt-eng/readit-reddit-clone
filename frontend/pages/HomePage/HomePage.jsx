@@ -32,7 +32,7 @@ const formatTimeAgo = (dateString) => {
   return `${years}y ago`;
 };
 
-const HomePage = ({onLogout, darkMode, onStartCommunity }) => {
+const HomePage = ({ darkMode, onStartCommunity }) => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);

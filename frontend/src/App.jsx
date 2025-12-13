@@ -90,10 +90,6 @@ useEffect(() => {
     closeAuthModal();
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setCurrentUser(null);
-  };
 
   const toggleDarkMode = () => setDarkMode((prev) => !prev);
 
@@ -105,8 +101,9 @@ useEffect(() => {
       {!isAuthPage && (
         <Navbar
           user={currentUser}
-          onLogout={handleLogout}
           isLoggedIn={isLoggedIn}
+          setIsLoggedIn = {setIsLoggedIn}
+          setCurrentUser={setCurrentUser}
           darkMode={darkMode}
           onToggleDarkMode={toggleDarkMode}
           onLoginClick={openLoginModal}
@@ -118,7 +115,6 @@ useEffect(() => {
       <AppRoutes
         darkMode={darkMode}
         toggleDarkMode={toggleDarkMode}
-        onLogout={handleLogout}
         onLogin={handleLogin}
         isLoggedIn={isLoggedIn}
         currentUser={currentUser}
