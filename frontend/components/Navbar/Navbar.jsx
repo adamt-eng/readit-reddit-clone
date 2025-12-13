@@ -43,8 +43,9 @@ const handleSearch = () => {
 
 // FETCH INITIAL COUNT
 useEffect(() => {
+  if (!user?._id) return;
   axios
-    .get("http://localhost:5000/notifications/count/69345c85481669617584618c")
+    .get(`http://localhost:5000/notifications/count/${user._id}`)
     .then((res) => {
       console.log("Initial unread:", res.data.unreadCount);
       setNotisCount(res.data.unreadCount);
@@ -52,7 +53,7 @@ useEffect(() => {
     .catch((err) => {
       console.log("Error fetching count:", err);
     });
-}, []);
+}, [user?._id]);
 
 
 // REAL-TIME SOCKET UPDATES
@@ -163,11 +164,12 @@ useEffect(() => {
 
           <div className="profile-menu-container" ref={profileMenuRef}>
             <button className="profile-btn" onClick={toggleProfileMenu}>
-              <img 
-                src={user?.avatar || "../../assets/profile.png"} 
-                alt="Profile"
-                className="profile-avatar"
+              <img
+              src={user?.avatarUrl ? `http://localhost:5000${user.avatarUrl}` : "../../assets/profile.png"}
+              alt="Profile"
+              className="profile-avatar"
               />
+
               <span className="profile-name">{user?.username}</span>
               <svg className={`dropdown-icon ${showProfileMenu ? 'open' : ''} ${darkMode ? 'dark-mode' : ''}`} fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -177,11 +179,19 @@ useEffect(() => {
             {showProfileMenu && (
               <div className="profile-dropdown">
 
-                <Link 
-                  to={`/user/${user?.username}`} 
-                  className="dropdown-item"
-                  onClick={() => handleDropdownItemClick('profile')}
+                <Link
+                to={user?._id ? `/user/${user._id}` : "#"}
+                className="dropdown-item"
+                onClick={(e) => {
+                if (!user?._id) {
+                e.preventDefault();
+                alert("User id not loaded yet");
+                return;
+                }
+                handleDropdownItemClick("profile");
+              }}
                 >
+
                   <FaUser className="dropdown-icon" />
                   <span>Profile</span>
                 </Link>
