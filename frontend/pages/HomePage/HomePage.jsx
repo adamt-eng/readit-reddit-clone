@@ -687,7 +687,7 @@ const HomePage = ({onLogout, darkMode, onStartCommunity }) => {
       {/* Use LeftSidebar component with start community button */}
       <LeftSidebar
         darkMode={darkMode}
-        showStartCommunity={!!user}
+        showStartCommunity={true}
         onStartCommunity={onStartCommunity}
       />
 
