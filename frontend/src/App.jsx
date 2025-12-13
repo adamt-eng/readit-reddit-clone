@@ -24,8 +24,9 @@ function App() {
   const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";
 
   const mockUser = {
+    _id: "69345c85481669617584618c", // put a REAL ID from MongoDB Compass
     username: "john_doe",
-    avatar: "profile.png",
+    avatarUrl: "", // backend uses avatarUrl
     karma: 1247,
   };
 
@@ -59,6 +60,33 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); */
 
+  // ✅ Load a real user from backend for local testing
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const res = await axios.get(
+          "http://localhost:5000/users/search?q=john&page=1&limit=1"
+        );
+
+        const users = res.data?.results || [];
+        if (users.length) {
+          setCurrentUser(users[0]);   // ✅ has _id
+          setIsLoggedIn(true);
+        } else {
+          setCurrentUser(mockUser);
+          setIsLoggedIn(true);
+        }
+      } catch (err) {
+        console.error("Failed to load user from backend, using mock:", err);
+        setCurrentUser(mockUser);
+        setIsLoggedIn(true);
+      }
+    }
+
+    loadUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useLayoutEffect(() => {
     const savedDarkMode = localStorage.getItem("darkMode");
     const isDark = savedDarkMode === "true";
@@ -75,8 +103,8 @@ function App() {
   }, [darkMode, isLoading]);
 
   const handleLogin = () => {
+    // ✅ for now: just mark logged in and keep the loaded user
     setIsLoggedIn(true);
-    setCurrentUser(mockUser);
     closeAuthModal();
   };
 
