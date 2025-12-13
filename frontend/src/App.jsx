@@ -23,12 +23,12 @@ function App() {
   const location = useLocation();
   const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";
 
-  const mockUser = {
+  /* const mockUser = {
     _id: "693c92f1c4258e79913cd1d7", // put a REAL ID from MongoDB Compass
     username: "john_doe",
     avatarUrl: "", // backend uses avatarUrl
     karma: 1247,
-  };
+  }; */
 
   // Try to load a real user from the backend for local testing
   // for DM testing -- adam
@@ -62,10 +62,22 @@ function App() {
 
  
 useEffect(() => {
-  setCurrentUser(mockUser);
-}, []);
-//remove
-        
+    const loadMe = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/users/me", {
+          withCredentials: true,
+        });
+
+        setCurrentUser(res.data);
+        setIsLoggedIn(true);
+      } catch (err) {
+        setCurrentUser(null);
+        setIsLoggedIn(false);
+      }
+    };
+
+    loadMe();
+  }, []);
 
    
 
@@ -84,10 +96,20 @@ useEffect(() => {
     }
   }, [darkMode, isLoading]);
 
-  const handleLogin = () => {
-    // ✅ for now: just mark logged in and keep the loaded user
-    setIsLoggedIn(true);
-    closeAuthModal();
+  const handleLogin = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/users/me", {
+        withCredentials: true,
+      });
+
+      setCurrentUser(res.data);
+      setIsLoggedIn(true);
+    } catch (err) {
+      setCurrentUser(null);
+      setIsLoggedIn(false);
+    } finally {
+      closeAuthModal();
+    }
   };
 
 
