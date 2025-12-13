@@ -24,7 +24,7 @@ function App() {
   const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";
 
   const mockUser = {
-    _id: "69345c85481669617584618c", // put a REAL ID from MongoDB Compass
+    _id: "693c92f1c4258e79913cd1d7", // put a REAL ID from MongoDB Compass
     username: "john_doe",
     avatarUrl: "", // backend uses avatarUrl
     karma: 1247,
