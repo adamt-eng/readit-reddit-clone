@@ -5,6 +5,7 @@ import './EditProfilePage.css';
 export default function EditProfilePage({ isDark, toggleDarkMode }) {
   return (
     <>
+    
       {/* Dark Mode Toggle Button — same as profile page */}
       <button
         onClick={toggleDarkMode}

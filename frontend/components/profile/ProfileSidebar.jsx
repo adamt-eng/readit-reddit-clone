@@ -1,26 +1,47 @@
 import { Link } from 'react-router-dom';
 
-export default function ProfileSidebar() {
+export default function ProfileSidebar({ user }) {
   return (
     <div className="profile-sidebar">
       <div className="profile-sidebar-top" />
       
-      <img
+      {/* <img
         src="../../assets/default-avatar.png"
         alt="avatar"
         className="profile-sidebar-avatar"
       />
+ */}
+      <img
+  src={
+    user?.avatarUrl
+      ? `http://localhost:5000${user.avatarUrl}`
+      : "../../assets/default-avatar.png"
+  }
+  alt="avatar"
+  className="profile-sidebar-avatar"
+/>
 
+
+        
       <div className="profile-sidebar-info">
-        <h2 className="profile-sidebar-name">Moist_Barber_9724</h2>
-        <p className="profile-sidebar-handle">u/Moist_Barber_9724</p>
+        <h2 className="profile-sidebar-name">
+        {user?.username}
+        </h2>
+
+        <p className="profile-sidebar-handle">
+          u/{user?.username}
+        </p>
+
 
         <button>Share</button>
 
-        {/* ← NEW: EDIT PROFILE BUTTON */}
-       <Link to="/edit-profile">
-        <button className="edit-profile-sidebar-btn">Edit Profile</button>
-        </Link>
+        {user && (
+  <Link to={`/edit-profile/${user._id}`}>
+    <button className="edit-profile-sidebar-btn">
+      Edit Profile
+    </button>
+  </Link>
+)}
 
 
         <div className="profile-stats-grid">
