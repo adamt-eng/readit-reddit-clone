@@ -196,21 +196,13 @@ useEffect(() => {
               <div className="profile-dropdown">
 
                 <Link
-                to={user?._id ? `/user/${user._id}` : "#"}
-                className="dropdown-item"
-                onClick={(e) => {
-                if (!user?._id) {
-                e.preventDefault();
-                alert("User id not loaded yet");
-                return;
-                }
-                handleDropdownItemClick("profile");
-              }}
-                >
-
-                  <FaUser className="dropdown-icon" />
-                  <span>Profile</span>
-                </Link>
+  to="/user/me"
+  className="dropdown-item"
+  onClick={() => handleDropdownItemClick("profile")}
+>
+  <FaUser className="dropdown-icon" />
+  <span>Profile</span>
+</Link>
 
                 <div 
                   className="dropdown-item"
