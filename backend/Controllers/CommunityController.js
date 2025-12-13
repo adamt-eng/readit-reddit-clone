@@ -22,7 +22,7 @@ export const createCommunity = async (req, res) => {
       name: name.toLowerCase(),
       title: title || name,
       description,
-      createdBy: "000000000000000000000000", // TEMPORARY
+      createdBy: req.user.id, 
       createdAt: new Date(),
       nsfw: nsfw || false,
       memberCount: 1,
@@ -31,6 +31,13 @@ export const createCommunity = async (req, res) => {
     });
 
     const saved = await community.save();
+    await Membership.create({
+      userId: req.user.id,        
+      communityId: saved._id,
+      role: "moderator",            
+      joinedAt: new Date()
+    });
+
     return res.status(201).json(saved);
   } catch (err) {
     console.error(err);
@@ -64,15 +71,39 @@ export const getCommunityByName = async (req, res) => {
 // ----------------------------------------------------
 export const deleteCommunity = async (req, res) => {
   try {
+    // must be logged in (auth middleware should set req.user.id)
+    if (!req.user?.id) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
     const { name } = req.params;
 
-    const deleted = await Community.findOneAndDelete({
-      name: name.toLowerCase(),
-    });
-
-    if (!deleted) {
+    // find the community first
+    const community = await Community.findOne({ name: name.toLowerCase() });
+    if (!community) {
       return res.status(404).json({ message: "Community not found" });
     }
+
+    // check membership for THIS community
+    const membership = await Membership.findOne({
+      userId: req.user.id,
+      communityId: community._id,
+    });
+
+    if (!membership || membership.role !== "moderator") {
+      return res.status(403).json({ message: "Only moderators can delete this community"});
+    }
+
+    // only moderators can delete
+    if (membership.role !== "moderator") {
+      return res.status(403).json({ message: "Only moderators can delete this community" });
+    }
+
+    // optional cleanup
+    await Membership.deleteMany({ communityId: community._id });
+    // await Post.deleteMany({ communityId: community._id }); // if you want delete posts too
+
+    await Community.deleteOne({ _id: community._id });
 
     return res.json({ message: "Community deleted successfully" });
   } catch (err) {
@@ -81,6 +112,7 @@ export const deleteCommunity = async (req, res) => {
   }
 };
 
+
 // Join Community
 export const joinCommunity = async (req, res) => {
   try {
@@ -88,7 +120,7 @@ export const joinCommunity = async (req, res) => {
       return res.status(401).json({ message: "Not authenticated" });
     }
 
-    const community = await Community.findOne({ name: req.params.name });
+    const community = await Community.findOne({ name: req.params.name.toLowerCase() });
     if (!community) {
       return res.status(404).json({ message: "Community not found" });
     }

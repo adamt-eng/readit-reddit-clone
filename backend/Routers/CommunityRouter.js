@@ -11,9 +11,8 @@ const router = express.Router();
 
 
 router.post("/:name/join", auth, joinCommunity);
-
-router.post("/", createCommunity);
+router.post("/",auth, createCommunity);
 router.get("/:name", getCommunityByName);
-router.delete("/:name", deleteCommunity);
+router.delete("/:name",auth, deleteCommunity);
 
 export default router;

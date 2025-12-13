@@ -1,18 +1,16 @@
 import PostCard from "../PostCard/PostCard";
 import "./PostList.css";
 
-function PostList({ posts }) {
-    if (!posts || posts.length === 0) {
-        return <p className="noPosts">No posts to display.</p>;
-    }
+function PostList({ posts, ...postCardProps }) {
+  if (!posts || posts.length === 0) return <p className="noPosts">No posts to display.</p>;
 
-    return (
-        <div className="postList">
-            {posts.map((post) => (
-                <PostCard key={post.id} post={post} />
-            ))}
-        </div>
-    );
+  return (
+    <div className="postList">
+      {posts.map((post) => (
+        <PostCard key={post.id} post={post} {...postCardProps} />
+      ))}
+    </div>
+  );
 }
 
 export default PostList;

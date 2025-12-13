@@ -4,6 +4,7 @@ import "./HomePage.css";
 import TrendingPosts from "../../components/Posts/TrendingPosts/TrendingPosts";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 import RecentPosts from "../../components/Posts/RecentPosts/RecentPosts";
+import CreateCommunityModal from "../../components/Community/CreateCommunityModal/CreateCommunityModal";
 import axios from "axios";
 
 

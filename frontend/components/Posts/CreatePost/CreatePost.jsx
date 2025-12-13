@@ -4,6 +4,7 @@ import PostTabs from "../PostTabs/PostTabs";
 import FormPostText from "../FormPostText/FormPostText";
 import FormPostImage from "../FormPostImage/FormPostImage";
 import FormPostLink from "../FormPostLink/FormPostLink";
+import { useSearchParams } from "react-router-dom";
 
 import "./CreatePost.css";
 
@@ -15,6 +16,10 @@ export default function CreatePost({ isDark }) {
   const [showDropdown, setShowDropdown] = useState(false);
 
   const dropdownRef = useRef(null);
+
+  //Read community from URL: /create-post?community=asucommunity
+  const [searchParams] = useSearchParams();
+  const communityFromUrl = searchParams.get("community");
 
   // TEMP USER
   const TEMP_USER_ID = "6938a02cea96c570c169d837";
@@ -28,13 +33,21 @@ export default function CreatePost({ isDark }) {
         );
         const data = await res.json();
         setCommunities(data);
+
+        //Auto-select community if coming from community page
+        if (communityFromUrl) {
+          const match = data.find(
+            (c) => c.name?.toLowerCase() === communityFromUrl.toLowerCase()
+          );
+          if (match) setSelectedCommunity(match);
+        }
       } catch (err) {
         console.error("Failed to fetch communities", err);
       }
     };
 
     fetchCommunities();
-  }, []);
+  }, [communityFromUrl]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -55,7 +68,6 @@ export default function CreatePost({ isDark }) {
       <div className="createpost-page">
         <div className="create-post-wrapper">
           <div className="create-post-container">
-
             {/* Header */}
             <div className="create-post-header">
               <div className="create-post-title">Create post</div>
@@ -140,7 +152,6 @@ export default function CreatePost({ isDark }) {
                 userId={TEMP_USER_ID}
               />
             )}
-
           </div>
         </div>
 
