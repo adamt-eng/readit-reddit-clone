@@ -105,19 +105,19 @@ export default function AppRoutes({
 
         {/* Edit profile */}
         <Route
-          path="/edit-profile/:id"
-          element={
-            isLoggedIn ? (
-              <EditProfilePage
-                isDark={darkMode}
-                toggleDarkMode={toggleDarkMode}
-                currentUser={currentUser}
-              />
-            ) : (
-              <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
-            )
-          }
-        />
+  path="/edit-profile"
+  element={
+    isLoggedIn ? (
+      <EditProfilePage
+        isDark={darkMode}
+        toggleDarkMode={toggleDarkMode}
+      />
+    ) : (
+      <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
+    )
+  }
+/>
+
 
         {/* Create post */}
         <Route
