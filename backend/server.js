@@ -40,16 +40,16 @@ app.use(cookieParser());
 
   app.use('/authentication', AuthRouter);
 
-  app.use(auth); // add later after testing
 
-  app.use('/users', UserRouter);
-  app.use('/posts', PostRouter);
-  app.use('/communities', CommunityRouter);
-  app.use('/notifications',NotificationRouter);
-  app.use('/search', SearchRouter);
-  app.use("/upload", UploadRouter);
-  app.use('/ai-summary', AiSummaryRouter);
-  app.use('/comments', CommentRouter);
+
+  app.use('/users',auth, UserRouter);
+  app.use('/posts',auth, PostRouter);
+  app.use('/communities',auth, CommunityRouter);
+  app.use('/notifications',auth,NotificationRouter);
+  app.use('/search',auth, SearchRouter);
+  app.use("/upload",auth, UploadRouter);
+  app.use('/ai-summary',auth, AiSummaryRouter);
+  app.use('/comments',auth, CommentRouter);
 
   /* ------------ MONGO CONNECTION ------------ */
 
