@@ -1,9 +1,9 @@
 /* eslint-disable no-undef */
-// pages/GuestHomePage/GuestHomePage.jsx
 import React, { useState, useEffect } from "react";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 import PopularCommunities from "../../components/Community/PopularCommunities/PopularCommunities";
 import TrendingPosts from "../../components/Posts/TrendingPosts/TrendingPosts";
+import axios from "axios";
 import "./GuestHomePage.css";
 
 export default function GuestHomePage({ darkMode, onLogin }) {
@@ -36,134 +36,98 @@ export default function GuestHomePage({ darkMode, onLogin }) {
     }
   });
 
-  const [posts,setPosts] = useState([
-    { 
-      id: 1,
-      community: "news", 
-      user: "newsbot", 
-      userAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-      title: "Ukraine faces losing dignity or US-large peace deal considerations", 
-      content: "Despite ongoing negotiations, Ukraine faces difficult choices in the peace deal discussions with international mediators.",
-      upvotes: 452, 
-      comments: 120,
-      time: "4 hours ago",
-      userVote: 0,
-      image: "https://images.unsplash.com/photo-1593115057322-e94b77572f20?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-      isExpanded: false,
-      commentsList: [
-        {
-          id: 1,
-          author: "world_traveler",
-          avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-          content: "This is such an important development. Hope they reach a peaceful resolution soon.",
-          upvotes: 45,
+  const [posts, setPosts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [sortBy, setSortBy] = useState("best");
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
+
+  // Helper function to format time ago
+  const formatTimeAgo = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const minutes = Math.floor(diffMs / (1000 * 60));
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const months = Math.floor(days / 30);
+    const years = Math.floor(days / 365);
+    if (minutes < 1) return "just now";
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days < 30) return `${days}d ago`;
+    if (months < 12) return `${months}mo ago`;
+    return `${years}y ago`;
+  };
+
+  // Fetch posts from API
+  useEffect(() => {
+    async function fetchGuestFeed() {
+      try {
+        setIsLoading(true);
+        
+        const sortByParam = sortBy === "Best" ? "best" : 
+                          sortBy === "Hot" ? "hot" : 
+                          sortBy === "New" ? "new" : 
+                          sortBy === "Top" ? "top" : "best";
+        
+        console.log("Fetching guest feed with sort:", sortByParam);
+        
+        const res = await axios.get(`http://localhost:5000/posts/feed`, {
+          params: {
+            sort: sortByParam,
+            limit: 50
+          }
+        });
+
+        console.log("Guest feed API response:", res.data);
+
+        const transformedPosts = (res.data.posts || []).map((p) => ({
+          id: p._id,
+          _id: p._id,
+          community: p.community || "",
+          user: p.user || "",
+          userAvatar: p.userAvatar || "/profile.png",
+          title: p.title || "",
+          content: p.content || "",
+          upvotes: p.upvotes || 0,
+          comments: p.comments || 0,
+          time: formatTimeAgo(p.createdAt),
           userVote: 0,
-          time: "2 hours ago",
-          replies: [
-            {
-              id: 2,
-              author: "politics_nerd",
-              avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-              content: "Agreed! The international community needs to support diplomatic solutions.",
-              upvotes: 23,
-              userVote: 0,
-              time: "1 hour ago",
-              replies: []
-            }
-          ]
-        },
-        {
-          id: 3,
-          author: "history_buff",
-          avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-          content: "Historical context is important here. Similar situations have occurred in the past.",
-          upvotes: 31,
-          userVote: 0,
-          time: "45 min ago",
-          replies: []
+          image: p.media?.url || null,
+          isExpanded: expandedPosts.includes(p._id),
+          commentsList: [],
+          type: p.type || "text"
+        }));
+
+        try {
+          const savedPostVotes = localStorage.getItem('postVotes');
+          if (savedPostVotes) {
+            const postVotes = JSON.parse(savedPostVotes);
+            transformedPosts.forEach(post => {
+              const savedVote = postVotes[post.id];
+              if (savedVote !== undefined) {
+                post.userVote = savedVote;
+                post.upvotes = post.upvotes + savedVote;
+              }
+            });
+          }
+        } catch (error) {
+          console.error('Error loading votes from localStorage:', error);
         }
-      ]
-    },
-    { 
-      id: 2,
-      community: "worldnews", 
-      user: "wildlifenews", 
-      userAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-      title: "Grizzly attacks hiker on remote Canadian beach trail", 
-      content: "A hiker was unexpectedly attacked by a grizzly bear while exploring remote trails in British Columbia. Rescue operations are underway.",
-      upvotes: 321, 
-      comments: 45,
-      time: "6 hours ago",
-      userVote: 0,
-      image: "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-      isExpanded: false,
-      commentsList: [
-        {
-          id: 4,
-          author: "outdoor_enthusiast",
-          avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-          content: "Always carry bear spray when hiking in grizzly country! Stay safe out there.",
-          upvotes: 67,
-          userVote: 0,
-          time: "3 hours ago",
-          replies: []
-        }
-      ]
-    },
-    { 
-      id: 3,
-      community: "movies", 
-      user: "movieupdates",
-      userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-      title: "Wicked Part 2 box office projections exceed expectations", 
-      content: "Early box office projections for Wicked Part 2 are surpassing industry expectations, with pre-sales breaking records.",
-      upvotes: 200, 
-      comments: 33,
-      time: "1 day ago",
-      userVote: 0,
-      image: null,
-      isExpanded: false,
-      commentsList: []
-    },
-    { 
-      id: 4,
-      community: null,
-      user: "react_learner",
-      userAvatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-      title: "Just built my first React todo app - any feedback welcome!", 
-      content: "After learning React for a month, I finally built a todo app with local storage persistence. It has add, delete, and toggle complete functionality. Would love any suggestions for improvement!",
-      upvotes: 78, 
-      comments: 12,
-      time: "2 hours ago",
-      userVote: 0,
-      image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-      isExpanded: false,
-      isUserPost: true,
-      commentsList: [
-        {
-          id: 5,
-          author: "senior_dev",
-          avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-          content: "Great job! The code structure looks clean. One suggestion: consider adding drag-and-drop functionality for reordering tasks.",
-          upvotes: 24,
-          userVote: 0,
-          time: "1 hour ago",
-          replies: [
-            {
-              id: 6,
-              author: "react_learner",
-              avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-              content: "Thanks! I'll look into react-beautiful-dnd for that feature.",
-              upvotes: 8,
-              userVote: 0,
-              time: "30 minutes ago",
-              replies: []
-            }
-          ]
-        }
-      ]
+
+        console.log("Transformed guest posts:", transformedPosts.length);
+        setPosts(transformedPosts);
+      } catch (err) {
+        console.error("Error fetching guest feed:", err);
+        setPosts([]);
+      } finally {
+        setIsLoading(false);
+      }
     }
-  ]);
+
+    fetchGuestFeed();
+  }, [sortBy, expandedPosts]);
 
   const popularCommunities = [
     { 
@@ -221,7 +185,7 @@ export default function GuestHomePage({ darkMode, onLogin }) {
   }, [expandedPosts]);
 
   useEffect(() => {
-    if (expandedPosts.length > 0) {
+    if (expandedPosts.length > 0 && posts.length > 0) {
       setPosts(prevPosts => 
         prevPosts.map(post => ({
           ...post,
@@ -256,8 +220,12 @@ export default function GuestHomePage({ darkMode, onLogin }) {
     promptLogin();
   };
 
-  const handlePostClick = () => {
-    // Guest post viewing logic could go here
+  const handlePostClick = (postId) => {
+    console.log("Guest clicked post:", postId);
+    const post = posts.find(p => p.id === postId);
+    if (post) {
+      promptLogin();
+    }
   };
 
   const handleHidePost = () => promptLogin();
@@ -313,13 +281,14 @@ export default function GuestHomePage({ darkMode, onLogin }) {
       
       <div className="main-feed">
         <div className="feed-controls">
-          <button 
-            className="view-toggle-btn" 
-            onClick={toggleViewMode}
-            title={`Current: ${viewMode} view`}
-          >
-            {viewMode === 'card' ? '☐' : '≡'}
-          </button>
+          <div className="sort-options">
+            {/* REMOVED THE SORT DROPDOWN - ONLY KEEPING THE VIEW TOGGLE BUTTON */}
+            
+            {/* View Toggle */}
+            <button className="view-toggle-btn" onClick={toggleViewMode}>
+              {viewMode === 'card' ? '☐' : '≡'}
+            </button>
+          </div>
         </div>
 
         <TrendingPosts
@@ -339,14 +308,13 @@ export default function GuestHomePage({ darkMode, onLogin }) {
           onHidePost={handleHidePost}
           onUnhidePost={() => {}}
           hiddenPosts={[]}
-          onUpvote={handleUpvote}
-          onDownvote={handleDownvote}
           onCommentVote={handleCommentVote}
           onCommentReply={handleCommentReply}
           getThumbnailImage={getThumbnailImage}
           toggleExpand={toggleExpand}
           isGuest={true}
           onPromptLogin={promptLogin}
+          isLoading={isLoading}
         />
       </div>
 
