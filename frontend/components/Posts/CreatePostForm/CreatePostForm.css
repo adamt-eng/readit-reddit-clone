@@ -1,9 +1,10 @@
-.form-link {
+.create-post-form {
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 
+/* INPUT */
 .input-wrap {
   position: relative;
   display: flex;
@@ -22,7 +23,6 @@
   font-size: 1.2rem;
   font-weight: 500;
   outline: none;
-  padding: 0;
   color: #1a1a1b;
 }
 
@@ -30,10 +30,6 @@
   color: #ff4500;
   margin-left: -4px;
   font-size: 1.3em;
-}
-
-.link-wrap {
-  margin-top: 0;
 }
 
 .title-count {
@@ -44,19 +40,57 @@
   color: #878a8c;
 }
 
-.tags-btn {
-  font-size: 1em;
-  padding: 8px 22px;
+/* TEXTAREA */
+.textarea-wrap {
+  background: #ffffff;
+  border: 1.5px solid #edeff1;
   border-radius: 12px;
-  background: #f6f7f8;
-  color: #b4b8be;
-  border: none;
-  margin-left: 6px;
-  cursor: not-allowed;
 }
 
-.btn-row {
+.textarea {
+  width: 100%;
+  min-height: 90px;
+  border: none;
+  resize: vertical;
+  outline: none;
+  background: transparent;
+  padding: 12px;
+  font-size: 1.1rem;
+  color: #1a1a1b;
+}
+
+
+/* LINK */
+.link-wrap {
+  margin-top: 0;
+}
+
+/* IMAGE */
+.dropzone {
+  width: 100%;
+  min-height: 145px;
+  border: 1.5px dashed #d7dadc;
+  border-radius: 18px;
+  background: #fcfcfb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-align: center;
+}
+
+.dropzone:hover {
+  background: #f3f6fa;
+}
+
+.image-preview {
   margin-top: 8px;
+  font-size: 1rem;
+}
+
+/* BUTTONS */
+.btn-row {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
@@ -67,67 +101,44 @@
   border-radius: 9999px;
   padding: 8px 22px;
   font-weight: bold;
-  font-size: 1rem;
   background: #edeff1;
   color: #787c83;
   cursor: not-allowed;
-  transition: background 0.18s;
 }
 
 .btn.primary {
   background: #0079d3;
-  color: #fff;
+  color: #ffffff;
   cursor: pointer;
 }
 
 .btn.primary:disabled {
   background: #d9eafa;
   color: #a8b8c7;
-  cursor: not-allowed;
 }
 
-/* ---------------------------------------------------- */
-/* --- Dark Mode Styles --- */
-/* ---------------------------------------------------- */
-
-.main-page-layout.dark-mode .input-wrap {
+/* DARK MODE */
+.dark .input-wrap,
+.dark .textarea-wrap,
+.dark .dropzone {
   background: #272729;
   border-color: #343536;
 }
 
-.main-page-layout.dark-mode .input {
+.dark .input,
+.dark .textarea {
   color: #d7dadc;
 }
 
-.main-page-layout.dark-mode .input::placeholder {
+.dark .title-count {
   color: #818384;
 }
 
-.main-page-layout.dark-mode .title-count {
-  color: #818384;
-}
-
-.main-page-layout.dark-mode .input-required {
-  color: #ff4500;
-}
-
-.main-page-layout.dark-mode .tags-btn {
-  background: #272729;
-  color: #565758;
-  border-color: #343536;
-}
-
-.main-page-layout.dark-mode .btn {
+.dark .btn {
   background: #343536;
   color: #818384;
 }
 
-.main-page-layout.dark-mode .btn.primary {
-  background: #0079d3;
-  color: #fff;
-}
-
-.main-page-layout.dark-mode .btn.primary:disabled {
+.dark .btn.primary:disabled {
   background: #1a4164;
-  color: #4a5c6e;
 }
