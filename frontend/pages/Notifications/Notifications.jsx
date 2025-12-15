@@ -4,6 +4,7 @@ import NotificationItem from "../../components/NotificationItem/NotificationItem
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 import axios from "axios";
 
+
 // Format date 
 function formatTimeAgo(date) {
   const diff = Date.now() - new Date(date).getTime();

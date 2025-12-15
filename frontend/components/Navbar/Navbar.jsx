@@ -3,6 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaSearch, FaPlus, FaBell, FaUser, FaCog, FaSignOutAlt, FaMoon, FaSun, FaComment } from "react-icons/fa";
 import axios from "axios"
 import { io } from "socket.io-client";
+import { useLocation } from "react-router-dom";
+
+
 
 
 import "./Navbar.css";
@@ -15,6 +18,9 @@ export default function Navbar({ setIsLoggedIn,setuser,user, isLoggedIn, darkMod
   const [searchText, setSearchText] = useState("");
   const [notisCount,setNotisCount]=useState(0);
 
+    const location = useLocation();
+    console.log(location);
+    
   const profileMenuRef = useRef(null);
 
   const promptLogin = () => alert("Login to continue");
@@ -204,7 +210,7 @@ useEffect(() => {
 
           <Link onClick = {()=>{handleOpenNotifications()}} to="/notifications" className="nav-icon-btn" title="Notifications">
             <FaBell  />
-            {notisCount > 0 && (
+            {location.pathname != "/notifications" && notisCount > 0 && (
               <span className="notification-badge">{notisCount}</span>
             )}
           </Link>
