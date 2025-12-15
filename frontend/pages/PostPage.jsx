@@ -14,7 +14,8 @@ export default function PostPage() {
   const [isSummaryMode, setIsSummaryMode] = useState(false);
   const [animatedText, setAnimatedText] = useState("");
 
-  // LOAD POST + COMMENTS
+  /* ---------------- LOAD POST + COMMENTS ---------------- */
+
   useEffect(() => {
     const fetchPost = async () => {
       const res = await fetch(
@@ -35,7 +36,10 @@ export default function PostPage() {
         text: data.content,
         image: data.media?.url,
         votes: data.upvoteCount - data.downvoteCount,
-        commentsCount: data.commentCount
+        commentsCount: data.commentCount,
+
+        // REQUIRED for correct voting behavior
+        userVote: 0
       });
     };
 
@@ -72,7 +76,47 @@ export default function PostPage() {
     load();
   }, [postId]);
 
-  // GENERATE SUMMARY (auth-safe, backend decides)
+  /* ---------------- VOTING (BACKEND AUTHORITATIVE) ---------------- */
+
+const handleVote = async (voteScore) => {
+  try {
+    const res = await fetch(
+      `http://localhost:5000/votes/${postId}`,
+      {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ voteScore }),
+      }
+    );
+
+    if (!res.ok) {
+      console.error("Vote failed:", res.status);
+      return;
+    }
+
+    const data = await res.json();
+
+    setPost((prev) => ({
+      ...prev,
+
+      // ✅ backend is authoritative
+      votes: data.post.upvoteCount - data.post.downvoteCount,
+
+      // ✅ toggle logic stays frontend-side
+      userVote: prev.userVote === voteScore ? 0 : voteScore,
+    }));
+  } catch (err) {
+    console.error("Vote request error:", err);
+  }
+};
+
+
+
+  /* ---------------- AI SUMMARY ---------------- */
+
   const handleGenerateSummary = async () => {
     try {
       setIsSummarizing(true);
@@ -80,7 +124,7 @@ export default function PostPage() {
 
       const res = await fetch(
         `http://localhost:5000/ai-summary/${postId}/generate`,
-        { credentials: "include" } 
+        { credentials: "include" }
       );
 
       if (!res.ok) {
@@ -121,6 +165,8 @@ export default function PostPage() {
     }
   };
 
+  /* ---------------- RENDER ---------------- */
+
   if (loading || !post) return <div>Loading...</div>;
 
   return (
@@ -131,11 +177,15 @@ export default function PostPage() {
           text: isSummaryMode ? animatedText : post.text
         }}
         comments={comments}
-        onUpvote={() => setPost((p) => ({ ...p, votes: p.votes + 1 }))}
-        onDownvote={() => setPost((p) => ({ ...p, votes: p.votes - 1 }))}
+
+        // ✔ correct voting
+        onUpvote={() => handleVote(1)}
+        onDownvote={() => handleVote(-1)}
+
         onComment={() => {}}
         onVote={() => {}}
         onReply={() => {}}
+
         isSummaryMode={isSummaryMode}
         isSummarizing={isSummarizing}
         onGenerateSummary={handleGenerateSummary}
