@@ -1,7 +1,6 @@
 import { useState, useLayoutEffect, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar/Navbar.jsx";
-import GuestHomePage from "../pages/GuestHomePage/GuestHomePage.jsx";
 import AppRoutes from "./routes.jsx";
 import AuthModal from "../pages/Authentication/AuthModal.jsx";
 import "./App.css";
@@ -62,7 +61,8 @@ useEffect(() => {
         withCredentials: true,
       });
       setCurrentUser(res.data);
-    } catch (err) {
+      setIsLoggedIn(true);
+    } catch {
       setCurrentUser(null);
     } finally {
       closeAuthModal();

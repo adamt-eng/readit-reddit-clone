@@ -31,6 +31,13 @@ useEffect(() => {
   fetchMe();
 }, []);
 
+  const resolveAvatar = (url) => {
+    if (!url) return "/profile.png";
+    if (url.startsWith("http://") || url.startsWith("https://")) return url;
+    // backend serves uploads at http://localhost:5000/uploads/...
+    return `http://localhost:5000${url}`;
+  };
+
   useEffect(() => {
     if (currentUser && currentUser._id) {
       socket.emit("register", currentUser._id);
@@ -59,7 +66,7 @@ useEffect(() => {
     if (currentUser === null) fetchConversations();
     // if no currentUser, wait until App sets it
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUser]);
+  }, [ ]);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -177,7 +184,7 @@ useEffect(() => {
                     className="chat-search-item"
                     onClick={() => createConversationWithUser(u)}
                   >
-                    <img src={u.avatarUrl || "/profile.png"} className="chat-avatar" alt="av" />
+                    <img src={resolveAvatar(u.avatarUrl)} className="chat-avatar" alt="av" />
                     <div style={{ marginLeft: 8 }}>
                       <div style={{ fontWeight: 700 }}>{u.username}</div>
                       <div style={{ fontSize: 12, color: "var(--dm-subtext)" }}>{u.karma ? `${u.karma} karma` : ""}</div>
@@ -200,7 +207,7 @@ useEffect(() => {
                 className={`chat-list-item ${selected?._id === c._id ? "active" : ""}`}
                 onClick={() => openConversation(c)}
               >
-                <img src={other?.avatarUrl || "/profile.png"} className="chat-avatar" alt="av" />
+                <img src={resolveAvatar(other?.avatarUrl)} className="chat-avatar" alt="av" />
                 <div className="chat-list-text">
                   <div className="chat-list-name">{other?.username || "Unknown"}</div>
                   <div className="chat-list-last">{/* could show last message */}</div>

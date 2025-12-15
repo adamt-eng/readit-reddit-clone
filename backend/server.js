@@ -1,116 +1,107 @@
-  import express from 'express';
-  import dotenv from 'dotenv';
-  import mongoose from 'mongoose';
-  import cors from 'cors';
-  import cookieParser from "cookie-parser";
-  import http from "http";               
-  import { Server } from "socket.io";   
-  import auth from './Middleware/AuthMiddleware.js';
-  import AuthRouter from './Routers/AuthRouter.js';
-  import CommunityRouter from "./Routers/CommunityRouter.js";
-  import UserRouter from "./Routers/UserRouter.js";
-  import PostRouter from "./Routers/PostRouter.js";
-  import SearchRouter from "./Routers/SearchRouter.js"
-  import UploadRouter from "./Routers/UploadRouter.js";
-  import AiSummaryRouter from "./Routers/AiSummaryRouter.js";
-  import CommentRouter from './Routers/CommentRouter.js';
-  import DMRouter from "./Routers/DMRouter.js";
-  import VoteRouter from "./Routers/VoteRouter.js";
-  import MembershipRouter from "./Routers/MembershipRouter.js";
-  import NotificationRouter from "./Routers/NotificationRouter.js"
+import express from "express";
+import dotenv from "dotenv";
+import mongoose from "mongoose";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import http from "http";
+import { Server } from "socket.io";
 
+import auth from "./Middleware/AuthMiddleware.js";
 
+import AuthRouter from "./Routers/AuthRouter.js";
+import CommunityRouter from "./Routers/CommunityRouter.js";
+import UserRouter from "./Routers/UserRouter.js";
+import PostRouter from "./Routers/PostRouter.js";
+import SearchRouter from "./Routers/SearchRouter.js";
+import UploadRouter from "./Routers/UploadRouter.js";
+import AiSummaryRouter from "./Routers/AiSummaryRouter.js";
+import CommentRouter from "./Routers/CommentRouter.js";
+import DMRouter from "./Routers/DMRouter.js";
+import VoteRouter from "./Routers/VoteRouter.js";
+import MembershipRouter from "./Routers/MembershipRouter.js";
+import NotificationRouter from "./Routers/NotificationRouter.js";
 
-  dotenv.config();
-  const app = express();
-  const PORT = process.env.PORT || 5000;
+// load env vars
+dotenv.config();
 
-  /* ------------ EXPRESS MIDDLEWARE ------------ */
+// app setup
+const app = express();
+const PORT = process.env.PORT || 5000;
 
-  app.use("/uploads", express.static("uploads"));
+// static uploads
+app.use("/uploads", express.static("uploads"));
 
-
+// body + cookies
 app.use(express.json());
-app.use(cookieParser());  
+app.use(cookieParser());
 
-  app.use(
-    cors({
-      origin: ["http://localhost:5173", "http://localhost:5174"],
-      credentials: true
-    })
-  );
+// cors
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "http://localhost:5174"],
+    credentials: true,
+  })
+);
 
-  /* ------------ ROUTERS ------------ */
+// routes
+app.use("/authentication", AuthRouter);
+app.use("/users", UserRouter);
+app.use("/posts", PostRouter);
+app.use("/votes", auth, VoteRouter);
+app.use("/communities", auth, CommunityRouter);
+app.use("/search", auth, SearchRouter);
+app.use("/upload", auth, UploadRouter);
+app.use("/ai-summary", auth, AiSummaryRouter);
+app.use("/comments", auth, CommentRouter);
+app.use("/memberships", auth, MembershipRouter);
 
-  app.use('/authentication', AuthRouter);
+// mongo
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.log("MongoDB connection error:", err));
 
+// socket server
+const server = http.createServer(app);
 
+export const io = new Server(server, {
+  cors: {
+    origin: ["http://localhost:5173", "http://localhost:5174"],
+    credentials: true,
+  },
+});
 
-  app.use('/users', UserRouter);
-  app.use('/posts', PostRouter);
-  app.use('/votes',auth, VoteRouter);
-  app.use('/communities',auth, CommunityRouter);
-  app.use('/search',auth, SearchRouter);
-  app.use("/upload",auth, UploadRouter);
-  app.use('/ai-summary',auth, AiSummaryRouter);
-  app.use('/comments',auth, CommentRouter);
-  app.use('/memberships',auth,MembershipRouter)
+// online users map
+export const onlineUsers = new Map();
 
-  /* ------------ MONGO CONNECTION ------------ */
+io.on("connection", (socket) => {
+  console.log("Socket connected:", socket.id);
 
-  mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log("Connected to MongoDB"))
-    .catch((err) => console.log("MongoDB connection error:", err));
+  socket.on("register", (userId) => {
+    onlineUsers.set(userId, socket.id);
+    console.log(`User ${userId} is online`);
+  });
 
+  socket.on("disconnect", () => {
+    console.log("Socket disconnected:", socket.id);
 
-
-  /* ===========================================
-    SOCKET.IO SERVER (REAL-TIME LAYER)
-    =========================================== */
-
-  const server = http.createServer(app);  
-
-  export const io = new Server(server, {
-    cors: {
-      origin: ["http://localhost:5173", "http://localhost:5174"],
-      credentials: true
+    for (const [userId, socketId] of onlineUsers.entries()) {
+      if (socketId === socket.id) {
+        onlineUsers.delete(userId);
+        console.log(`User ${userId} is offline`);
+        break;
+      }
     }
   });
+});
 
-  // Map<userId, socketId>
-  export const onlineUsers = new Map();
+// socket-aware routes
+app.use("/dm", DMRouter({ io, onlineUsers }));
+app.use("/notifications", auth, NotificationRouter({ io, onlineUsers }));
 
-  io.on("connection", (socket) => {
-    console.log("Socket connected:", socket.id);
+// start server
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
 
-    // frontend: socket.emit("register", userId)
-    socket.on("register", (userId) => {
-      onlineUsers.set(userId, socket.id);
-      console.log(`User ${userId} is online`);
-    });
-
-    socket.on("disconnect", () => {
-      console.log("Socket disconnected:", socket.id);
-
-      // remove from online users
-      for (let [userId, sockId] of onlineUsers.entries()) {
-        if (sockId === socket.id) {
-          onlineUsers.delete(userId);
-          console.log(`User ${userId} is offline`);
-        }
-      }
-    });
-  });
-
-
-  app.use('/dm',auth, DMRouter({ io, onlineUsers }));
-  app.use('/notifications',auth,NotificationRouter({io,onlineUsers}));
-
-
-  /* ------------ START SERVER ------------ */
-
-  server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
-
-  export default app;
+export default app;
