@@ -17,6 +17,8 @@
   import CommentRouter from './Routers/CommentRouter.js';
   import DMRouter from "./Routers/DMRouter.js";
   import VoteRouter from "./Routers/VoteRouter.js";
+  import MembershipRouter from "./Routers/MembershipRouter.js";
+
 
 
   dotenv.config();
@@ -53,6 +55,7 @@ app.use(cookieParser());
   app.use("/upload",auth, UploadRouter);
   app.use('/ai-summary',auth, AiSummaryRouter);
   app.use('/comments',auth, CommentRouter);
+  app.use('/memberships',auth,MembershipRouter)
 
   /* ------------ MONGO CONNECTION ------------ */
 

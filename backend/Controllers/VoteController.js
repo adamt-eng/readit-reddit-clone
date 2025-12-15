@@ -165,3 +165,36 @@ export const voteComment = async (req, res) => {
   }
 };
 
+/**
+ * GET /votes/posts/me
+ * Returns: { postId: voteValue }
+ */
+export const getUserPostVotes = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    // Get only post votes (ignore comment votes)
+    const votes = await Vote.find(
+      {
+        userId,
+        postId: { $ne: null }
+      },
+      { postId: 1, value: 1, _id: 0 }
+    );
+
+    // Convert to map: { postId: value }
+    const voteMap = {};
+    for (const v of votes) {
+      voteMap[v.postId.toString()] = v.value;
+    }
+
+    res.json(voteMap);
+  } catch (err) {
+    console.error("getUserPostVotes error:", err);
+    res.status(500).json({ message: "Failed to fetch user votes" });
+  }
+};

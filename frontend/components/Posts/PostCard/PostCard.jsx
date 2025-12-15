@@ -2,6 +2,7 @@
 import { FaRegCommentAlt, FaShare, FaEllipsisH, FaExpand, FaCompress, FaBell, FaRegBookmark, FaEyeSlash, FaFlag } from "react-icons/fa";
 import Comment from "../../Comment/Comment";
 import "./PostCard.css";
+import { Link } from "react-router-dom";
 
 export default function PostCard({
   // Post data
@@ -15,7 +16,7 @@ export default function PostCard({
   onToggleComments,
   onPostClick,
   onJoinCommunity,
-  joinedCommunities = {},
+  joinedCommunities = [],
   expandedPostId,
   commentInputs = {},
   onCommentInputChange,
@@ -41,6 +42,9 @@ export default function PostCard({
     return darkMode ? "../../../assets/compact-image-dark.png" : "../../../assets/compact-image.png";
   });
 
+const safeJoinedCommunities = Array.isArray(joinedCommunities)
+  ? joinedCommunities
+  : [];
 
   const handleUpvote = (e) => {
     e.stopPropagation();
@@ -153,7 +157,7 @@ const handleJoinCommunity = (e) => {
         )}
 
         <div className="post-meta">
-          <div className="post-meta-left">
+          <Link onClick={(e) => e.stopPropagation()} to={`/community/${post.community}`} className="post-meta-left">
             <img 
               src={post.userAvatar} 
               alt={post.user}
@@ -173,16 +177,16 @@ const handleJoinCommunity = (e) => {
             <span className="user">Posted by u/{post.user}</span>
             <span className="divider">•</span>
             <span className="time">{post.time}</span>
-          </div>
+          </Link>
 
           <div className="post-meta-right">
             {/* Join button only shows if post has a community AND is NOT user's own post */}
-            {post.community && !post.isUserPost && (
+            {!isGuest&& post.community && !post.isUserPost &&  !safeJoinedCommunities.includes(post.community) && (
               <button
-                className={`join-btn ${joinedCommunities[post.community] ? 'joined' : ''}`}
+                className={`join-btn joined`}
                 onClick={handleJoinCommunity}
               >
-                {joinedCommunities[post.community] ? 'Joined' : 'Join'}
+                Join
               </button>
             )}
 

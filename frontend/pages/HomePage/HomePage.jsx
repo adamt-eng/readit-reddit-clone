@@ -128,22 +128,16 @@ const HomePage = ({ darkMode, onStartCommunity }) => {
           commentsList: [],
           type: p.type || "text"
         }));
-
-        // Apply saved votes from localStorage
         try {
-          const savedPostVotes = localStorage.getItem('postVotes');
-          if (savedPostVotes) {
-            const postVotes = JSON.parse(savedPostVotes);
-            transformedPosts.forEach(post => {
-              const savedVote = postVotes[post.id];
-              if (savedVote !== undefined) {
-                post.userVote = savedVote;
-                post.upvotes = post.upvotes + savedVote;
-              }
-            });
-          }
+          const { data: voteMap } = await axios.get(
+            "http://localhost:5000/votes/me",
+            { withCredentials: true }
+          );
+          transformedPosts.forEach(post => {
+            post.userVote = voteMap[post.id] ?? 0;
+          });
         } catch (error) {
-          console.error('Error loading votes from localStorage:', error);
+          console.error('Error loading votes from server:', error);
         }
 
         console.log("Transformed posts:", transformedPosts.length);
@@ -159,7 +153,7 @@ const HomePage = ({ darkMode, onStartCommunity }) => {
     // Only fetch feed if we have a user (or null for guest mode)
     // The API handles both cases (with userId or without)
     fetchFeed();
-  }, [user?._id, sortBy, expandedPosts]);
+  }, [user?._id, sortBy]);
 
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [commentInputs, setCommentInputs] = useState({});
@@ -180,18 +174,26 @@ const HomePage = ({ darkMode, onStartCommunity }) => {
   });
 
   // Initialize joinedCommunities from localStorage
-  const [joinedCommunities, setJoinedCommunities] = useState(() => {
+const [joinedCommunities, setJoinedCommunities] = useState([]);
+useEffect(() => {
+  const fetchJoinedCommunities = async () => {
     try {
-      const savedJoinedCommunities = localStorage.getItem('joinedCommunities');
-      if (savedJoinedCommunities) {
-        const parsedCommunities = JSON.parse(savedJoinedCommunities);
-        return typeof parsedCommunities === 'object' ? parsedCommunities : {};
-      }
+      const res = await axios.get(
+        "http://localhost:5000/memberships/me",
+        { withCredentials: true }
+      );
+
+
+      setJoinedCommunities(res.data);
+      console.log("joined: ",joinedCommunities);
     } catch (error) {
-      console.error('Error loading joined communities from localStorage:', error);
+      console.error("Error loading joined communities from server:", error);
+      setJoinedCommunities({});
     }
-    return {};
-  });
+  };
+
+  fetchJoinedCommunities();
+}, []);
 
   // Initialize hiddenPosts from localStorage
   const [hiddenPosts, setHiddenPosts] = useState(() => {
@@ -281,44 +283,8 @@ const HomePage = ({ darkMode, onStartCommunity }) => {
       console.error('Error saving expanded posts to localStorage:', error);
     }
   }, [expandedPosts]);
-  
-  // Save post votes to localStorage whenever posts change
-  useEffect(() => {
-    try {
-      const postVotes = {};
-      const commentVotes = {};
 
-      // Extract post votes
-      posts.forEach(post => {
-        if (post.userVote !== 0) {
-          postVotes[post.id] = post.userVote;
-        }
-      });
-
-      // Extract comment votes recursively
-      const extractCommentVotes = (comments) => {
-        comments.forEach(comment => {
-          if (comment.userVote !== 0) {
-            commentVotes[comment.id] = comment.userVote;
-          }
-          if (comment.replies && comment.replies.length > 0) {
-            extractCommentVotes(comment.replies);
-          }
-        });
-      };
-
-      posts.forEach(post => {
-        extractCommentVotes(post.commentsList);
-      });
-
-      localStorage.setItem('postVotes', JSON.stringify(postVotes));
-      localStorage.setItem('commentVotes', JSON.stringify(commentVotes));
-    } catch (error) {
-      console.error('Error saving votes to localStorage:', error);
-    }
-  }, [posts]);
-
-  // Save recent posts to localStorage whenever they change
+// Save recent posts to localStorage whenever they change
   useEffect(() => {
     try {
       localStorage.setItem('recentPosts', JSON.stringify(recentPosts));
@@ -451,10 +417,12 @@ const HomePage = ({ darkMode, onStartCommunity }) => {
     }
 
     // Update UI only AFTER backend succeeds
-    setJoinedCommunities(prev => ({
-      ...prev,
-      [communityName]: true
-    }));
+setJoinedCommunities(prev =>
+  prev.includes(communityName)
+    ? prev
+    : [...prev, communityName]
+);
+
   } catch (err) {
     console.error("Join community error:", err);
   }
@@ -639,34 +607,42 @@ const HomePage = ({ darkMode, onStartCommunity }) => {
   };
 
   // Handle post voting
-  const handleVote = (postId, voteType) => {
-    setPosts(prevPosts => 
-      prevPosts.map(post => {
-        if (post.id === postId) {
-          let newUpvotes = post.upvotes;
-          let newUserVote = voteType;
-          
-          if (post.userVote === voteType) {
-            newUserVote = 0;
-            newUpvotes -= voteType;
-          } 
-          else if (post.userVote !== 0) {
-            newUpvotes = newUpvotes - post.userVote + voteType;
-          }
-          else {
-            newUpvotes += voteType;
-          }
-          
-          return {
-            ...post,
-            upvotes: newUpvotes,
-            userVote: newUserVote
-          };
-        }
-        return post;
-      })
+const handleVote = async (postId, voteType) => {
+  try {
+    const res = await axios.post(
+      `http://localhost:5000/votes/posts/${postId}`,
+      { voteScore: voteType }, // MUST be voteScore (1 or -1)
+      { withCredentials: true }
     );
-  };
+
+    const updatedPost = res.data.post;
+
+    setPosts(prevPosts =>
+      prevPosts.map(post =>
+        post.id === postId
+          ? {
+              ...post,
+
+              // backend is source of truth
+              upvoteCount: updatedPost.upvoteCount,
+              downvoteCount: updatedPost.downvoteCount,
+
+              // what you display in UI
+              upvotes:
+                updatedPost.upvoteCount - updatedPost.downvoteCount,
+
+              // reflect current user vote
+              userVote:
+                post.userVote === voteType ? 0 : voteType
+            }
+          : post
+      )
+    );
+  } catch (err) {
+    console.error("Error voting:", err);
+  }
+};
+
 
   // Function to get thumbnail image for compact view
   const getThumbnailImage = (post) => {
