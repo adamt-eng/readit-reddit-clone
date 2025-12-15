@@ -10,16 +10,22 @@ import {
 } from "../Controllers/NotificationController.js";
 
 
-const router = express.Router();
 
-router.get("/:id",  getNotifications);//changetoauh
+export default function createNotificationRouter({io,user})
+{
+  
+const router = express.Router();
+router.get("/:id",  getNotifications);
 router.get("/unread", getUnreadNotifications);
-router.get("/count/:id",getUnreadCount);//changetoauh
+router.get("/count/:id",getUnreadCount);
 router.patch("/:id/read", markAsRead);
 router.patch("/read-all",  markAllAsRead);
 
 router.delete("/:id", deleteNotification);
 router.delete("/", deleteAllNotifications);
 
+return router;
+}
 
-export default router;
+
+

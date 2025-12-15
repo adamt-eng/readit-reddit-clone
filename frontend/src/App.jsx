@@ -64,6 +64,21 @@ function App() {
 
 
   
+useEffect(() => {
+  const fetchMe = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/users/me",
+        { withCredentials: true }
+      );
+      setCurrentUser(res.data);
+    } catch (err) {
+      console.log("Error fetching user:", err);
+    }
+  };
+
+  fetchMe();
+}, []);
 
   useLayoutEffect(() => {
     const savedDarkMode = localStorage.getItem("darkMode");
@@ -104,27 +119,44 @@ function App() {
     <div className={`app${darkMode ? "dark-mode" : ""}`}>
       {/* NAVBAR always visible except when visiting actual auth pages */}
       {!isAuthPage && (
-        <Navbar
+        !currentUser?(<Navbar
           user={currentUser}
-          isLoggedIn={isLoggedIn}
+          isLoggedIn={false}
           setIsLoggedIn = {setIsLoggedIn}
           setCurrentUser={setCurrentUser}
           darkMode={darkMode}
           onToggleDarkMode={toggleDarkMode}
           onLoginClick={openLoginModal}
           onSignupClick={openSignupModal}
-        />
+        />):(<Navbar
+          user={currentUser}
+          isLoggedIn={true}
+          setIsLoggedIn = {setIsLoggedIn}
+          setCurrentUser={setCurrentUser}
+          darkMode={darkMode}
+          onToggleDarkMode={toggleDarkMode}
+          onLoginClick={openLoginModal}
+          onSignupClick={openSignupModal}
+        />)
       )}
 
       {/* Routes for ALL pages */}
-      <AppRoutes
+      {!currentUser?(<AppRoutes
         darkMode={darkMode}
         toggleDarkMode={toggleDarkMode}
         onLogin={handleLogin}
-        isLoggedIn={isLoggedIn}
+        isLoggedIn={false}
         currentUser={currentUser}
         setCurrentUser={setCurrentUser} 
-      />
+      />):(<AppRoutes
+        darkMode={darkMode}
+        toggleDarkMode={toggleDarkMode}
+        onLogin={handleLogin}
+        isLoggedIn={true}
+        currentUser={currentUser}
+        setCurrentUser={setCurrentUser} 
+        />)}
+
 
       {/* Auth Modal */}
       {showAuthModal && (

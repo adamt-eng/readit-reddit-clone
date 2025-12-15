@@ -13,11 +13,11 @@
   import SearchRouter from "./Routers/SearchRouter.js"
   import UploadRouter from "./Routers/UploadRouter.js";
   import AiSummaryRouter from "./Routers/AiSummaryRouter.js";
-  import NotificationRouter from './Routers/NotificationRouter.js';
   import CommentRouter from './Routers/CommentRouter.js';
   import DMRouter from "./Routers/DMRouter.js";
   import VoteRouter from "./Routers/VoteRouter.js";
   import MembershipRouter from "./Routers/MembershipRouter.js";
+  import NotificationRouter from "./Routers/NotificationRouter.js"
 
 
 
@@ -50,7 +50,6 @@ app.use(cookieParser());
   app.use('/posts', PostRouter);
   app.use('/votes',auth, VoteRouter);
   app.use('/communities',auth, CommunityRouter);
-  app.use('/notifications',auth,NotificationRouter);
   app.use('/search',auth, SearchRouter);
   app.use("/upload",auth, UploadRouter);
   app.use('/ai-summary',auth, AiSummaryRouter);
@@ -105,6 +104,7 @@ app.use(cookieParser());
 
 
   app.use('/dm',auth, DMRouter({ io, onlineUsers }));
+  app.use('/notifications',auth,NotificationRouter({io,onlineUsers}));
 
 
   /* ------------ START SERVER ------------ */

@@ -12,13 +12,11 @@ export async function buildNotificationData(type, payload) {
   const { actorId, postId, commentId } = payload;
 
 
-  // 1. Get actor username
   const actor = await User.findById(actorId).select("username");
   const actorUsername = actor?.username || "Someone";
 
   let communityName = "";
 
-  // 2. If related to a post or comment → fetch community name
   if (postId) {
     const post = await Post.findById(postId).select("communityId");
     if (post?.communityId) {
@@ -26,8 +24,6 @@ export async function buildNotificationData(type, payload) {
       communityName = community?.name || "";
     }
   }
-
-  // 3. Build message based on notification type
   let message = "";
 
   switch (type) {
@@ -62,11 +58,16 @@ export async function buildNotificationData(type, payload) {
 }
 
 
-export async function createNotification({ userId, type, payload }) {
-  // Prevent self-notifications
+export async function createNotification({
+  userId,
+  type,
+  payload,
+  io,
+  onlineUsers
+}) {
+  // prevent self notification
   if (!userId || userId.toString() === payload.actorId?.toString()) return;
 
-  // Build payload (fetch actor username, community, etc.)
   const finalPayload = await buildNotificationData(type, payload);
 
   const notification = await Notification.create({
@@ -77,16 +78,19 @@ export async function createNotification({ userId, type, payload }) {
     createdAt: new Date(),
   });
 
-  //hetreereer
-
+  if (onlineUsers instanceof Map && io) {
+    const socketId = onlineUsers.get(userId.toString());
+    if (socketId) {
+      io.to(socketId).emit("notification", notification);
+    }
+  }
   return notification;
 }
 
 
-// -----------------------------
-// GET /notifications
-// Returns all notifications for the logged-in user
-// -----------------------------
+
+
+// get user notis
 export const getNotifications = async (req, res) => {
     console.log("fetch");
     
@@ -94,15 +98,14 @@ export const getNotifications = async (req, res) => {
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
-    // 1) Delete notifications older than 1 month
     await Notification.deleteMany({
-      userId: req.params.id,   //changetoauth
+      userId: req.user.id,   
       createdAt: { $lt: oneMonthAgo}
     });
 
-    // 2) Return only notifications from the past month
+    // Return only notifications from the past month
     const notifications = await Notification.find({
-      userId: req.params.id, //changetoauth
+      userId: req.user.id,
       createdAt: { $gte: oneMonthAgo }
     }).sort({ createdAt: -1 });
 
@@ -113,9 +116,8 @@ export const getNotifications = async (req, res) => {
   }
 };
 
-// -----------------------------
-// GET /notifications/unread
-// -----------------------------
+
+//get user unread notis
 export const getUnreadNotifications = async (req, res) => {
   try {
     const unread = await Notification.find({
@@ -129,10 +131,8 @@ export const getUnreadNotifications = async (req, res) => {
   }
 };
 
-// -----------------------------
-// PATCH /notifications/:id/read
-// Marks a single notification as read
-// -----------------------------
+
+//mark a noti as read
 export const markAsRead = async (req, res) => {
   try {
     await Notification.findOneAndUpdate(
@@ -146,10 +146,9 @@ export const markAsRead = async (req, res) => {
   }
 };
 
-// -----------------------------
-// PATCH /notifications/read-all
-// Marks all notifications as read
-// -----------------------------
+
+
+//mark all notis as read
 export const markAllAsRead = async (req, res) => {
   try {
     await Notification.updateMany(
@@ -163,10 +162,8 @@ export const markAllAsRead = async (req, res) => {
   }
 };
 
-// -----------------------------
-// DELETE /notifications/:id
-// Delete a specific notification
-// -----------------------------
+
+//delete a noti
 export const deleteNotification = async (req, res) => {
   try {
     await Notification.findOneAndDelete({
@@ -208,13 +205,13 @@ export const getUnreadCount = async (req, res) => {
 
     // 1) Remove old notifications
     await Notification.deleteMany({
-      userId: req.params.id, // change to auth
+      userId: req.user.id, // change to auth
       createdAt: { $lt: oneMonthAgo }
     });
 
     // 2) Count unread notifications from last month
     const unreadCount = await Notification.countDocuments({
-      userId: req.params.id, // change to auth
+      userId: req.user.id, // change to auth
       isRead: false,
       createdAt: { $gte: oneMonthAgo }
     });
