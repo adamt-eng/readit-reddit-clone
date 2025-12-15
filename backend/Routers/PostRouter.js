@@ -6,8 +6,6 @@ import {
   searchPosts,
   getPostsByUser,
   getPostById,
-  upvotePost,
-  downvotePost,
   getPersonalizedFeed
 } from "../Controllers/PostController.js";
 
@@ -48,14 +46,6 @@ router.post("/:postId/comments",auth, createComment);
 router.get("/:postId/comments",auth, getCommentsForPost);
 
 
-/* -----------------------------
-        POST VOTING
------------------------------- */
-
-// Upvote a post
-router.post("/:postId/upvote",auth, upvotePost);
-// Downvote a post
-router.post("/:postId/downvote",auth, downvotePost);
 
 
 /* -----------------------------

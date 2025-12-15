@@ -10,7 +10,8 @@ const UserSchema = new Schema(
     avatarUrl: { type: String, default: "" },
     createdAt: { type: Date, default: Date.now },
     lastLogin: { type: Date, default: Date.now },
-    karma: { type: Number, default: 0 }
+    karma: { type: Number, default: 0 },
+    contributions:{type: Number,default:0}
   },
   { collection: "users" }
 );

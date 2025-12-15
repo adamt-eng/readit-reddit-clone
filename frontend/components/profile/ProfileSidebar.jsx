@@ -23,8 +23,14 @@ export default function ProfileSidebar({ user, isMyProfile }) {
 
         <p className="profile-sidebar-handle">u/{user?.username || "Loading..."}</p>
 
-        <button>Share</button>
-
+        <button
+          onClick={() => {
+            navigator.clipboard.writeText(`http://localhost:5173/user/${user.username}`);
+            alert("Profile link copied to clipboard");
+          }}
+        >
+          Share
+        </button>
         {/*  Only show Edit Profile on YOUR OWN profile */}
         {isMyProfile && (
           <Link to="/edit-profile">
