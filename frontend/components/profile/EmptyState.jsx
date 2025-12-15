@@ -10,7 +10,6 @@ export default function EmptyState() {
       <p className="empty-text">
         Once you post to a community, it'll show up here. If you'd rather hide your posts, update your settings.
       </p>
-      <button className="btn-settings">Update Settings</button>
     </div>
   );
 }

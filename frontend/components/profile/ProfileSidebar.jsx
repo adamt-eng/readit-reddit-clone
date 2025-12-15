@@ -1,11 +1,8 @@
 import { Link } from "react-router-dom";
 
-export default function ProfileSidebar({ user, currentUser }) {
-  // ✅ show Edit Profile only if this is MY profile
-  const isMyProfile =
-    user?._id && currentUser?._id && String(user._id) === String(currentUser._id);
+export default function ProfileSidebar({ user, isMyProfile }) {
 
-  // ✅ safe avatar src (fallback if missing)
+  //  safe avatar src (fallback if missing)
   const avatarSrc =
     user?.avatarUrl && user.avatarUrl.trim() !== ""
       ? `http://localhost:5000${user.avatarUrl}`
@@ -28,7 +25,7 @@ export default function ProfileSidebar({ user, currentUser }) {
 
         <button>Share</button>
 
-        {/* ✅ Only show Edit Profile on YOUR OWN profile */}
+        {/*  Only show Edit Profile on YOUR OWN profile */}
         {isMyProfile && (
           <Link to="/edit-profile">
             <button className="edit-profile-sidebar-btn">Edit Profile</button>
@@ -36,35 +33,27 @@ export default function ProfileSidebar({ user, currentUser }) {
         )}
 
         <div className="profile-stats-grid">
-          <div className="stat-item">
-            <div className="stat-value">0</div>
-            <div className="stat-label">Followers</div>
-          </div>
 
           <div className="stat-item">
             <div className="stat-value">{user?.karma ?? 0}</div>
-            <div className="stat-label">Karma</div>
+            <div className="stat-label"><strong>Karma</strong></div>
           </div>
 
           <div className="stat-item">
             <div className="stat-value">0</div>
-            <div className="stat-label">Contributions</div>
+            <div className="stat-label"><strong>Contributions</strong></div>
           </div>
 
           <div className="stat-item">
             <div className="stat-value">0</div>
-            <div className="stat-label">Active in &gt;</div>
+            <div className="stat-label"><strong>Active in</strong></div>
           </div>
 
           <div className="stat-item">
             <div className="stat-value">0 d</div>
-            <div className="stat-label">Reddit Age</div>
+            <div className="stat-label"><strong>Reddit age</strong></div>
           </div>
 
-          <div className="stat-item">
-            <div className="stat-value">0</div>
-            <div className="stat-label">Gold earned</div>
-          </div>
         </div>
 
         <div className="achievements-section">

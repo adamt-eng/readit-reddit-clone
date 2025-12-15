@@ -30,7 +30,7 @@ export default function Login({ onLogin, darkMode, inModal, switchMode }) {
 
   return (
     <div
-      className={`auth-page login-page ${darkMode ? "dark-mode" : ""} ${
+      className={`auth-page login-page  ${
         inModal ? "auth-modal-content" : ""
       }`}
     >

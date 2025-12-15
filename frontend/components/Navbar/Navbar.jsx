@@ -90,7 +90,7 @@ useEffect(() => {
   }
 
   socket.on("notification", handleNotif);
-
+ 
   return () => {
     socket.off("notification", handleNotif);
   };
@@ -263,7 +263,7 @@ useEffect(() => {
       <div className="nav-center">
         <div className="search-container">
           <input 
-            placeholder='What is the "default skin" for your country?'
+            placeholder='Please log in to to dive into the world of reddit!'
             className="nav-search"
             onClick={promptLogin}
           />

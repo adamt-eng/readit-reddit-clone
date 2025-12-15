@@ -1,4 +1,4 @@
-const tabs = ['Overview', 'Posts', 'Comments', 'Saved', 'History', 'Hidden', 'Upvoted', 'Downvoted'];
+const tabs = ['Overview', 'Posts', 'Comments'];
 
 export default function ProfileTabs({ activeTab, setActiveTab }) {
   return (

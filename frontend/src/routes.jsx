@@ -69,11 +69,7 @@ export default function AppRoutes({
           path="/user/:id"
           element={
             isLoggedIn ? (
-              <UserProfilePage
-                isDark={darkMode}
-                toggleDarkMode={toggleDarkMode}
-                currentUser={currentUser}
-              />
+              <UserProfilePage/>
             ) : (
               <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
             )

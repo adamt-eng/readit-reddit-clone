@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-export default function Signup({ onLogin,darkMode, inModal, switchMode }) {
+export default function Signup({ onLogin, inModal, switchMode }) {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -35,7 +35,7 @@ export default function Signup({ onLogin,darkMode, inModal, switchMode }) {
 
   return (
     <div
-      className={`auth-page signup-page ${darkMode ? "dark-mode" : ""} ${
+      className={`auth-page signup-page  ${
         inModal ? "auth-modal-content" : ""
       }`}
     >

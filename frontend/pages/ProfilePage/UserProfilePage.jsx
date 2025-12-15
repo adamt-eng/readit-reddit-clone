@@ -15,10 +15,10 @@ import "../../components/profile/styles/dark.css";
 
 const API_BASE = "http://localhost:5000";
 
-export default function UserProfilePage({ isDark, toggleDarkMode,currentUser}) {
-  const { id: userId } = useParams(); // ✅ this is the param name in routes: /user/:id
+export default function UserProfilePage() {
+  const { id: userId } = useParams(); 
   const [activeTab, setActiveTab] = useState("Overview");
-
+  const [isMyProfile,setIsMyProfile]=useState(false)
   const [user, setUser] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -26,6 +26,13 @@ export default function UserProfilePage({ isDark, toggleDarkMode,currentUser}) {
 
 
 useEffect(() => {
+  if(userId == "me")
+  {
+    setIsMyProfile(true)
+  }
+  else{
+    setIsMyProfile(false)
+  }
   async function loadUser() {
     try {
       setLoading(true);
@@ -37,7 +44,7 @@ useEffect(() => {
           : `${API_BASE}/users/${userId}`;
 
       const res = await axios.get(url, {
-        withCredentials: true, // ✅ send cookie
+        withCredentials: true, // send cookie
       });
 
       setUser(res.data);
@@ -78,8 +85,8 @@ useEffect(() => {
             </main>
 
             <aside className="profile-aside">
-              {/* ✅ pass currentUser so sidebar can decide if it's "my profile" */}
-              {user && <ProfileSidebar user={user} currentUser={currentUser} />}
+              {/*  pass currentUser so sidebar can decide if it's "my profile" */}
+              {user && <ProfileSidebar user={user} isMyProfile={isMyProfile} />}
             </aside>
           </div>
         </div>

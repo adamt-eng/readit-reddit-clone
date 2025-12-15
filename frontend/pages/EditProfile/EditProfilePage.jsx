@@ -20,7 +20,7 @@ export default function EditProfilePage({ isDark, toggleDarkMode, setCurrentUser
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState("");
 
-  // ✅ LOAD MY PROFILE
+  // LOAD MY PROFILE
   useEffect(() => {
     const loadMe = async () => {
       try {

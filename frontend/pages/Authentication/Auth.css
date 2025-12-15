@@ -1,55 +1,72 @@
-/* Theme Variables */
+/* ================= THEME TOKENS ================= */
+
 :root {
+  --reddit-main: #ff4500;
+  --reddit-main-hover: #d03a00;
+
   --auth-bg: #ffffff;
-  --auth-light: #f6f7f8;
+  --auth-surface: #f6f7f8;
   --auth-text: #1a1a1b;
   --auth-subtext: #555;
   --auth-border: #d3d3d3;
-  --reddit-main: #ff4500;
-  --reddit-main-hover: #d03a00;
 }
 
-.dark-mode {
+/* Dark mode overrides */
+.appdark-mode {
   --auth-bg: #1a1a1b;
-  --auth-light: #2c2d2e;
+  --auth-surface: #2c2d2e;
   --auth-text: #d7dadc;
   --auth-subtext: #9a9a9a;
   --auth-border: #3b3c3d;
 }
 
-/* Main Layout */
+/* ================= PAGE / MODAL ================= */
+
 .auth-page {
   display: flex;
   width: 100%;
   height: 100vh;
   background: var(--auth-bg);
   font-family: sans-serif;
-  transition: background 0.3s ease;
 }
 
-/* Left Side - EXACT 50% width */
+/* Modal version */
+.auth-modal-content {
+  flex-direction: column;
+  height: auto;
+  background: transparent;
+}
+
+/* ================= LAYOUT ================= */
+
 .auth-left {
   width: 50%;
-  background: var(--auth-light);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-end; /* align toward middle */
+  background: var(--auth-surface);
   padding: 80px;
   text-align: right;
 }
 
-/* Right Side - EXACT 50% width */
 .auth-right {
   width: 50%;
   background: var(--auth-bg);
-  display: flex;
-  justify-content: flex-start; /* align toward middle */
-  align-items: center;
   padding: 80px;
+  display: flex;
+  align-items: center;
 }
 
-/* Form */
+.auth-modal-content .auth-left {
+  display: none;
+}
+
+.auth-modal-content .auth-right {
+  width: 100%;
+  padding: 24px;
+  justify-content: center;
+  text-align: center;
+}
+
+/* ================= FORM ================= */
+
 .auth-form {
   width: 100%;
   max-width: 360px;
@@ -58,56 +75,59 @@
   gap: 18px;
 }
 
+/* ================= INPUTS ================= */
+
 .auth-input {
   padding: 14px 16px;
   font-size: 15px;
   border-radius: 8px;
-  background: var(--auth-light);
+  background: var(--auth-surface);
   border: 1px solid var(--auth-border);
   color: var(--auth-text);
 }
 
-.auth-input:focus {
-  border-color: var(--reddit-main);
-  background: #fff;
-  outline: none;
+.auth-input::placeholder {
+  color: var(--auth-subtext);
 }
 
-.dark-mode .auth-input:focus {
-  background: #3b3c3d;
+.auth-input:focus {
+  outline: none;
+  border-color: var(--reddit-main);
+  background: var(--auth-surface);
 }
+
+/* ================= BUTTON ================= */
+/* SAME IN LIGHT AND DARK — NO OVERRIDES */
 
 .auth-btn {
   padding: 14px;
   font-size: 16px;
   font-weight: 600;
   border-radius: 30px;
-  background: var(--reddit-main);
-  color: #fff;
   border: none;
   cursor: pointer;
+
+  background: #ff4500;
+  color: #ffffff;
+
   transition: background 0.2s ease;
 }
+
 .auth-btn:hover {
-  background: var(--reddit-main-hover);
+  background: #d03a00;
 }
 
-/* Logo placement (full page mode) */
-.auth-page:not(.auth-modal-content) .auth-logo {
-  width: 160px;
-  margin-bottom: 16px;
-  align-self: flex-end;
-}
+/* ================= TEXT ================= */
 
-/* Headings & text */
-.auth-left h1 {
+.auth-left h1,
+.auth-form h1 {
   font-size: 32px;
   font-weight: 700;
   color: var(--auth-text);
-  margin-bottom: 10px;
 }
 
 .auth-left p,
+.auth-form p,
 .auth-small {
   font-size: 14px;
   color: var(--auth-subtext);
@@ -117,112 +137,15 @@
   text-align: center;
 }
 
-
-.auth-small a:hover {
-  text-decoration: underline;
-}
-
-/* MOBILE responsive */
-@media (max-width: 900px) {
-  .auth-left {
-    display: none;
-  }
-  .auth-right {
-    width: 100%;
-    justify-content: center;
-    padding: 50px;
-  }
-}
-
-/* ---------------- MODAL MODE ---------------- */
-.auth-modal-content {
-  flex-direction: column;
-  width: 100%;
-  height: auto;
-  background: transparent;
-}
-
-.auth-modal-content .auth-left {
-  display: none;
-}
-
-.auth-modal-content .auth-right {
-  width: 100%;
-  justify-content: center;
-  padding: 0 20px;
-  text-align: center;
-}
-
-.auth-modal-content .auth-logo {
-  width: 130px;
-  align-self: center !important;
-  margin-bottom: 12px;
-}
-
-.auth-modal-content .auth-form {
-  max-width: 300px;
-  width: 100%;
-}
-
-.auth-modal-content h1,
-.auth-modal-content p {
-  text-align: center;
-}
-/* ================= ALERTS ================= */
-
-.auth-alert {
-  padding: 12px 14px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  animation: fadeSlide 0.25s ease;
-}
-
-.auth-error {
-  background: rgba(255, 69, 0, 0.12);
-  color: #ff4500;
-  border: 1px solid rgba(255, 69, 0, 0.4);
-}
-
-.auth-success {
-  background: rgba(46, 204, 113, 0.15);
-  color: #2ecc71;
-  border: 1px solid rgba(46, 204, 113, 0.4);
-}
-
-@keyframes fadeSlide {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Dark mode tweaks */
-.dark-mode .auth-error {
-  background: rgba(255, 69, 0, 0.18);
-}
-
-.dark-mode .auth-success {
-  background: rgba(46, 204, 113, 0.18);
-}
-/* ================= AUTH TEXT LINKS ================= */
+/* ================= LINKS ================= */
 
 .auth-link-switch,
 .auth-small a {
   background: none;
   border: none;
   padding: 0;
-  margin: 0;
-  font-size: inherit;
   font-weight: 600;
-  color: var(--reddit-main); /* reddit orange */
+  color: var(--reddit-main);
   cursor: pointer;
   text-decoration: none;
 }
@@ -232,6 +155,34 @@
   text-decoration: underline;
 }
 
-.auth-link-switch:focus {
-  outline: none;
+/* ================= ALERTS ================= */
+
+.auth-alert {
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.auth-error {
+  background: rgba(255, 69, 0, 0.15);
+  color: #ff4500;
+}
+
+.auth-success {
+  background: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 900px) {
+  .auth-left {
+    display: none;
+  }
+
+  .auth-right {
+    width: 100%;
+    padding: 40px;
+    justify-content: center;
+  }
 }

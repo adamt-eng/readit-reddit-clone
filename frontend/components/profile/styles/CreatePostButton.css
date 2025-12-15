@@ -1,9 +1,10 @@
 /* src/components/profile/CreatePostButton.css — SMALLER & EXACT REDDIT 2025 STYLE */
-
 .create-post-wrapper {
-  margin: 16px 0;
-  padding: 0;        /* was 0 16px */
+  margin: 16px auto;   /* ← THIS is the missing part */
+  width: fit-content;  /* ← shrink to button width */
 }
+
+
 
 .create-post-btn {
   display: flex;
