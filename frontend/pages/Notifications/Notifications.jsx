@@ -3,7 +3,6 @@ import "./Notifications.css";
 import NotificationItem from "../../components/NotificationItem/NotificationItem";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 import axios from "axios";
-import socket from "../../Socket/socket";
 
 
 
@@ -36,13 +35,9 @@ export default function Notifications() {
   // ===============================
  
   useEffect(() => {
-     socket.on("notification",(notification)=>
-      {
-          setNotifications((prev) => [notification, ...prev]);
-      })
     const fetchNotifications = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/notifications/69345c85481669617584618c",{withCredentials:true}); ///changetoauth
+        const res = await axios.get("http://localhost:5000/notifications",{withCredentials:true}); 
 
         const formatted = res.data.map((n) => ({
           ...n,

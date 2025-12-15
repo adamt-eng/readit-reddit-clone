@@ -46,7 +46,7 @@ app.use(cookieParser());
 
 
 
-  app.use('/users',auth, UserRouter);
+  app.use('/users', UserRouter);
   app.use('/posts', PostRouter);
   app.use('/votes',auth, VoteRouter);
   app.use('/communities',auth, CommunityRouter);

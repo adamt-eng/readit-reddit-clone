@@ -1,31 +1,29 @@
 import express from "express";
 import {
-  getNotifications,
-  getUnreadNotifications,
-  markAsRead,
-  markAllAsRead,
-  deleteNotification,
-  deleteAllNotifications,
-  getUnreadCount,
+  createNotisController
 } from "../Controllers/NotificationController.js";
 
+export default function createNotificationRouter({ io, onlineUsers }) {
+
+  const router = express.Router();
+
+  // create controller instance 
+  const NotificationController = createNotisController({ io, onlineUsers });
+
+  router.get("/", NotificationController.getNotifications);
+
+  router.get("/unread", NotificationController.getUnreadNotifications);
+
+  router.get("/count/:id", NotificationController.getUnreadCount);
+
+  router.patch("/:id/read", NotificationController.markAsRead);
+
+  router.patch("/read-all", NotificationController.markAllAsRead);
 
 
-export default function createNotificationRouter({io,user})
-{
-  
-const router = express.Router();
-router.get("/:id",  getNotifications);
-router.get("/unread", getUnreadNotifications);
-router.get("/count/:id",getUnreadCount);
-router.patch("/:id/read", markAsRead);
-router.patch("/read-all",  markAllAsRead);
+  router.delete("/:id", NotificationController.deleteNotification);
 
-router.delete("/:id", deleteNotification);
-router.delete("/", deleteAllNotifications);
+  router.delete("/", NotificationController.deleteAllNotifications);
 
-return router;
+  return router;
 }
-
-
-

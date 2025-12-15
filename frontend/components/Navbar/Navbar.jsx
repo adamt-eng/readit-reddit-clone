@@ -2,13 +2,14 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaSearch, FaPlus, FaBell, FaUser, FaCog, FaSignOutAlt, FaMoon, FaSun, FaComment } from "react-icons/fa";
 import axios from "axios"
-import socket from "../../Socket/socket";
+import { io } from "socket.io-client";
+
 
 import "./Navbar.css";
 import profileFallback from "../../assets/profile.png";
 
 
-export default function Navbar({ setIsLoggedIn,setCurrentUser,user, isLoggedIn, darkMode, onToggleDarkMode, onLoginClick, onSignupClick }) {
+export default function Navbar({ setIsLoggedIn,setuser,user, isLoggedIn, darkMode, onToggleDarkMode, onLoginClick, onSignupClick }) {
   const navigate = useNavigate()
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -51,50 +52,77 @@ const handleLogout = async () => {
   } catch (err) {
     console.error("Logout error:", err);
   } finally {
-    setIsLoggedIn(false);
-    setCurrentUser(null);
+    setuser(null);
     setNotisCount(0);
     navigate("/");
   }
 };
 
+const handleOpenNotifications = async () => {
+  try {
+    await axios.patch(
+      "http://localhost:5000/notifications/read-all",
+      {},
+      { withCredentials: true }
+    );
+    setNotisCount(0);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+
+const fetchCount = async () => {
+  if (!user) return;
+
+  try {
+    const res = await axios.get(
+      `http://localhost:5000/notifications/count/${user._id}`,
+      { withCredentials: true }
+    );
+    console.log("Initial unread:", res.data.unreadCount);
+    setNotisCount(res.data.unreadCount);
+  } catch (err) {
+    console.log("Error fetching count:", err);
+  }
+};
+
+const socketRef = useRef(null);
+
+//creeate socket
+useEffect(() => {
+  if (!socketRef.current) {
+    socketRef.current = io("http://localhost:5000");
+  }
+}, []);
+
+
+
 // FETCH INITIAL COUNT
 useEffect(() => {
   if (!user?._id) return;
-  axios
-    .get(`http://localhost:5000/notifications/count/${user._id}`)
-    .then((res) => {
-      console.log("Initial unread:", res.data.unreadCount);
-      setNotisCount(res.data.unreadCount);
-    })
-    .catch((err) => {
-      console.log("Error fetching count:", err);
-    });
-}, []);
+  fetchCount();
+}, [user]);
+
 
 
 // REAL-TIME SOCKET UPDATES
 useEffect(() => {
-  if (!user || !user._id) return;
+  if (!user?._id) return;
 
-  console.log("Registering socket for:", user._id);
-  socket.emit("register", user._id);
+  socketRef.current.emit("register", user._id);
 
+  const handleNotification = () => {
+    fetchCount();
+  };
+
+  socketRef.current.on("notification", handleNotification);
+
+  return () => {
+    socketRef.current.off("notification", handleNotification);
+  };
 }, [user?._id]);
 
-// LISTEN FOR LIVE NOTIFICATIONS
-useEffect(() => {
-  function handleNotif(notification) {
-    console.log("Realtime notification received:", notification);
-    setNotisCount(prev => prev + 1);
-  }
-
-  socket.on("notification", handleNotif);
- 
-  return () => {
-    socket.off("notification", handleNotif);
-  };
-}, []);
 
 
   const handleDropdownItemClick = (action) => {
@@ -174,7 +202,7 @@ useEffect(() => {
             <FaComment />
           </Link>
 
-          <Link to="/notifications" className="nav-icon-btn" title="Notifications">
+          <Link onClick = {()=>{handleOpenNotifications()}} to="/notifications" className="nav-icon-btn" title="Notifications">
             <FaBell  />
             {notisCount > 0 && (
               <span className="notification-badge">{notisCount}</span>

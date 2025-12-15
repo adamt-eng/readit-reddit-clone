@@ -26,7 +26,7 @@ export const getUserById = async (req, res) => {
     }
 
 createNotification({
-  userId: "69345c85481669617584618c",
+  userId: req.params.id,
   type: "profile_view",
   payload: {
     actorId: "69345c854816696175846190", 
