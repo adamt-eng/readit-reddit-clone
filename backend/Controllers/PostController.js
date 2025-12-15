@@ -196,182 +196,187 @@ const hoursSinceCreation = (createdAt) => {
   return (Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60);
 };
 
-/* ---------- PERSONALIZED FEED ALGORITHM ---------- */
+/* ---------- PERSONALIZED FEED ---------- */
 export const getPersonalizedFeed = async (req, res) => {
   try {
-    let userId = req.user?.id
+    const userId = req.user?.id || null;
     const { page = 1, limit = 20, sort = "best" } = req.query;
+
     const pageNum = Number(page);
     const limitNum = Number(limit);
     const skip = (pageNum - 1) * limitNum;
+    const now = new Date();
 
-    // If no userId (guest), return random posts
+    /* =======================
+       GUEST FEED
+    ======================= */
     if (!userId) {
-      const randomPosts = await Post.find({ isRemoved: false })
-        .populate("communityId", "name title iconUrl")
-        .populate("authorId", "username avatarUrl")
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limitNum);
+      const posts = await Post.aggregate([
+        { $match: { isRemoved: false } },
+        { $sort: { createdAt: -1 } },
+        { $skip: skip },
+        { $limit: limitNum },
 
-      // Shuffle for randomness
-      const shuffled = randomPosts.sort(() => Math.random() - 0.5);
+        {
+          $lookup: {
+            from: "communities",
+            localField: "communityId",
+            foreignField: "_id",
+            as: "community"
+          }
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "authorId",
+            foreignField: "_id",
+            as: "author"
+          }
+        },
+        { $unwind: "$community" },
+        { $unwind: "$author" }
+      ]);
 
-      const formatted = shuffled.map((p) => {
-        // Infer post type from content
-        let postType = "text";
-        if (p.media?.url) {
-          postType = "image";
-        }
-        
-        return {
+      return res.json({
+        posts: posts.map(p => ({
           _id: p._id,
           title: p.title,
           content: p.content,
           media: p.media,
-          community: p.communityId?.name || "",
-          communityTitle: p.communityId?.title || "",
-          user: p.authorId?.username || "",
-          userAvatar: p.authorId?.avatarUrl || "",
-          upvotes: p.upvoteCount,
-          downvotes: p.downvoteCount,
-          comments: p.commentCount,
+          community: p.community.name,
+          communityTitle: p.community.title,
+          user: p.author.username,
+          userAvatar: p.author.avatarUrl,
+          upvotes: p.upvoteCount || 0,
+          downvotes: p.downvoteCount || 0,
+          comments: p.commentCount || 0,
           createdAt: p.createdAt,
-          type: postType,
-        };
+          type: p.media?.url ? "image" : "text",
+          userVote: 0
+        })),
+        hasMore: posts.length === limitNum
       });
-
-      return res.json({ posts: formatted, total: formatted.length });
     }
 
-    // Validate userId
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: "Invalid user ID format" });
-    }
-
-    // Get user's joined communities
+    /* =======================
+       USER DATA
+    ======================= */
     const memberships = await Membership.find({ userId }).select("communityId");
-    const joinedCommunityIds = memberships.map((m) => m.communityId);
+    const joinedCommunityIds = memberships.map(m => m.communityId);
 
-    // Get user's voting history to understand interests
-    const userVotes = await Vote.find({ userId, postId: { $ne: null } })
-      .populate("postId", "communityId")
-      .limit(100); // Limit to recent votes for performance
+    const posts = await Post.aggregate([
+      { $match: { isRemoved: false } },
 
-    // Extract communities from voted posts (user's interests)
-    const interestedCommunityIds = [
-      ...new Set(
-        userVotes
-          .map((v) => v.postId?.communityId)
-          .filter((id) => id && !joinedCommunityIds.some((j) => j.equals(id)))
-      ),
-    ];
+      {
+        $addFields: {
+          baseScore: {
+            $cond: [{ $in: ["$communityId", joinedCommunityIds] }, 100, 0]
+          }
+        }
+      },
 
-    // Get all posts (excluding removed ones)
-    let allPosts = await Post.find({ isRemoved: false })
-      .populate("communityId", "name title iconUrl")
-      .populate("authorId", "username avatarUrl")
-      .lean();
+      {
+        $addFields: {
+          engagementScore: {
+            $add: [
+              { $multiply: ["$upvoteCount", 0.1] },
+              { $multiply: ["$commentCount", 0.5] }
+            ]
+          },
+          hoursSince: {
+            $divide: [{ $subtract: [now, "$createdAt"] }, 3600000]
+          }
+        }
+      },
 
-    // Calculate personalized scores for each post
-    const postsWithScores = allPosts.map((post) => {
-      let score = 0;
-      const postCommunityId = post.communityId?._id?.toString();
-
-      // High priority: Posts from joined communities (+100 points)
-      if (
-        postCommunityId &&
-        joinedCommunityIds.some((id) => id.toString() === postCommunityId)
-      ) {
-        score += 100;
+      {
+        $addFields: {
+          personalizedScore: {
+            $add: ["$baseScore", "$engagementScore"]
+          },
+          hotScore: {
+            $divide: [
+              { $add: ["$engagementScore", "$baseScore", 1] },
+              { $add: ["$hoursSince", 2] }
+            ]
+          }
+        }
       }
+    ]);
 
-      // Medium priority: Posts from communities user has voted in (+50 points)
-      if (
-        postCommunityId &&
-        interestedCommunityIds.some((id) => id?.toString() === postCommunityId)
-      ) {
-        score += 50;
-      }
+    /* =======================
+       SORTING
+    ======================= */
+    if (sort === "new") posts.sort((a, b) => b.createdAt - a.createdAt);
+    else if (sort === "top") posts.sort((a, b) => b.upvoteCount - a.upvoteCount);
+    else if (sort === "hot") posts.sort((a, b) => b.hotScore - a.hotScore);
+    else posts.sort((a, b) => b.personalizedScore - a.personalizedScore);
 
-      // Engagement score: Based on upvotes and comments (normalized)
-      const engagementScore =
-        (post.upvoteCount || 0) * 0.1 + (post.commentCount || 0) * 0.5;
-      score += engagementScore;
+    const paginated = posts.slice(skip, skip + limitNum);
 
-      // Recency score: Newer posts get slight boost
-      const hoursSince = hoursSinceCreation(post.createdAt);
-      const recencyScore = Math.max(0, 10 - hoursSince * 0.5);
-      score += recencyScore;
-
-      return { ...post, personalizedScore: score };
+    /* =======================
+       USER VOTES (CRITICAL)
+    ======================= */
+    const votes = await Vote.find({
+      userId,
+      postId: { $in: paginated.map(p => p._id) }
     });
 
-    // Sort by personalized score (descending)
-    postsWithScores.sort((a, b) => b.personalizedScore - a.personalizedScore);
+    const voteMap = {};
+    votes.forEach(v => {
+      voteMap[v.postId.toString()] = v.value;
+    });
 
-    // If user is new (no communities joined, no votes), shuffle top posts for variety
-    if (joinedCommunityIds.length === 0 && userVotes.length === 0) {
-      // Take top 50 posts and shuffle them for randomness
-      const topPosts = postsWithScores.slice(0, 50);
-      const shuffled = topPosts.sort(() => Math.random() - 0.5);
-      postsWithScores.splice(0, 50, ...shuffled);
-    }
+    /* =======================
+       POPULATE + FORMAT
+    ======================= */
+    const populated = await Post.populate(paginated, [
+      { path: "communityId", select: "name title" },
+      { path: "authorId", select: "username avatarUrl" }
+    ]);
 
-    // Apply sorting if specified
-    if (sort === "new") {
-      postsWithScores.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-      );
-    } else if (sort === "top") {
-      postsWithScores.sort((a, b) => b.upvoteCount - a.upvoteCount);
-    } else if (sort === "hot") {
-      // Hot = combination of upvotes and recency
-      postsWithScores.sort((a, b) => {
-        const hotScoreA =
-          (a.upvoteCount || 0) / Math.max(1, hoursSinceCreation(a.createdAt));
-        const hotScoreB =
-          (b.upvoteCount || 0) / Math.max(1, hoursSinceCreation(b.createdAt));
-        return hotScoreB - hotScoreA;
-      });
-    }
-    // "best" uses personalized score (already sorted)
-
-    // Paginate
-    const paginatedPosts = postsWithScores.slice(skip, skip + limitNum);
-
-    // Format response
-    const formatted = paginatedPosts.map((p) => {
-      // Infer post type from content
-      let postType = "text";
-      if (p.media?.url) {
-        postType = "image"; // Could be image or video, but defaulting to image
-      }
-      
-      return {
+    res.json({
+      posts: populated.map(p => ({
         _id: p._id,
         title: p.title,
         content: p.content,
         media: p.media,
-        community: p.communityId?.name || "",
-        communityTitle: p.communityId?.title || "",
-        user: p.authorId?.username || "",
-        userAvatar: p.authorId?.avatarUrl || "",
+        community: p.communityId.name,
+        communityTitle: p.communityId.title,
+        user: p.authorId.username,
+        userAvatar: p.authorId.avatarUrl,
         upvotes: p.upvoteCount || 0,
         downvotes: p.downvoteCount || 0,
         comments: p.commentCount || 0,
         createdAt: p.createdAt,
-        type: postType,
-      };
+        type: p.media?.url ? "image" : "text",
+        userVote: voteMap[p._id.toString()] || 0
+      })),
+      hasMore: skip + limitNum < posts.length
     });
 
-    res.json({
-      posts: formatted,
-      total: postsWithScores.length,
-      hasMore: skip + limitNum < postsWithScores.length,
-    });
   } catch (err) {
-    console.error("getPersonalizedFeed error:", err);
-    res.status(500).json({ message: "Failed to load personalized feed" });
+    console.error("Feed error:", err);
+    res.status(500).json({ message: "Failed to load feed" });
   }
 };
+
+
+/* ---------- FORMATTER ---------- */
+function formatPosts(posts) {
+  return posts.map(p => ({
+    _id: p._id,
+    title: p.title,
+    content: p.content,
+    media: p.media,
+    community: p.community.name,
+    communityTitle: p.community.title,
+    user: p.author.username,
+    userAvatar: p.author.avatarUrl,
+    upvotes: p.upvoteCount || 0,
+    downvotes: p.downvoteCount || 0,
+    comments: p.commentCount || 0,
+    createdAt: p.createdAt,
+    type: p.media?.url ? "image" : "text"
+  }));
+}
