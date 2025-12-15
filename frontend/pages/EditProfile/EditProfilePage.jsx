@@ -5,7 +5,7 @@ import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 import "./EditProfilePage.css";
 import defaultAvatar from "../../assets/default-avatar.png";
 
-export default function EditProfilePage({ isDark, toggleDarkMode, setCurrentUser  }) {
+export default function EditProfilePage({ setCurrentUser  }) {
   const navigate = useNavigate();
   const fileRef = useRef(null);
 
@@ -41,12 +41,12 @@ export default function EditProfilePage({ isDark, toggleDarkMode, setCurrentUser
     loadMe();
   }, []);
 
-  // ✅ OPEN FILE EXPLORER
+  // OPEN FILE EXPLORER
   const openFilePicker = () => {
     fileRef.current.click();
   };
 
-  // ✅ FILE SELECTED
+  //  FILE SELECTED
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -55,7 +55,7 @@ export default function EditProfilePage({ isDark, toggleDarkMode, setCurrentUser
     setAvatarPreview(URL.createObjectURL(file));
   };
 
-  // ✅ SAVE PROFILE
+  //  SAVE PROFILE
   const handleSave = async () => {
   try {
     setSaving(true);
@@ -63,10 +63,10 @@ export default function EditProfilePage({ isDark, toggleDarkMode, setCurrentUser
 
     let finalAvatarUrl = avatarUrl;
 
-    // 1️⃣ UPLOAD AVATAR IF CHANGED
+    // 1️UPLOAD AVATAR IF CHANGED
     if (avatarFile) {
       const form = new FormData();
-      form.append("avatar", avatarFile); // 🔥 MUST MATCH MULTER
+      form.append("avatar", avatarFile); // MUST MATCH MULTER
 
       const uploadRes = await axios.post(
         "http://localhost:5000/upload/avatar",
@@ -80,7 +80,7 @@ export default function EditProfilePage({ isDark, toggleDarkMode, setCurrentUser
       finalAvatarUrl = uploadRes.data.avatarUrl;
     }
 
-    // 2️⃣ UPDATE PROFILE
+    // 2UPDATE PROFILE
     const updateRes = await axios.patch(
       "http://localhost:5000/users/me",
       {
@@ -91,7 +91,7 @@ export default function EditProfilePage({ isDark, toggleDarkMode, setCurrentUser
       { withCredentials: true }
     );
 
-    // ✅ update navbar instantly
+    //update navbar instantly
     setCurrentUser(updateRes.data);
 
     navigate("/user/me");
@@ -113,25 +113,6 @@ export default function EditProfilePage({ isDark, toggleDarkMode, setCurrentUser
 
   return (
     <>
-      <button
-        onClick={toggleDarkMode}
-        style={{
-          position: "fixed",
-          top: "70px",
-          right: "20px",
-          zIndex: 10000,
-          padding: "10px 16px",
-          borderRadius: "999px",
-          background: isDark ? "#d7dadc" : "#1a1a1b",
-          color: isDark ? "#000" : "#fff",
-          border: "none",
-          fontWeight: "bold",
-          cursor: "pointer",
-        }}
-      >
-        {isDark ? "Light Mode" : "Dark Mode"}
-      </button>
-
       <div className="profile-page-wrapper">
         <LeftSidebar />
 

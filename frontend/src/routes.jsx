@@ -106,8 +106,6 @@ export default function AppRoutes({
   element={
     isLoggedIn ? (
       <EditProfilePage
-        isDark={darkMode}
-        toggleDarkMode={toggleDarkMode}
         setCurrentUser={setCurrentUser} 
       />
     ) : (
