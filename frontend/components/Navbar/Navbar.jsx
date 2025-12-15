@@ -212,15 +212,13 @@ useEffect(() => {
           <div className="profile-menu-container" ref={profileMenuRef}>
             <button className="profile-btn" onClick={toggleProfileMenu}>
               <img
-  src={user?.avatarUrl ? `http://localhost:5000${user.avatarUrl}` : profileFallback}
-  alt="Profile"
-  className="profile-avatar"
-  onError={(e) => {
-    e.currentTarget.src = profileFallback;
-  }}
-/>
-
-
+              src={user?.avatarUrl ? `http://localhost:5000${user.avatarUrl}` : profileFallback}
+              alt="Profile"
+              className="profile-avatar"
+              onError={(e) => {
+                e.currentTarget.src = profileFallback;
+              }}
+            />
 
               <span className="profile-name">{user?.username}</span>
               <svg className={`dropdown-icon ${showProfileMenu ? 'open' : ''}`} fill="currentColor" viewBox="0 0 20 20">

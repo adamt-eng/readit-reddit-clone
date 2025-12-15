@@ -4,9 +4,7 @@ import NotificationItem from "../../components/NotificationItem/NotificationItem
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 import axios from "axios";
 
-
-
-// Format date → "22m", "1h", "3d", etc.
+// Format date 
 function formatTimeAgo(date) {
   const diff = Date.now() - new Date(date).getTime();
 
@@ -30,14 +28,14 @@ export default function Notifications() {
   const [loading, setLoading] = useState(true);
   const [showEarlier, setShowEarlier] = useState(false);
 
-  // ===============================
-  // FETCH ALL NOTIFICATIONS
-  // ===============================
- 
+  // fetch notis
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/notifications",{withCredentials:true}); 
+        const res = await axios.get(
+          "http://localhost:5000/notifications",
+          { withCredentials: true }
+        );
 
         const formatted = res.data.map((n) => ({
           ...n,
@@ -55,16 +53,29 @@ export default function Notifications() {
     fetchNotifications();
   }, []);
 
-  // ===============================
-  // READ / UNREAD HANDLING
-  // ===============================
-  const unread = notifications.filter((n) => !n.isRead);
-  const read = notifications.filter((n) => n.isRead);
+  // time based filtering
+  const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+  const now = Date.now();
 
-  const markAll = () => {
-    setNotifications(notifications.map((n) => ({ ...n, isRead: true })));
+  const recent = notifications.filter(
+    (n) => now - new Date(n.createdAt).getTime() <= THREE_DAYS_MS
+  );
 
-    axios.put("/api/notifications/mark-all-read").catch(() => {});
+  const older = notifications.filter(
+    (n) => now - new Date(n.createdAt).getTime() > THREE_DAYS_MS
+  );
+
+  
+  // DELETE HANDLING
+ 
+  const deleteAll = () => {
+    setNotifications([]);
+
+    axios
+      .delete("http://localhost:5000/notifications", {
+        withCredentials: true,
+      })
+      .catch(() => {});
   };
 
   const markOne = (id) => {
@@ -74,28 +85,30 @@ export default function Notifications() {
       )
     );
 
-    axios.put(`/api/notifications/${id}/read`).catch(() => {});
+    axios
+      .patch(
+        `http://localhost:5000/notifications/${id}/read`,
+        {},
+        { withCredentials: true }
+      )
+      .catch(() => {});
   };
 
-  // ===============================
-  // RENDER
-  // ===============================
+
   return (
     <div className="page-container">
-
       {/* LEFT SIDEBAR */}
       <LeftSidebar />
 
       {/* MAIN CONTENT */}
       <div className="notifs-page">
-
         {/* Sticky Header */}
         <div className="notifs-header">
           <h2>Notifications</h2>
 
-          {unread.length > 0 && (
-            <button className="header-btn" onClick={markAll}>
-              Mark all as read
+          {notifications.length > 0 && (
+            <button className="header-btn" onClick={deleteAll}>
+              Clear all
             </button>
           )}
         </div>
@@ -105,13 +118,12 @@ export default function Notifications() {
           <div className="no-new-message">Loading...</div>
         ) : (
           <div className="notifs-list">
-
-            {/* NEW NOTIFICATIONS */}
-            {unread.length > 0 ? (
+            {/* RECENT NOTIFICATIONS */}
+            {recent.length > 0 ? (
               <>
                 <h3 className="section-title">New</h3>
 
-                {unread.map((n) => (
+                {recent.map((n) => (
                   <NotificationItem
                     key={n._id}
                     data={n}
@@ -120,27 +132,29 @@ export default function Notifications() {
                 ))}
               </>
             ) : (
-              <div className="no-new-message">You're all caught up 🎉</div>
+              <div className="no-new-message">
+                No notifications in the last 3 days
+              </div>
             )}
 
-            {/* EXPAND EARLIER */}
-            {read.length > 0 && (
+            {/* EXPAND OLDER */}
+            {older.length > 0 && (
               <button
                 className="expand-earlier-btn"
                 onClick={() => setShowEarlier(!showEarlier)}
               >
                 {showEarlier
-                  ? "Hide earlier notifications ▲"
-                  : "Show earlier notifications ▼"}
+                  ? "Hide older notifications ▲"
+                  : "Show older notifications ▼"}
               </button>
             )}
 
-            {/* EARLIER NOTIFICATIONS */}
-            {showEarlier && read.length > 0 && (
+            {/* OLDER NOTIFICATIONS */}
+            {showEarlier && older.length > 0 && (
               <>
-                <h3 className="section-title">Earlier</h3>
+                <h3 className="section-title">Older</h3>
 
-                {read.map((n) => (
+                {older.map((n) => (
                   <NotificationItem
                     key={n._id}
                     data={n}
@@ -149,7 +163,6 @@ export default function Notifications() {
                 ))}
               </>
             )}
-
           </div>
         )}
       </div>
