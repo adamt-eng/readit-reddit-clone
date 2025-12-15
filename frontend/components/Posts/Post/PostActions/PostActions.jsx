@@ -11,18 +11,21 @@ export default function PostActions({
 }) {
   return (
     <div className="post-actions">
-      <button className="vote-btn upvote" onClick={onUpvote} title="Upvote">
+      <button
+        className={`vote-btn upvote ${post.userVote === 1 ? "active" : ""}`}
+        onClick={onUpvote}
+      >
         ▲
       </button>
 
       <span className="post-votes">{post.votes}</span>
 
-      <button className="vote-btn downvote" onClick={onDownvote} title="Downvote">
+      <button
+        className={`vote-btn downvote ${post.userVote === -1 ? "active" : ""}`}
+        onClick={onDownvote}
+      >
         ▼
       </button>
-
-      <button className="action-btn">💬 {post.commentsCount} Comments</button>
-      <button className="action-btn">🔗 Share</button>
 
       {isSummaryMode ? (
         <button className="action-btn" onClick={onShowOriginal}>

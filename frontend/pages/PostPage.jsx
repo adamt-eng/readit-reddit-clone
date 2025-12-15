@@ -9,11 +9,6 @@ export default function PostPage() {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // SUMMARY STATES
-  const [isSummarizing, setIsSummarizing] = useState(false);
-  const [isSummaryMode, setIsSummaryMode] = useState(false);
-  const [animatedText, setAnimatedText] = useState("");
-
   /* ---------------- LOAD POST + COMMENTS ---------------- */
 
   useEffect(() => {
@@ -22,7 +17,6 @@ export default function PostPage() {
         `http://localhost:5000/posts/${postId}`,
         { credentials: "include" }
       );
-
       if (!res.ok) return;
 
       const data = await res.json();
@@ -37,8 +31,6 @@ export default function PostPage() {
         image: data.media?.url,
         votes: data.upvoteCount - data.downvoteCount,
         commentsCount: data.commentCount,
-
-        // REQUIRED for correct voting behavior
         userVote: 0
       });
     };
@@ -48,121 +40,150 @@ export default function PostPage() {
         `http://localhost:5000/posts/${postId}/comments`,
         { credentials: "include" }
       );
-
       if (!res.ok) return;
 
       const data = await res.json();
 
-      const convert = (arr) =>
+      const normalize = (arr) =>
         arr.map((c) => ({
           id: c._id,
-          author: c.authorId,
-          body: c.content,
+          author: c.authorId?.username ?? "unknown",
+          content: c.content,
           timeAgo: new Date(c.createdAt).toLocaleDateString(),
-          votes: c.upvoteCount - c.downvoteCount,
+          votes: (c.upvoteCount || 0) - (c.downvoteCount || 0),
           userVote: 0,
-          replies: convert(c.replies || [])
+          replies: normalize(c.replies || [])
         }));
 
-      setComments(convert(data));
+      setComments(normalize(data));
     };
 
-    const load = async () => {
-      await fetchPost();
-      await fetchComments();
-      setLoading(false);
-    };
-
-    load();
+    Promise.all([fetchPost(), fetchComments()]).then(() =>
+      setLoading(false)
+    );
   }, [postId]);
 
-  /* ---------------- VOTING (BACKEND AUTHORITATIVE) ---------------- */
+  /* ---------------- POST VOTING ---------------- */
 
-const handleVote = async (voteScore) => {
-  try {
+  const handlePostVote = async (voteScore) => {
     const res = await fetch(
-      `http://localhost:5000/votes/${postId}`,
+      `http://localhost:5000/votes/posts/${postId}`,
       {
         method: "POST",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ voteScore }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ voteScore })
       }
     );
 
-    if (!res.ok) {
-      console.error("Vote failed:", res.status);
-      return;
-    }
-
+    if (!res.ok) return;
     const data = await res.json();
 
     setPost((prev) => ({
       ...prev,
-
-      // ✅ backend is authoritative
       votes: data.post.upvoteCount - data.post.downvoteCount,
-
-      // ✅ toggle logic stays frontend-side
-      userVote: prev.userVote === voteScore ? 0 : voteScore,
+      userVote: prev.userVote === voteScore ? 0 : voteScore
     }));
-  } catch (err) {
-    console.error("Vote request error:", err);
-  }
-};
+  };
 
+  /* ---------------- COMMENT VOTING ---------------- */
 
+  const handleCommentVote = async (commentId, voteType) => {
+    const res = await fetch(
+      `http://localhost:5000/votes/comments/${commentId}`,
+      {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ voteScore: voteType })
+      }
+    );
 
-  /* ---------------- AI SUMMARY ---------------- */
+    if (!res.ok) return;
+    const data = await res.json();
 
-  const handleGenerateSummary = async () => {
-    try {
-      setIsSummarizing(true);
-      setAnimatedText("");
-
-      const res = await fetch(
-        `http://localhost:5000/ai-summary/${postId}/generate`,
-        { credentials: "include" }
+    const updateVotes = (arr) =>
+      arr.map((c) =>
+        c.id === commentId
+          ? {
+              ...c,
+              votes:
+                data.comment.upvoteCount - data.comment.downvoteCount,
+              userVote: c.userVote === voteType ? 0 : voteType
+            }
+          : { ...c, replies: updateVotes(c.replies) }
       );
 
-      if (!res.ok) {
-        setIsSummarizing(false);
-        return;
+    setComments(updateVotes);
+  };
+
+  /* ---------------- COMMENT CREATE ---------------- */
+
+  const handleComment = async (postId, text) => {
+    const res = await fetch(
+      `http://localhost:5000/posts/${postId}/comments`,
+      {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: text })
       }
+    );
 
-      const data = await res.json();
+    if (!res.ok) return;
+    const data = await res.json();
 
-      const summary =
-        data.summaryText ||
-        data.summary ||
-        data.aiSummary ||
-        data.text ||
-        "";
+    const newComment = {
+      id: data._id,
+      author: data.authorId.username,
+      content: data.content,
+      timeAgo: new Date(data.createdAt).toLocaleDateString(),
+      votes: 0,
+      userVote: 0,
+      replies: []
+    };
 
-      if (!summary) {
-        setIsSummarizing(false);
-        return;
+    setComments((prev) => [newComment, ...prev]);
+    setPost((prev) => ({
+      ...prev,
+      commentsCount: prev.commentsCount + 1
+    }));
+  };
+
+  /* ---------------- COMMENT REPLY ---------------- */
+
+  const handleReply = async (commentId, text) => {
+    const res = await fetch(
+      `http://localhost:5000/comments/${commentId}/reply`,
+      {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: text })
       }
+    );
 
-      const words = summary.split(" ");
-      let i = 0;
+    if (!res.ok) return;
+    const data = await res.json();
 
-      setIsSummaryMode(true);
+    const reply = {
+      id: data._id,
+      author: data.authorId.username,
+      content: data.content,
+      timeAgo: new Date(data.createdAt).toLocaleDateString(),
+      votes: 0,
+      userVote: 0,
+      replies: []
+    };
 
-      const interval = setInterval(() => {
-        setAnimatedText((prev) => prev + words[i] + " ");
-        i++;
-        if (i >= words.length) {
-          clearInterval(interval);
-          setIsSummarizing(false);
-        }
-      }, 40);
-    } catch (err) {
-      console.error("Error generating summary:", err);
-      setIsSummarizing(false);
-    }
+    const insertReply = (arr) =>
+      arr.map((c) =>
+        c.id === commentId
+          ? { ...c, replies: [...c.replies, reply] }
+          : { ...c, replies: insertReply(c.replies) }
+      );
+
+    setComments(insertReply);
   };
 
   /* ---------------- RENDER ---------------- */
@@ -170,27 +191,14 @@ const handleVote = async (voteScore) => {
   if (loading || !post) return <div>Loading...</div>;
 
   return (
-    <div style={{ padding: "20px" }}>
-      <Post
-        post={{
-          ...post,
-          text: isSummaryMode ? animatedText : post.text
-        }}
-        comments={comments}
-
-        // ✔ correct voting
-        onUpvote={() => handleVote(1)}
-        onDownvote={() => handleVote(-1)}
-
-        onComment={() => {}}
-        onVote={() => {}}
-        onReply={() => {}}
-
-        isSummaryMode={isSummaryMode}
-        isSummarizing={isSummarizing}
-        onGenerateSummary={handleGenerateSummary}
-        onShowOriginal={() => setIsSummaryMode(false)}
-      />
-    </div>
+    <Post
+      post={post}
+      comments={comments}
+      onUpvote={() => handlePostVote(1)}
+      onDownvote={() => handlePostVote(-1)}
+      onComment={handleComment}
+      onVote={handleCommentVote}
+      onReply={handleReply}
+    />
   );
 }

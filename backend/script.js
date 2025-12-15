@@ -387,7 +387,7 @@ async function main() {
       { _id: genId(), userId: users[0]._id, postId: posts[0]._id, commentId: null, value: 1, createdAt: new Date() },
       { _id: genId(), userId: users[1]._id, postId: posts[0]._id, commentId: null, value: 1, createdAt: new Date() },
       { _id: genId(), userId: users[2]._id, postId: posts[2]._id, commentId: null, value: 1, createdAt: new Date() },
-      { _id: genId(), userId: users[3]._1, postId: posts[3]._id, commentId: null, value: 1, createdAt: new Date() },
+      { _id: genId(), userId: users[3]._id, postId: posts[3]._id, commentId: null, value: 1, createdAt: new Date() },
       { _id: genId(), userId: users[3]._id, postId: posts[5]._id,  commentId: null, value: 1,  createdAt: new Date("2025-11-03T10:00:00Z") },
 { _id: genId(), userId: users[7]._id, postId: posts[5]._id,  commentId: null, value: -1, createdAt: new Date("2025-11-03T10:05:00Z") },
 { _id: genId(), userId: users[12]._id, postId: posts[7]._id, commentId: null, value: 1,  createdAt: new Date("2025-11-03T11:00:00Z") },

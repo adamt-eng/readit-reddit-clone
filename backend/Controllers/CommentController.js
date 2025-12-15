@@ -1,17 +1,27 @@
 import Comment from "../Models/Comment.js";
 import Post from "../Models/Post.js";
 
+/* ---------------- GET COMMENTS ---------------- */
+
 export const getCommentsForPost = async (req, res) => {
   try {
     const { postId } = req.params;
 
-    const comments = await Comment.find({ postId }).lean();
+    const comments = await Comment.find({ postId })
+      .populate("authorId", "username")
+      .lean();
 
     // Build tree
     const map = {};
     const roots = [];
 
-    comments.forEach(c => (map[c._id] = { ...c, replies: [] }));
+    comments.forEach(c => {
+      map[c._id] = {
+        ...c,
+        author: c.authorId.username, // ✅ normalize
+        replies: []
+      };
+    });
 
     comments.forEach(c => {
       if (c.parentId) {
@@ -28,7 +38,8 @@ export const getCommentsForPost = async (req, res) => {
   }
 };
 
-// Create a new comment
+/* ---------------- CREATE COMMENT ---------------- */
+
 export const createComment = async (req, res) => {
   try {
     const { postId } = req.params;
@@ -38,27 +49,38 @@ export const createComment = async (req, res) => {
       return res.status(400).json({ message: "Content is required" });
     }
 
-    // TEMP — replace with req.user._id when auth is added
-    const userId = "6938a02cea96c570c169d837";
+    // ✅ REAL logged-in user
+    const userId = req.user.id;
 
     const comment = await Comment.create({
       postId,
       parentId: null,
       authorId: userId,
-      content
+      content,
+      upvoteCount: 0,
+      downvoteCount: 0,
+      isRemoved: false,
+      createdAt: new Date()
     });
 
-    // Update post's comment count
+    await comment.populate("authorId", "username");
+
     await Post.findByIdAndUpdate(postId, { $inc: { commentCount: 1 } });
 
-    res.status(201).json(comment);
+    res.status(201).json({
+      _id: comment._id,
+      content: comment.content,
+      createdAt: comment.createdAt,
+      authorId: comment.authorId // { _id, username }
+    });
   } catch (err) {
     console.error("Error creating comment:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// Reply to a comment
+/* ---------------- REPLY TO COMMENT ---------------- */
+
 export const replyToComment = async (req, res) => {
   try {
     const { commentId } = req.params;
@@ -73,65 +95,33 @@ export const replyToComment = async (req, res) => {
       return res.status(404).json({ message: "Parent comment not found" });
     }
 
-    const userId = "6938a02cea96c570c169d837";
+    const userId = req.user.id;
 
     const reply = await Comment.create({
       postId: parent.postId,
       parentId: commentId,
       authorId: userId,
-      content
+      content,
+      upvoteCount: 0,
+      downvoteCount: 0,
+      isRemoved: false,
+      createdAt: new Date()
     });
 
-    await Post.findByIdAndUpdate(parent.postId, { $inc: { commentCount: 1 } });
+    await reply.populate("authorId", "username");
 
-    res.status(201).json(reply);
+    await Post.findByIdAndUpdate(parent.postId, {
+      $inc: { commentCount: 1 }
+    });
+
+    res.status(201).json({
+      _id: reply._id,
+      content: reply.content,
+      createdAt: reply.createdAt,
+      authorId: reply.authorId
+    });
   } catch (err) {
     console.error("Error replying to comment:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
-
-// Upvote a comment
-export const upvoteComment = async (req, res) => {
-  try {
-    const { commentId } = req.params;
-
-    const updated = await Comment.findByIdAndUpdate(
-      commentId,
-      { $inc: { upvoteCount: 1 } },
-      { new: true }
-    );
-
-    if (!updated) {
-      return res.status(404).json({ message: "Comment not found" });
-    }
-
-    res.json(updated);
-  } catch (err) {
-    console.error("Error upvoting comment:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
-// Downvote a comment
-export const downvoteComment = async (req, res) => {
-  try {
-    const { commentId } = req.params;
-
-    const updated = await Comment.findByIdAndUpdate(
-      commentId,
-      { $inc: { downvoteCount: 1 } },
-      { new: true }
-    );
-
-    if (!updated) {
-      return res.status(404).json({ message: "Comment not found" });
-    }
-
-    res.json(updated);
-  } catch (err) {
-    console.error("Error downvoting comment:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-

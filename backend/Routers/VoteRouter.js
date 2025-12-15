@@ -1,9 +1,10 @@
-import express from 'express';
+import express from "express";
 import auth from "../Middleware/AuthMiddleware.js";
-import { votePost } from '../Controllers/VoteController.js';
+import { votePost, voteComment } from "../Controllers/VoteController.js";
 
 const router = express.Router();
 
-router.post("/:id",auth,votePost)
+router.post("/posts/:id", auth, votePost);
+router.post("/comments/:commentId", auth, voteComment);
 
 export default router;
