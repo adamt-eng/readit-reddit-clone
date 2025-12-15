@@ -36,11 +36,8 @@ export const getPostableCommunities = async (req, res) => {
 // Create a new post (TEMP: userId from request body)
 export const createPost = async (req, res) => {
   try {
-    const { userId, title, content, type, communityId } = req.body;
-
-    if (!userId) {
-      return res.status(401).json({ message: "userId missing (temporary)" });
-    }
+    const { title, content, type, communityId } = req.body;
+    const userId = req.user.id;
 
     if (!title || !communityId || !type) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -72,6 +69,7 @@ export const createPost = async (req, res) => {
     res.status(500).json({ message: "Failed to create post" });
   }
 };
+
 
 
 /* ---------------- POST SEARCH ---------------- */
