@@ -71,18 +71,22 @@ export default function SearchResults() {
     async function runSearch() {
       try {
         setIsLoading(true);
+const [postsRes, usersRes, communitiesRes] = await Promise.all([
+  axios.get(`${API_URL}/search/posts`, {
+    withCredentials: true,
+    params: { q, page, limit, sort: sortBy, time: timeFilter }
+  }),
 
-        const [postsRes, usersRes, communitiesRes] = await Promise.all([
-          axios.get(`${API_URL}/search/posts`, {
-            params: { q, page, limit, sort: sortBy, time: timeFilter }
-          },{withCredentials:true}),
-          axios.get(`${API_URL}/search/users`, {
-            params: { q, page, limit }
-          },{withCredentials:true}),
-          axios.get(`${API_URL}/search/communities`, {
-            params: { q, page, limit }
-          },{withCredentials:true})
-        ]);
+  axios.get(`${API_URL}/search/users`, {
+    withCredentials: true,
+    params: { q, page, limit }
+  }),
+
+  axios.get(`${API_URL}/search/communities`, {
+    withCredentials: true,
+    params: { q, page, limit }
+  })
+]);
 
         // update results
         setSearchResults({
