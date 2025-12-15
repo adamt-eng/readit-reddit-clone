@@ -5,10 +5,11 @@ import Vote from "../Models/Votes.js";
 export const votePost = async (req, res) => {
   try {
     const userId = req.user?.id;
-    const { postId } = req.params;
+    const { id: postId } = req.params;
     const { voteScore } = req.body; // +1 or -1
 
-    // ---------- VALIDATION ----------
+    /* ---------- VALIDATION ---------- */
+
     if (!userId) {
       return res.status(401).json({ message: "Not authenticated" });
     }
@@ -28,15 +29,19 @@ export const votePost = async (req, res) => {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    // ---------- FIND EXISTING VOTE ----------
+    /* ---------- FIND EXISTING VOTE ---------- */
+
     const existingVote = await Vote.findOne({ userId, postId });
 
-    // ---------- CASE 1: NO PREVIOUS VOTE ----------
+    /* ---------- CASE 1: NO PREVIOUS VOTE ---------- */
+
     if (!existingVote) {
       await Vote.create({
         userId,
         postId,
-        voteScore,
+
+    
+        value: voteScore,
       });
 
       if (voteScore === 1) post.upvoteCount += 1;
@@ -47,8 +52,9 @@ export const votePost = async (req, res) => {
       return res.json({ message: "Vote added", post });
     }
 
-    // ---------- CASE 2: SAME VOTE → REMOVE (UNVOTE) ----------
-    if (existingVote.voteScore === voteScore) {
+    /* ---------- CASE 2: SAME VOTE → REMOVE ---------- */
+
+    if (existingVote.value === voteScore) {
       await existingVote.deleteOne();
 
       if (voteScore === 1) post.upvoteCount -= 1;
@@ -59,8 +65,9 @@ export const votePost = async (req, res) => {
       return res.json({ message: "Vote removed", post });
     }
 
-    // ---------- CASE 3: CHANGE VOTE ----------
-    if (existingVote.voteScore === 1) {
+    /* ---------- CASE 3: CHANGE VOTE ---------- */
+
+    if (existingVote.value === 1) {
       post.upvoteCount -= 1;
       post.downvoteCount += 1;
     } else {
@@ -68,7 +75,9 @@ export const votePost = async (req, res) => {
       post.upvoteCount += 1;
     }
 
-    existingVote.voteScore = voteScore;
+   
+    existingVote.value = voteScore;
+
     await existingVote.save();
     await post.save();
 
