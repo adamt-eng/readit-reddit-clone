@@ -114,6 +114,21 @@ export default function AppRoutes({
   }
 />
 
+        {/* Edit profile */}
+<Route
+  path="/popular"
+  element={
+    isLoggedIn ? (
+      <HomePage
+        darkMode={darkMode}
+        onStartCommunity={openCommunityModal}
+      />
+    ) : (
+      <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
+    )
+  }
+/>
+
 
         {/* Create post */}
         <Route

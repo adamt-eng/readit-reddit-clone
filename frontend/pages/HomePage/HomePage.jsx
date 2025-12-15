@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import "./HomePage.css";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import TrendingPosts from "../../components/Posts/TrendingPosts/TrendingPosts";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
@@ -37,11 +37,14 @@ const HomePage = ({ darkMode, onStartCommunity }) => {
   const navigate = useNavigate();
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
 
+  const location = useLocation();
+  const isPopular = location.pathname === "/popular";
+
   // Fetch user on component mount
   useEffect(() => {
     async function fetchUser() {
       try {
-        const res = await axios.get(`http://localhost:5000/users/me`,{withCredentials:true}); // change to auth later
+        const res = await axios.get(`http://localhost:5000/users/me`,{withCredentials:true});
         setUser(res.data);
         console.log(res.data);
       } catch (err) {
@@ -66,7 +69,7 @@ const HomePage = ({ darkMode, onStartCommunity }) => {
   const [sortBy, setSortBy] = useState(() => {
     try {
       const savedSortBy = localStorage.getItem('sortBy');
-      const sortOptions = ["Best", "Hot", "New", "Top", "Rising"];
+      const sortOptions = ["Best","New", "Top", "Rising"];
       return sortOptions.includes(savedSortBy) ? savedSortBy : 'Best';
     } catch (error) {
       console.error('Error loading sort by from localStorage:', error);
@@ -89,71 +92,77 @@ const HomePage = ({ darkMode, onStartCommunity }) => {
   });
 
   // Fetch personalized feed from API
-  useEffect(() => {
-    async function fetchFeed() {
+useEffect(() => {
+  async function fetchFeed() {
+    try {
+      setIsLoadingPosts(true);
+
+      const sortByParam =
+        sortBy === "Best" ? "best" :
+        sortBy === "New" ? "new" :
+        sortBy === "Top" ? "top" : "best";
+
+      //choose endpoint based on URL
+      const res = isPopular
+        ? await axios.get("http://localhost:5000/posts/popular", {
+        withCredentials: true})
+        : await axios.get("http://localhost:5000/posts/feed", {
+        params: {
+          sort: sortByParam,
+          limit: 50
+        },
+        withCredentials: true
+      });
+
+
+      const transformedPosts = res.data.posts.map((p) => ({
+        id: p._id,
+        _id: p._id,
+        community: p.community || "",
+        user: p.user || "",
+        userAvatar: p.userAvatar || "/profile.png",
+        title: p.title || "",
+        content: p.content || "",
+        upvotes: p.upvotes || 0,
+        comments: p.comments || 0,
+        time: formatTimeAgo(p.createdAt),
+        userVote: 0,
+        image: p.media?.url || null,
+        isExpanded: expandedPosts.includes(p._id),
+        commentsList: [],
+        type: p.type || "text"
+      }));
+
+      // load votes if logged in
       try {
-        setIsLoadingPosts(true);
-        const userId = user?._id || null;
-        const sortByParam = sortBy === "Best" ? "best" : 
-                          sortBy === "Hot" ? "hot" : 
-                          sortBy === "New" ? "new" : 
-                          sortBy === "Top" ? "top" : "best";
-        
-        console.log("Fetching feed with userId:", userId, "sort:", sortByParam);
-        
-        const res = await axios.get(`http://localhost:5000/posts/feed`, {
-          params: {
-            sort: sortByParam,
-            limit: 50
-          }
+        const { data: voteMap } = await axios.get(
+          "http://localhost:5000/votes/me",
+          { withCredentials: true }
+        );
+
+        transformedPosts.forEach(post => {
+          post.userVote = voteMap[post.id] ?? 0;
         });
-
-        console.log("Feed API response:", res.data);
-
-        // Transform API response to match frontend format
-        const transformedPosts = res.data.posts.map((p) => ({
-          id: p._id,
-          _id: p._id,
-          community: p.community || "",
-          user: p.user || "",
-          userAvatar: p.userAvatar || "/profile.png",
-          title: p.title || "",
-          content: p.content || "",
-          upvotes: p.upvotes || 0,
-          comments: p.comments || 0,
-          time: formatTimeAgo(p.createdAt),
-          userVote: 0,
-          image: p.media?.url || null,
-          isExpanded: expandedPosts.includes(p._id),
-          commentsList: [],
-          type: p.type || "text"
-        }));
-        try {
-          const { data: voteMap } = await axios.get(
-            "http://localhost:5000/votes/me",
-            { withCredentials: true }
-          );
-          transformedPosts.forEach(post => {
-            post.userVote = voteMap[post.id] ?? 0;
-          });
-        } catch (error) {
-          console.error('Error loading votes from server:', error);
-        }
-
-        console.log("Transformed posts:", transformedPosts.length);
-        setPosts(transformedPosts);
-      } catch (err) {
-        console.error("Error fetching feed:", err);
-        setPosts([]); // Set empty array on error instead of keeping old posts
-      } finally {
-        setIsLoadingPosts(false);
+      } catch {
+        // guest mode → ignore
       }
-    }
 
-    // Only fetch feed if we have a user (or null for guest mode)
-    // The API handles both cases (with userId or without)
-    fetchFeed();
-  }, [user?._id, sortBy]);
+      setPosts(transformedPosts);
+    } catch (err) {
+      console.error("Error fetching feed:", err);
+      setPosts([]);
+    } finally {
+      setIsLoadingPosts(false);
+    }
+  }
+
+  fetchFeed();
+}, [
+  sortBy,
+  expandedPosts,
+  isPopular
+]);
+
 
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [commentInputs, setCommentInputs] = useState({});
@@ -242,7 +251,7 @@ useEffect(() => {
     });
   };
 
-  const sortOptions = ["Best", "Hot", "New", "Top", "Rising"];
+  const sortOptions = ["Best", "New", "Top", "Rising"];
 
   // Save viewMode to localStorage whenever it changes
   useEffect(() => {
@@ -689,8 +698,8 @@ const handleVote = async (postId, voteType) => {
 
       {/* Main Feed */}
       <div className="main-feed">
-        <div className="feed-controls">
-          <div className="sort-options">
+      <div className="feed-controls">
+          {!isPopular&&(<div className="sort-options">
             {/* Sort Dropdown */}
             <div className="sort-dropdown-container">
               <button className="sort-btn active" onClick={toggleSortDropdown}>
@@ -700,7 +709,7 @@ const handleVote = async (postId, voteType) => {
                 </svg>
               </button>
               
-              {showSortDropdown && (
+              {showSortDropdown &&  (
                 <div className="sort-dropdown">
                   <div className="dropdown-list">
                     {sortOptions.map((option, index) => (
@@ -721,8 +730,14 @@ const handleVote = async (postId, voteType) => {
             <button className="view-toggle-btn" onClick={toggleViewMode}>
               {viewMode === 'card' ? '☐' : '≡'}
             </button>
-          </div>
+          </div>)}
+          {isPopular && (
+          <p style={{ textAlign: "center" }}>
+            <strong>Popular</strong>
+          </p>
+        )}
         </div>
+
 
         {/* Posts */}
         <TrendingPosts

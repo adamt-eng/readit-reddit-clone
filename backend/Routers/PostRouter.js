@@ -6,7 +6,8 @@ import {
   searchPosts,
   getPostsByUser,
   getPostById,
-  getPersonalizedFeed
+  getPersonalizedFeed,
+  getPopularPosts
 } from "../Controllers/PostController.js";
 
 import { 
@@ -32,6 +33,9 @@ router.post("/",auth, createPost);
 
 // Get personalized feed (supports guest mode with no userId)
 router.get("/feed", getPersonalizedFeed);
+
+router.get("/popular", getPopularPosts);
+
 
 
 
