@@ -6,11 +6,17 @@ export const votePost = async (req, res) => {
   try {
     const userId = req.user?.id;
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     const { id: postId } = req.params;
     const { voteScore } = req.body; // +1 or -1
 
     /* ---------- VALIDATION ---------- */
 
+=======
+    const postId = req.params.id;
+    const { value } = req.body;
+
+>>>>>>> Stashed changes
 =======
     const postId = req.params.id;
     const { value } = req.body;
@@ -30,6 +36,7 @@ export const votePost = async (req, res) => {
     }
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     /* ---------- FIND EXISTING VOTE ---------- */
 
     const existingVote = await Vote.findOne({ userId, postId });
@@ -41,14 +48,25 @@ export const votePost = async (req, res) => {
 
     // ---------- NO PREVIOUS VOTE ----------
 >>>>>>> Stashed changes
+=======
+    const existingVote = await Vote.findOne({ userId, postId });
+
+    // ---------- NO PREVIOUS VOTE ----------
+>>>>>>> Stashed changes
     if (!existingVote) {
       await Vote.create({
         userId,
         postId,
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
     
         value: voteScore,
+=======
+        commentId: null,
+        value,
+        createdAt: new Date()
+>>>>>>> Stashed changes
 =======
         commentId: null,
         value,
@@ -64,9 +82,14 @@ export const votePost = async (req, res) => {
     }
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     /* ---------- CASE 2: SAME VOTE → REMOVE ---------- */
 
     if (existingVote.value === voteScore) {
+=======
+    // ---------- SAME VOTE (REMOVE) ----------
+    if (existingVote.value === value) {
+>>>>>>> Stashed changes
 =======
     // ---------- SAME VOTE (REMOVE) ----------
     if (existingVote.value === value) {
@@ -84,8 +107,12 @@ export const votePost = async (req, res) => {
     }
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     /* ---------- CASE 3: CHANGE VOTE ---------- */
 
+=======
+    // ---------- CHANGE VOTE ----------
+>>>>>>> Stashed changes
 =======
     // ---------- CHANGE VOTE ----------
 >>>>>>> Stashed changes
@@ -98,14 +125,20 @@ export const votePost = async (req, res) => {
     }
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
    
     existingVote.value = voteScore;
 
 =======
+=======
+>>>>>>> Stashed changes
     post.upvoteCount = Math.max(0, post.upvoteCount);
     post.downvoteCount = Math.max(0, post.downvoteCount);
 
     existingVote.value = value;
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
     await existingVote.save();
     await post.save();
@@ -117,6 +150,7 @@ export const votePost = async (req, res) => {
   }
 };
 
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 export const voteComment = async (req, res) => {
   try {
@@ -195,6 +229,8 @@ export const voteComment = async (req, res) => {
 };
 
 =======
+=======
+>>>>>>> Stashed changes
 /* ---------- GET MY VOTES ---------- */
 export const getMyVotes = async (req, res) => {
   try {
@@ -216,4 +252,7 @@ export const getMyVotes = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch votes" });
   }
 };
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
