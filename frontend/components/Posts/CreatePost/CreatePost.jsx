@@ -17,37 +17,55 @@ export default function CreatePost({ isDark }) {
 
   const dropdownRef = useRef(null);
 
-  //Read community from URL: /create-post?community=asucommunity
+  // Read community from URL: /create-post?community=asucommunity
   const [searchParams] = useSearchParams();
   const communityFromUrl = searchParams.get("community");
 
-  // TEMP USER
-  const TEMP_USER_ID = "6938a02cea96c570c169d837";
+  // --------------------------------------------------
+  // Fetch communities user can post in (AUTH-BASED)
+  // --------------------------------------------------
+  const fetchCommunities = async () => {
+    try {
+      const res = await fetch(
+        "http://localhost:5000/posts/communities",
+        { credentials: "include" }
+      );
 
-  // Fetch communities
-  useEffect(() => {
-    const fetchCommunities = async () => {
-      try {
-        const res = await fetch(
-          `http://localhost:5000/posts/communities?userId=${TEMP_USER_ID}`
-        );
-        const data = await res.json();
-        setCommunities(data);
-
-        //Auto-select community if coming from community page
-        if (communityFromUrl) {
-          const match = data.find(
-            (c) => c.name?.toLowerCase() === communityFromUrl.toLowerCase()
-          );
-          if (match) setSelectedCommunity(match);
-        }
-      } catch (err) {
-        console.error("Failed to fetch communities", err);
+      if (!res.ok) {
+        console.error("Failed to load communities");
+        setCommunities([]);
+        return;
       }
-    };
 
+      const data = await res.json();
+
+      if (!Array.isArray(data)) {
+        console.error("Invalid communities response:", data);
+        setCommunities([]);
+        return;
+      }
+
+      setCommunities(data);
+
+      // Auto-select community if coming from community page
+      if (communityFromUrl) {
+        const match = data.find(
+          (c) => c.name?.toLowerCase() === communityFromUrl.toLowerCase()
+        );
+        if (match) setSelectedCommunity(match);
+      }
+    } catch (err) {
+      console.error("Failed to fetch communities", err);
+      setCommunities([]);
+    }
+  };
+
+  // Initial load + URL change
+  useEffect(() => {
     fetchCommunities();
   }, [communityFromUrl]);
+
+
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -58,9 +76,13 @@ export default function CreatePost({ isDark }) {
     };
 
     document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
+    return () =>
+      document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
 
+  // --------------------------------------------------
+  // Render
+  // --------------------------------------------------
   return (
     <div className={`createpost-page-wrapper ${isDark ? "dark" : ""}`}>
       <LeftSidebar />
@@ -87,7 +109,9 @@ export default function CreatePost({ isDark }) {
                     ? selectedCommunity.name
                     : "Select a community"}
                 </span>
-                <span className={`dropdown-arrow ${showDropdown ? "open" : ""}`}>
+                <span
+                  className={`dropdown-arrow ${showDropdown ? "open" : ""}`}
+                >
                   ▾
                 </span>
               </button>
@@ -129,28 +153,22 @@ export default function CreatePost({ isDark }) {
             </div>
 
             {/* Tabs */}
-            <PostTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+            <PostTabs
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+            />
 
             {/* Tab content */}
             {activeTab === "post" && (
-              <FormPostText
-                selectedCommunity={selectedCommunity}
-                userId={TEMP_USER_ID}
-              />
+              <FormPostText selectedCommunity={selectedCommunity} />
             )}
 
             {activeTab === "image" && (
-              <FormPostImage
-                selectedCommunity={selectedCommunity}
-                userId={TEMP_USER_ID}
-              />
+              <FormPostImage selectedCommunity={selectedCommunity} />
             )}
 
             {activeTab === "link" && (
-              <FormPostLink
-                selectedCommunity={selectedCommunity}
-                userId={TEMP_USER_ID}
-              />
+              <FormPostLink selectedCommunity={selectedCommunity} />
             )}
           </div>
         </div>

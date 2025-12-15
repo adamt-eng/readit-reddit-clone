@@ -432,13 +432,34 @@ const HomePage = ({ darkMode, onStartCommunity }) => {
   };
 
   // Handle community join toggle
-  const handleJoinCommunity = (communityName, e) => {
-    e?.stopPropagation();
+ const handleJoinCommunity = async (communityName, e) => {
+  e?.stopPropagation();
+
+  try {
+    const res = await fetch(
+      `http://localhost:5000/communities/${communityName}/join`,
+      {
+        method: "POST",
+        credentials: "include",
+      }
+    );
+
+    if (!res.ok) {
+      const err = await res.json();
+      console.error("Join failed:", err.message);
+      return;
+    }
+
+    // Update UI only AFTER backend succeeds
     setJoinedCommunities(prev => ({
       ...prev,
-      [communityName]: !prev[communityName]
+      [communityName]: true
     }));
-  };
+  } catch (err) {
+    console.error("Join community error:", err);
+  }
+};
+
 
   // Function to get thumbnail for recent posts
   const getRecentPostThumbnail = (post) => {

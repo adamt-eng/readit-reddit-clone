@@ -4,13 +4,14 @@ import Membership from "../Models/Membership.js";
 import Post from "../Models/Post.js";
 import Vote from "../Models/Votes.js";
 
+
 // Get communities where the user is a member and can post
 export const getPostableCommunities = async (req, res) => {
   try {
-    const { userId } = req.query; // TEMP
+    const userId = req.user.id;
 
     if (!userId) {
-      return res.status(400).json({ message: "userId missing (temporary)" });
+      return res.status(401).json({ message: "Not authenticated" });
     }
 
     const memberships = await Membership.find(

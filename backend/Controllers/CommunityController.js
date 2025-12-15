@@ -135,11 +135,16 @@ export const joinCommunity = async (req, res) => {
     }
 
     await Membership.create({
-      userId: req.user.id,
-      communityId: community._id,
-      role: "member",
-      joinedAt: new Date()
-    });
+    userId: req.user.id,
+    communityId: community._id,
+    role: "member",
+    joinedAt: new Date()
+  });
+
+  await Community.findByIdAndUpdate(
+  community._id,
+  { $inc: { memberCount: 1 } }
+  );
 
     res.json({ message: "Joined community" });
   } catch (err) {
