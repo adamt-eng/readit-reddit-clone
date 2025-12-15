@@ -68,11 +68,11 @@ export default function DirectMessages({ darkMode, currentUser }) {
 
     const id = setTimeout(async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/users/search?q=${encodeURIComponent(q)}&limit=6`, {
+        const res = await axios.get(`http://localhost:5000/users/search?q=${encodeURIComponent(q)}&limit=30`, {
           withCredentials: true,
         });
         const users = res.data && res.data.results ? res.data.results : [];
-        setSearchResults(users);
+        setSearchResults(users.filter(((user)=>user.username!=currentUser.username)));
       } catch (err) {
         console.error("User search failed:", err);
         setSearchResults([]);

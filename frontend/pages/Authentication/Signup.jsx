@@ -11,23 +11,33 @@ export default function Signup({ onLogin, inModal, switchMode }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [postSignupHint, setPostSignupHint] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
+    setPostSignupHint("");
 
     try {
-      const res = await axios.post(
+      await axios.post(
         "http://localhost:5000/authentication/signup",
         { email, username, password },
         { withCredentials: true }
       );
 
       setSuccess("Account created successfully 🎉");
+      setPostSignupHint(
+        "To continue setting up your profile, please go to My Profile > Edit Profile"
+      );
 
-        onLogin()
-        navigate("/");
+      // Hide the hint after 2 seconds
+      setTimeout(() => {
+        setPostSignupHint("");
+      }, 2000);
+
+      onLogin();
+      navigate("/");
     } catch (err) {
       setError(err.response?.data?.message || "Signup failed");
     }
@@ -35,7 +45,7 @@ export default function Signup({ onLogin, inModal, switchMode }) {
 
   return (
     <div
-      className={`auth-page signup-page  ${
+      className={`auth-page signup-page ${
         inModal ? "auth-modal-content" : ""
       }`}
     >
@@ -58,6 +68,12 @@ export default function Signup({ onLogin, inModal, switchMode }) {
 
           {error && <div className="auth-alert auth-error">{error}</div>}
           {success && <div className="auth-alert auth-success">{success}</div>}
+
+          {postSignupHint && (
+            <div className="auth-alert auth-success">
+              {postSignupHint}
+            </div>
+          )}
 
           <input
             className="auth-input"
