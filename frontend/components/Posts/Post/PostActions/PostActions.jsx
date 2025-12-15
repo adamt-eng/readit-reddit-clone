@@ -11,28 +11,19 @@ export default function PostActions({
 }) {
   return (
     <div className="post-actions">
-      <button
-        className="vote-btn upvote"
-        onClick={() => onUpvote?.(post.id)}
-        title="Upvote"
-      >
+      <button className="vote-btn upvote" onClick={onUpvote} title="Upvote">
         ▲
       </button>
 
       <span className="post-votes">{post.votes}</span>
 
-      <button
-        className="vote-btn downvote"
-        onClick={() => onDownvote?.(post.id)}
-        title="Downvote"
-      >
+      <button className="vote-btn downvote" onClick={onDownvote} title="Downvote">
         ▼
       </button>
 
       <button className="action-btn">💬 {post.commentsCount} Comments</button>
       <button className="action-btn">🔗 Share</button>
 
-      {/* ⭐ SUMMARY BUTTON REPLACES SAVE BUTTON ⭐ */}
       {isSummaryMode ? (
         <button className="action-btn" onClick={onShowOriginal}>
           🔄 Show Original
