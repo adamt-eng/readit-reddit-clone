@@ -8,7 +8,7 @@ const createDMController = ({ io, onlineUsers }) => {
   const getOrCreateConversation = async (req, res) => {
     try {
       // allow an optional asUserId query parameter for local/dev testing when no auth cookie is present
-      const userId = (req.user && req.user._id) || req.query.asUserId;
+      const userId = (req.user && req.user.id) || req.query.asUserId;
       if (!userId) return res.status(401).json({ message: "Not authenticated" });
       const { otherUserId } = req.params;
       const [userA, userB] = ensureOrder(userId, otherUserId);
@@ -28,7 +28,8 @@ const createDMController = ({ io, onlineUsers }) => {
 
   const listConversations = async (req, res) => {
     try {
-      const userId = (req.user && req.user._id) || req.query.asUserId;
+      console.log("henaaa",req.user)
+      const userId = (req.user && req.user.id) || req.query.asUserId;
       if (!userId) return res.status(401).json({ message: "Not authenticated" });
       const convos = await DmConversation.find({
         $or: [{ userA: userId }, { userB: userId }]
@@ -45,7 +46,7 @@ const createDMController = ({ io, onlineUsers }) => {
 
   const getMessages = async (req, res) => {
     try {
-      const userId = (req.user && req.user._id) || req.query.asUserId;
+      const userId = (req.user && req.user.id) || req.query.asUserId;
       if (!userId) return res.status(401).json({ message: "Not authenticated" });
       const { conversationId } = req.params;
       const limit = parseInt(req.query.limit) || 50;
@@ -63,7 +64,7 @@ const createDMController = ({ io, onlineUsers }) => {
 
   const sendMessage = async (req, res) => {
     try {
-      const senderId = (req.user && req.user._id) || req.body.asUserId || req.query.asUserId;
+      const senderId = (req.user && req.user.id) || req.body.asUserId || req.query.asUserId;
       if (!senderId) return res.status(401).json({ message: "Not authenticated" });
       const { conversationId, recipientId, content } = req.body;
 

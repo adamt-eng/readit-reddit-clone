@@ -5,7 +5,8 @@ import { io } from "socket.io-client";
 
 const socket = io("http://localhost:5000");
 
-export default function DirectMessages({ darkMode, currentUser }) {
+export default function DirectMessages({ darkMode}) {
+  const [currentUser,setCurrentUser] = useState(null);
   const [conversations, setConversations] = useState([]);
   const [selected, setSelected] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -13,6 +14,22 @@ export default function DirectMessages({ darkMode, currentUser }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const scrollRef = useRef();
+
+useEffect(() => {
+  const fetchMe = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/users/me",
+        { withCredentials: true }
+      );
+      setCurrentUser(res.data);
+    } catch (err) {
+      console.log("Error fetching user:", err);
+    }
+  };
+
+  fetchMe();
+}, []);
 
   useEffect(() => {
     if (currentUser && currentUser._id) {
@@ -35,11 +52,11 @@ export default function DirectMessages({ darkMode, currentUser }) {
     };
      
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUser, selected]);
+  }, [selected]);
 
   // fetch conversations once currentUser is available (prevents 401 when landing on /messages)
   useEffect(() => {
-    if (currentUser && currentUser._id) fetchConversations();
+    if (currentUser === null) fetchConversations();
     // if no currentUser, wait until App sets it
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);

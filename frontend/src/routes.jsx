@@ -15,7 +15,7 @@ import CommunityPage from "../pages/CommunityPage/CommunityPage.jsx";
 import Notifications from "../pages/Notifications/Notifications.jsx";
 
 
-import PostPage from "../pages/PostPage.jsx";
+import PostPage from "../pages/PostPage/PostPage.jsx";
 
 export default function AppRoutes({
   darkMode,

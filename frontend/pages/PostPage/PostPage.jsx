@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import Post from "../components/Posts/Post/Post.jsx";
+import Post from "../../components/Posts/Post/Post.jsx";
 
 export default function PostPage() {
   const { postId } = useParams();

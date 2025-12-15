@@ -104,7 +104,7 @@ app.use(cookieParser());
   });
 
 
-  app.use('/dm', DMRouter({ io, onlineUsers }));
+  app.use('/dm',auth, DMRouter({ io, onlineUsers }));
 
 
   /* ------------ START SERVER ------------ */
