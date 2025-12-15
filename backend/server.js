@@ -16,16 +16,8 @@
   import NotificationRouter from './Routers/NotificationRouter.js';
   import CommentRouter from './Routers/CommentRouter.js';
   import DMRouter from "./Routers/DMRouter.js";
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
   import VoteRouter from "./Routers/VoteRouter.js";
 
-=======
-  import VoteRouter from "./Routers/VoteRouter.js"
->>>>>>> Stashed changes
-=======
-  import VoteRouter from "./Routers/VoteRouter.js"
->>>>>>> Stashed changes
 
   dotenv.config();
   const app = express();
@@ -60,7 +52,6 @@ app.use(cookieParser());
   app.use('/search',auth, SearchRouter);
   app.use("/upload",auth, UploadRouter);
   app.use('/ai-summary',auth, AiSummaryRouter);
-  app.use('/votes',VoteRouter)
   app.use('/comments',auth, CommentRouter);
 
   /* ------------ MONGO CONNECTION ------------ */
