@@ -17,7 +17,13 @@ export default function PostPage() {
   // LOAD POST + COMMENTS
   useEffect(() => {
     const fetchPost = async () => {
-      const res = await fetch(`http://localhost:5000/posts/${postId}`,{withCredentials:true});
+      const res = await fetch(
+        `http://localhost:5000/posts/${postId}`,
+        { credentials: "include" }
+      );
+
+      if (!res.ok) return;
+
       const data = await res.json();
 
       setPost({
@@ -34,7 +40,13 @@ export default function PostPage() {
     };
 
     const fetchComments = async () => {
-      const res = await fetch(`http://localhost:5000/posts/${postId}/comments`);
+      const res = await fetch(
+        `http://localhost:5000/posts/${postId}/comments`,
+        { credentials: "include" }
+      );
+
+      if (!res.ok) return;
+
       const data = await res.json();
 
       const convert = (arr) =>
@@ -60,18 +72,24 @@ export default function PostPage() {
     load();
   }, [postId]);
 
-  // GENERATE SUMMARY
+  // GENERATE SUMMARY (auth-safe, backend decides)
   const handleGenerateSummary = async () => {
     try {
       setIsSummarizing(true);
       setAnimatedText("");
 
-      const res = await fetch(`http://localhost:5000/ai-summary/${postId}/generate`);
+      const res = await fetch(
+        `http://localhost:5000/ai-summary/${postId}/generate`,
+        { credentials: "include" } 
+      );
+
+      if (!res.ok) {
+        setIsSummarizing(false);
+        return;
+      }
+
       const data = await res.json();
 
-      console.log("AI response:", data);
-
-      // SAFELY detect summary
       const summary =
         data.summaryText ||
         data.summary ||
@@ -80,7 +98,6 @@ export default function PostPage() {
         "";
 
       if (!summary) {
-        console.error("No summary returned:", data);
         setIsSummarizing(false);
         return;
       }
