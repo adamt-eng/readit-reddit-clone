@@ -16,6 +16,8 @@
   import NotificationRouter from './Routers/NotificationRouter.js';
   import CommentRouter from './Routers/CommentRouter.js';
   import DMRouter from "./Routers/DMRouter.js";
+  import VoteRouter from "./Routers/VoteRouter.js";
+
 
   dotenv.config();
   const app = express();
@@ -44,6 +46,7 @@ app.use(cookieParser());
 
   app.use('/users',auth, UserRouter);
   app.use('/posts', PostRouter);
+  app.use('/votes',auth, VoteRouter);
   app.use('/communities',auth, CommunityRouter);
   app.use('/notifications',auth,NotificationRouter);
   app.use('/search',auth, SearchRouter);
