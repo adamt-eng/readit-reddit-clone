@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 
 import { FaRegCommentAlt, FaShare, FaEllipsisH, FaExpand, FaCompress, FaBell, FaRegBookmark, FaEyeSlash, FaFlag } from "react-icons/fa";
 import Comment from "../../Comment/Comment";
@@ -61,14 +60,28 @@ export default function PostCard({
     }
   };
 
-  const handleJoinCommunity = (e) => {
-    e.stopPropagation();
-    if (isGuest) {
-      onPromptLogin?.();
-    } else {
-      onJoinCommunity?.(post.community, e);
-    }
-  };
+const handleJoinCommunity = (e) => {
+  e.stopPropagation();
+
+  if (isGuest) {
+    onPromptLogin?.();
+    return;
+  }
+
+  const communityName =
+    typeof post.community === "string"
+      ? post.community
+      : post.community?.name;
+
+  if (!communityName) {
+    console.error("Invalid community:", post.community);
+    return;
+  }
+
+  onJoinCommunity?.(communityName);
+};
+
+
 
   const handleHidePost = (e) => {
     e.stopPropagation();
