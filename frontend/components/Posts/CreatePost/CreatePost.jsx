@@ -1,9 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import LeftSidebar from "../../LeftSidebar/LeftSidebar";
 import PostTabs from "../PostTabs/PostTabs";
-import FormPostText from "../FormPostText/FormPostText";
-import FormPostImage from "../FormPostImage/FormPostImage";
-import FormPostLink from "../FormPostLink/FormPostLink";
+import CreatePostForm from "../CreatePostForm/CreatePostForm";
 import { useSearchParams } from "react-router-dom";
 
 import "./CreatePost.css";
@@ -159,17 +157,11 @@ export default function CreatePost({ isDark }) {
             />
 
             {/* Tab content */}
-            {activeTab === "post" && (
-              <FormPostText selectedCommunity={selectedCommunity} />
-            )}
+            <CreatePostForm
+            type={activeTab} // "post" | "image" | "link"
+  selectedCommunity={selectedCommunity}
+/>
 
-            {activeTab === "image" && (
-              <FormPostImage selectedCommunity={selectedCommunity} />
-            )}
-
-            {activeTab === "link" && (
-              <FormPostLink selectedCommunity={selectedCommunity} />
-            )}
           </div>
         </div>
 
