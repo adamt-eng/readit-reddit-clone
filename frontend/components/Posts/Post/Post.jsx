@@ -1,10 +1,6 @@
+import { useState } from "react";
 import "./Post.css";
-import PostHeader from "./PostHeader/PostHeader";
-import PostContent from "./PostContent/PostContent";
-import PostActions from "./PostActions/PostActions";
-import CommentForm from "./CommentForm/CommentForm";
-import Comment from "../../Comment/Comment"; 
-
+import Comment from "../../Comment/Comment.jsx";
 
 export default function Post({
   post,
@@ -17,25 +13,92 @@ export default function Post({
   isSummaryMode,
   isSummarizing,
   onGenerateSummary,
-  onShowOriginal
+  onShowOriginal,
 }) {
+  const [commentText, setCommentText] = useState("");
+
+  const handleCommentSubmit = (e) => {
+    e.preventDefault();
+    if (!commentText.trim()) return;
+    onComment?.(post.id, commentText);
+    setCommentText("");
+  };
+
   return (
     <div className="post-card">
-      <PostHeader post={post} />
-      <PostContent post={post} />
+      {/* ---------- HEADER ---------- */}
+      <div className="post-header">
+        <span className="post-community">r/{post.community}</span>
+        <span className="dot">•</span>
+        <span className="post-author">Posted by u/{post.author}</span>
+        <span className="dot">•</span>
+        <span className="post-time">{post.timeAgo}</span>
+      </div>
 
-      <PostActions
-        post={post}
-        onUpvote={onUpvote}
-        onDownvote={onDownvote}
-        isSummaryMode={isSummaryMode}
-        isSummarizing={isSummarizing}
-        onGenerateSummary={onGenerateSummary}
-        onShowOriginal={onShowOriginal}
-      />
+      {/* ---------- CONTENT ---------- */}
+      <div className="post-content">
+        {post.title && <div className="post-title">{post.title}</div>}
 
-      <CommentForm postId={post.id} onComment={onComment} />
+        {post.text && <div className="post-body">{post.text}</div>}
 
+        {post.image && (
+          <div className="post-image">
+            <img src={post.image} alt="post visual" />
+          </div>
+        )}
+      </div>
+
+      {/* ---------- ACTIONS ---------- */}
+      <div className="post-actions">
+        <button
+          className={`vote-btn upvote ${post.userVote === 1 ? "active" : ""}`}
+          onClick={onUpvote}
+        >
+          ▲
+        </button>
+
+        <span className="post-votes">{post.votes}</span>
+
+        <button
+          className={`vote-btn downvote ${post.userVote === -1 ? "active" : ""}`}
+          onClick={onDownvote}
+        >
+          ▼
+        </button>
+
+        {isSummaryMode ? (
+          <button className="action-btn" onClick={onShowOriginal}>
+            🔄 Show Original
+          </button>
+        ) : (
+          <button
+            className="action-btn"
+            onClick={onGenerateSummary}
+            disabled={isSummarizing}
+          >
+            {isSummarizing ? "⏳ Summarizing..." : "✨ Summary"}
+          </button>
+        )}
+      </div>
+
+      {/* ---------- COMMENT FORM ---------- */}
+      <form className="comment-form" onSubmit={handleCommentSubmit}>
+        <textarea
+          className="comment-input"
+          placeholder="What are your thoughts?"
+          value={commentText}
+          onChange={(e) => setCommentText(e.target.value)}
+        />
+        <button
+          type="submit"
+          className="comment-submit"
+          disabled={!commentText.trim()}
+        >
+          Comment
+        </button>
+      </form>
+
+      {/* ---------- COMMENTS ---------- */}
       <div className="comments-list">
         {comments.map((comment) => (
           <Comment

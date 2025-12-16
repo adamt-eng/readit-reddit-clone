@@ -1,15 +1,147 @@
+/* ============================= */
+/* Post Card */
+/* ============================= */
+
 .post-card {
-  background: #fff;
-  border: 1px solid #edeff1;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  max-width: 750px;
-  margin: 32px auto 24px auto;
-  padding: 18px 22px 12px 22px;
-  box-shadow: 0 2px 8px 0 rgba(60,74,130,0.05);
+  max-width: 740px;
+  margin: 32px auto;
+  padding: 18px 22px;
+  color: var(--text-primary);
 }
-.comments-list {
-  margin-top: 18px;
+
+/* ============================= */
+/* Header */
+/* ============================= */
+
+.post-header {
   display: flex;
-  flex-direction: column;
-  gap: 18px;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.post-community {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.post-author,
+.post-time {
+  color: var(--text-muted);
+}
+
+/* ============================= */
+/* Content */
+/* ============================= */
+
+.post-title {
+  margin: 10px 0 6px 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.post-body {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+/* ============================= */
+/* Actions */
+/* ============================= */
+
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.vote-btn {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.vote-btn.upvote:hover {
+  color: var(--accent-upvote);
+}
+
+.vote-btn.downvote:hover {
+  color: var(--accent-downvote);
+}
+
+.post-votes {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.action-btn {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  transition: background 0.15s ease;
+}
+
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ============================= */
+/* Comment Form */
+/* ============================= */
+
+.comment-form {
+  margin-top: 16px;
+}
+
+.comment-input {
+  width: 100%;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 10px;
+  resize: vertical;
+}
+
+.comment-input::placeholder {
+  color: var(--text-muted);
+}
+
+.comment-submit {
+  margin-top: 8px;
+  align-self: flex-end;
+  background: #0079d3;
+  color: white;
+  border: none;
+  border-radius: 999px;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+
+.comment-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================= */
+/* Comments */
+/* ============================= */
+
+.comments-list {
+  margin-top: 20px;
 }
