@@ -57,19 +57,22 @@ export default function SearchItem({ type, data }) {
     const timeAgo = formatTimeAgo(data.createdAt);
 
     return (
-      <Link to={`/post/${data._id}`} className="sp-container">
+      <Link to={`/posts/${data._id}`} className="sp-container">
         <div className="sp-left">
           <div className="info">
-            <img
+           <div className="sp-meta">
+            <span className="sp-community">
+              <img
               src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(data.communityName)}`}
               alt="community icon"
               className="sp-icon"
             />
-            <div className="sp-meta">
-              {data.communityName.startsWith("r/") ? data.communityName : "r/" + data.communityName}
-              {" • "}
-              {timeAgo}
-            </div>
+              {data.communityName.startsWith("r/")
+                ? data.communityName
+                : "r/" + data.communityName}  •  {timeAgo}
+            </span>
+          </div>
+
           </div>
 
           <div className="sp-title">{data.title}</div>

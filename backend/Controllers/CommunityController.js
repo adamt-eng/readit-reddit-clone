@@ -201,4 +201,33 @@ export async function getTopCommunities(req, res) {
 
 
 
+//get user communities
+export async function getUserCommunities(req, res) {
+  try {
+    const userId = req.user.id;
+
+    const memberships = await Membership.find({ userId })
+      .populate({
+        path: "communityId",
+        select: "name title description memberCount iconUrl bannerUrl nsfw",
+      })
+      .sort({ joinedAt: -1 });
+
+    // Extract and filter the community objects
+    const results = memberships
+      .map((m) => m.communityId)
+      .filter((c) => c !== null);
+
+    // Returning the array directly as requested
+    console.log(results);
+    
+    res.json(results);
+  } catch (err) {
+    console.error("getUserCommunities error:", err);
+    res.status(500).json({ error: "Server error fetching communities" });
+  }
+}
+
+
+
 

@@ -190,6 +190,9 @@ export default function AppRoutes({
           }
         />
 
+        {/*post page*/}
+
+
         {/* Search */}
         <Route
           path="/search"
@@ -202,7 +205,7 @@ export default function AppRoutes({
           }
         />
 
-        {/* ⭐ THE ONLY ROUTE YOU WERE MISSING */}
+        {/*THE ONLY ROUTE YOU WERE MISSING */}
         <Route
           path="/posts/:postId"
           element={

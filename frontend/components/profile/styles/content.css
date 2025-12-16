@@ -21,3 +21,38 @@
   opacity: 0.6;
   margin-bottom: 20px;
 }
+
+.profile-items-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.profile-item-frame {
+  background-color: #fff; 
+  border: 1px solid #edeff1; 
+  border-radius: 8px; 
+  padding: 8px; 
+  transition: border-color 0.2s;
+}
+
+.profile-item-frame:hover {
+  border-color: #878a8c; 
+}
+
+/* Dark mode support */
+.appdark-mode .profile-item-frame {
+  background-color: #1a1a1b;
+  border-color: #343536;
+}
+
+.appdark-mode .profile-item-frame:hover {
+  border-color: #d7dadc;
+}
+
+.empty-tab-message {
+  padding: 40px;
+  text-align: center;
+  color: #777;
+}

@@ -1,43 +1,107 @@
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import EmptyState from './EmptyState';
-import CreatePostButton from './CreatePostButton';   // ← NEW
+import CreatePostButton from './CreatePostButton';
+import SearchItem from "../../components/SearchItem/SearchItem";
+
+const API_URL = "http://localhost:5000";
 
 export default function ProfileContent({ activeTab = 'Overview' }) {
-  const hasPosts = false; // Change to true later when you have real posts
+  const [posts, setPosts] = useState([]);
+  const [communities, setCommunities] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // ---------- FETCH DATA ----------
+  useEffect(() => {
+    async function fetchProfileData() {
+      try {
+        setIsLoading(true);
+        // Fetching the user's own posts and communities from the APIs
+        const [postsRes, communitiesRes] = await Promise.all([
+          axios.get(`${API_URL}/posts/me`, { withCredentials: true }),
+          axios.get(`${API_URL}/communities/me`, { withCredentials: true })
+        ]);
+
+        // APIs return the array directly as per your controller logic
+        setPosts(postsRes.data || []);
+        setCommunities(communitiesRes.data || []);
+      } catch (err) {
+        console.error("Error fetching profile data:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchProfileData();
+  }, []);
+
+  const hasPosts = posts.length > 0;
+  const hasCommunities = communities.length > 0;
 
   return (
     <div className="card profile-content">
       {/* CREATE POST BUTTON — ALWAYS VISIBLE ON PROFILE */}
-      <CreatePostButton />
+      {activeTab === "Posts"&&<CreatePostButton />}
 
-      {/* Show content based on active tab */}
-      {activeTab === 'Overview' && (
-        <>
-          {hasPosts ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#777' }}>
-              Posts will appear here
-            </div>
-          ) : (
-            <EmptyState />
+      {isLoading ? (
+        <div style={{ padding: '40px', textAlign: 'center' }}>Loading...</div>
+      ) : (
+        <div className="profile-items-container">
+          {/* OVERVIEW TAB */}
+          {activeTab === 'Overview' && (
+            <>
+              {hasPosts ? (
+                posts.map(post => (
+                  <div key={post._id} className="profile-item-frame">
+                    <SearchItem type="post" data={post} />
+                  </div>
+                ))
+              ) : (
+                <EmptyState />
+              )}
+            </>
           )}
-        </>
-      )}
 
-      {/* Other tabs (Posts, Comments, etc.) */}
-      {activeTab === 'Posts' && (
-        <div style={{ padding: '40px', textAlign: 'center', color: '#777' }}>
-          This user has no posts yet.
-        </div>
-      )}
+          {/* POSTS TAB */}
+          {activeTab === 'Posts' && (
+            <>
+              {hasPosts ? (
+                posts.map(post => (
+                  <div key={post._id} className="profile-item-frame">
+                    <SearchItem type="post" data={post} />
+                  </div>
+                ))
+              ) : (
+                <div className="empty-tab-message">
+                  This user has no posts yet.
+                </div>
+              )}
+            </>
+          )}
 
-      {activeTab === 'Comments' && (
-        <div style={{ padding: '40px', textAlign: 'center', color: '#777' }}>
-          This user has no comments yet.
-        </div>
-      )}
+          {/* COMMUNITIES TAB */}
+          {activeTab === 'Communities' && (
+            <>
+              {hasCommunities ? (
+                communities.map(comm => (
+                  <div key={comm._id} className="profile-item-frame">
+                    <SearchItem type="community" data={comm} />
+                  </div>
+                ))
+              ) : (
+                <div className="empty-tab-message">
+                  This user hasn't joined any communities.
+                </div>
+              )}
+            </>
+          )}
 
-      {['Saved', 'Hidden', 'Upvoted', 'Downvoted'].includes(activeTab) && (
-        <div style={{ padding: '40px', textAlign: 'center', color: '#777' }}>
-          Nothing here yet.
+          {/* OTHER TABS */}
+          {['Saved', 'Hidden', 'Upvoted', 'Downvoted'].includes(activeTab) && (
+            <div className="empty-tab-message">
+              Nothing here yet.
+            </div>
+          )}
         </div>
       )}
     </div>

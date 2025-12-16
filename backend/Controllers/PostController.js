@@ -137,7 +137,7 @@ export async function searchPosts(req, res) {
   }
 }
 
-/* ---------- GET ALL POSTS BY USER (for profile) ---------- */
+/* ---------- GET ALL POSTS BY USER ---------- */
 export const getPostsByUser = async (req, res) => {
   try {
     // raw id from URL may contain spaces/newlines
@@ -515,3 +515,35 @@ export const getPopularPosts = async (req, res) => {
     res.status(500).json({ message: "Failed to load popular posts" });
   }
 };
+
+
+//get user's post for profile
+export async function getUserPosts(req, res) {
+  try {
+    const userId = req.user.id; // From auth middleware
+
+    const posts = await Post.find({ authorId: userId, isRemoved: false })
+      .populate("communityId", "name")
+      .populate("authorId", "username avatarUrl")
+      .sort({ createdAt: -1 });
+
+    // Format matches the "formatted" logic in your searchPosts
+    const results = posts.map((p) => ({
+      _id: p._id,
+      title: p.title,
+      content: p.content,
+      communityName: p.communityId?.name || "",
+      author: p.authorId?.username || "",
+      avatarUrl: p.authorId?.avatarUrl || "",
+      upvoteCount: p.upvoteCount,
+      commentCount: p.commentCount,
+      createdAt: p.createdAt,
+    }));
+
+    // Returning the array directly as requested
+    res.json(results);
+  } catch (err) {
+    console.error("getUserPosts error:", err);
+    res.status(500).json({ error: "Server error fetching posts" });
+  }
+}

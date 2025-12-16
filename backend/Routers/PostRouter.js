@@ -7,7 +7,8 @@ import {
   getPostsByUser,
   getPostById,
   getPersonalizedFeed,
-  getPopularPosts
+  getPopularPosts,
+  getUserPosts
 } from "../Controllers/PostController.js";
 
 import { 
@@ -58,8 +59,8 @@ router.get("/:postId/comments",auth, getCommentsForPost);
 
 router.get("/search",auth, searchPosts);
 
-// Get all posts by a user
-router.get("/user/:userId",auth, getPostsByUser);
+// Get user posts
+router.get("/me",auth,getUserPosts);
 
 
 /* -----------------------------

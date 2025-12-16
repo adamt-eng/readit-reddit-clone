@@ -60,13 +60,12 @@
 .sp-meta {
   font-size: 13px;
   color: #7c7c7c;
-  margin-bottom: 4px;
 }
 
 .sp-title {
   font-size: 17px;
   font-weight: 600;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   color: #1a1a1b;
 }
 
@@ -84,12 +83,12 @@
 
 /* Post header layout */
 .info {
-  display: flex;
+    display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 6px 0;
+  gap: 0px;
+  padding: 0px 0;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 0px;
   text-align: left;
   text-decoration: none;
   color: inherit;
@@ -165,4 +164,37 @@
 .appdark-mode .sc-icon,
 .appdark-mode .sp-icon {
   background: #2a2a2a;
+}
+.sp-community {
+  font-weight: 500;
+}
+
+
+.sp-time {
+  white-space: nowrap;
+}
+/* Force post meta to stay left like Reddit */
+.sp-meta {
+  margin-left: 0 !important;
+  text-align: left;
+  align-self: flex-start;
+}
+
+
+/* Lock post header layout */
+.info {
+  justify-content: flex-start !important;
+  text-align: left;
+  width: 100%;
+}
+
+
+/* Prevent meta from being pushed right */
+.info .sp-meta {
+  margin-left: 0 !important;
+  flex: 0 0 auto;
+}
+
+.sp-icon {
+  margin-right: 6px;
 }

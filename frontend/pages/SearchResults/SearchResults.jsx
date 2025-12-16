@@ -54,7 +54,7 @@ export default function SearchResults() {
   useEffect(() => {
     async function fetchTopComms() {
       try {
-        const res = await axios.get(`${API_URL}/search/top-communities`);
+        const res = await axios.get(`${API_URL}/search/top-communities`,{withCredentials:true});
         setTopCommunities(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error("Top communities load error:", err);
