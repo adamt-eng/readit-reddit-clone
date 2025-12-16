@@ -29,7 +29,7 @@ createNotification({
   userId: req.params.id,
   type: "profile_view",
   payload: {
-    actorId: "69345c854816696175846190", 
+    actorId: req.user.id, 
     postId: null,
     commentId: null,
   }

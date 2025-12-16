@@ -136,7 +136,16 @@ const createDMController = ({
                     });
                 }
             }
-            //send not
+            //send noti
+            createNotification({
+              userId: recipientId,
+              type: "private_message",
+              payload: {
+                actorId: req.user.id, 
+                postId: null,
+                commentId: null,
+              }
+            });
             return res.status(201).json(populated);
         } catch (err) {
             console.error(err);

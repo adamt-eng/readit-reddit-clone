@@ -45,8 +45,8 @@ app.use(
 
 // routes
 app.use("/authentication", AuthRouter);
-app.use("/users", UserRouter);
 app.use("/posts", PostRouter);
+app.use("/users",auth, UserRouter);
 app.use("/votes", auth, VoteRouter);
 app.use("/communities", auth, CommunityRouter);
 app.use("/search", auth, SearchRouter);

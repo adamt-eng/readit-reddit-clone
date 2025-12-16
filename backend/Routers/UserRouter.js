@@ -13,7 +13,7 @@ const router = express.Router();
 // /users/search?q=...
 router.get("/search", searchUsers);
 
-// ✅ MY PROFILE (no ID in URL)
+// MY PROFILE (no ID in URL)
 router.get("/me", auth, getProfile);
 router.patch("/me", auth, updateMyProfile);
 
