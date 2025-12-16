@@ -1,4 +1,8 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect } from 'react';
+import { FaTrash } from "react-icons/fa";
+
+import axios from "axios";
 import "./SearchItem.css";
 
 function formatTimeAgo(dateString) {
@@ -22,11 +26,31 @@ function formatTimeAgo(dateString) {
   return `${years}y ago`;
 }
 
-export default function SearchItem({ type, data }) {
+export default function SearchItem({ type, data, member = false,onLeave = null, onDelete = null}) {
+  const[isMember,setIsMember] = useState(member);
 
-   //COMMUNITY RESULT
-   // navigates to: /community/:id
+  // COMMUNITY RESULT
   if (type === "community") {
+    const handleMembership = async (e) => {
+      e.preventDefault(); 
+      e.stopPropagation();
+      try{
+      if (isMember) {
+        await axios.post(`http://localhost:5000/communities/${data.name}/leave`,{},{withCredentials:true}); 
+        setIsMember(false);
+        if(onLeave)
+          onLeave(data.name);
+      } else {
+        await axios.post(`http://localhost:5000/communities/${data.name}/join`,{},{withCredentials:true}); 
+                setIsMember(true);
+
+      }
+    }
+    catch(err){
+      console.log("Failed to join/leave community ",err);
+    }
+    };
+
     return (
       <Link to={`/community/${data.name}`} className="sc-container">
         <img
@@ -34,6 +58,7 @@ export default function SearchItem({ type, data }) {
           alt="community icon"
           className="sc-icon"
         />
+
         <div className="sc-info">
           <div className="sc-title">
             {data.name.startsWith("r/") ? data.name : "r/" + data.name}
@@ -42,20 +67,44 @@ export default function SearchItem({ type, data }) {
             {(data.memberCount ?? 0).toLocaleString()} members
           </div>
         </div>
+
+        {/* JOIN / LEAVE BUTTON */}
+        <button
+          className={`sc-join-btn ${isMember ? "leave" : "join"}`}
+          onClick={handleMembership}
+        >
+          {isMember ? "Leave" : "Join"}
+        </button>
       </Link>
     );
   }
 
-   //POST RESULT
-   // navigates to: /post/:id
+// post
+if (type === "post") {
+  const timeAgo = formatTimeAgo(data.createdAt);
 
-  if (type === "post") {
-    const timeAgo = formatTimeAgo(data.createdAt);
+  const handleDelete = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-    return (
-      <Link to={`/posts/${data._id}`} className="sp-container">
-        <div className="sp-left">
-         <div className="sp-meta">
+    try {
+      await axios.delete(
+        `http://localhost:5000/posts/${data._id}`,
+        { withCredentials: true }
+      );
+
+      if (onDelete) {
+        onDelete(data._id);
+      }
+    } catch (err) {
+      console.error("Failed to delete post:", err);
+    }
+  };
+
+  return (
+    <Link to={`/posts/${data._id}`} className="sp-container">
+      <div className="sp-left">
+        <div className="sp-meta">
           <img
             src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(data.communityName)}`}
             alt="community icon"
@@ -69,30 +118,41 @@ export default function SearchItem({ type, data }) {
           <span className="sp-time">• {timeAgo}</span>
         </div>
 
+        <div className="sp-title">{data.title}</div>
 
-          <div className="sp-title">{data.title}</div>
-
-          <div className="sp-sub">
-            {(data.upvoteCount ?? 0).toLocaleString()} votes •{" "}
-            {(data.commentCount ?? 0).toLocaleString()} comments
-          </div>
+        <div className="sp-sub">
+          {(data.upvoteCount ?? 0).toLocaleString()} votes •{" "}
+          {(data.commentCount ?? 0).toLocaleString()} comments
         </div>
+      </div>
 
-        {data.media?.url && (
-          <img className="sp-thumb" src={data.media.url} alt="" />
-        )}
-      </Link>
-    );
-  }
+      {onDelete && (
+        <FaTrash
+          className="sp-delete-btn"
+          onClick={handleDelete}
+        >
+          Delete
+        </FaTrash>
+      )}
 
-  // USER RESULT
-   // navigates to: /user/:id
+      {data.media?.url && (
+        <img className="sp-thumb" src={data.media.url} alt="" />
+      )}
+    </Link>
+  );
+}
+
+
+  // user
   if (type === "user") {
     return (
       <Link to={`/user/${data._id}`} className="su-container">
         <img
           className="su-avatar"
-          src={data.avatarUrl || `https://api.dicebear.com/7.x/thumbs/svg?seed=${data.username}`}
+          src={
+            data.avatarUrl ||
+            `https://api.dicebear.com/7.x/thumbs/svg?seed=${data.username}`
+          }
           alt="avatar"
         />
 

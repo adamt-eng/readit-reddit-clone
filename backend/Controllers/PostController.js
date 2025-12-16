@@ -3,6 +3,8 @@ import Community from "../Models/Community.js";
 import Membership from "../Models/Membership.js";
 import Post from "../Models/Post.js";
 import Vote from "../Models/Votes.js";
+import Comment from "../Models/Comment.js";
+
 
 
 // Get communities where the user is a member and can post
@@ -547,3 +549,58 @@ export async function getUserPosts(req, res) {
     res.status(500).json({ error: "Server error fetching posts" });
   }
 }
+
+//delete post
+export const deletePost = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    const  postId  = req.params.id;
+    console.log("id is ",postId);
+    
+
+    if (!userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    // Only author can delete
+    if (post.authorId.toString() !== userId) {
+      return res.status(403).json({ message: "Not allowed to delete this post" });
+    }
+
+
+    // Get all comment IDs under the post
+    const comments = await Comment.find(
+      { postId },
+      { _id: 1 }
+    );
+
+    const commentIds = comments.map(c => c._id);
+
+    // 2Delete votes on comments
+    if (commentIds.length > 0) {
+      await Vote.deleteMany({
+        commentId: { $in: commentIds }
+      });
+    }
+
+    // Delete votes on the post
+    await Vote.deleteMany({ postId });
+
+    // Delete all comments under the post
+    await Comment.deleteMany({ postId });
+
+    // Delete the post itself
+    await Post.deleteOne({ _id: postId });
+
+    return res.json({ message: "Post and all related data deleted successfully" });
+
+  } catch (err) {
+    console.error("deletePost error:", err);
+    return res.status(500).json({ message: "Failed to delete post" });
+  }
+};

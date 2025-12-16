@@ -99,6 +99,29 @@
   margin-bottom: 10px;
   padding: 0;
 }
+/* ============================= */
+/* POST DELETE BUTTON */
+/* ============================= */
+
+.sp-delete-btn {
+  margin-left: 12px;
+  font-size: 16px;
+  color: #9a9a9a;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.sp-delete-btn:hover {
+  color: #e53935; /* Reddit-like red */
+  transform: scale(1.1);
+}
+
+.sp-delete-btn:active {
+  transform: scale(0.95);
+}
+
 
 /* ============================= */
 /* COMMUNITIES */
@@ -129,6 +152,25 @@
   font-size: 13px;
 }
 
+.sc-join-btn {
+  margin-left: auto;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.sc-join-btn.join {
+  background: #ff4500; /* orange */
+  color: white;
+}
+
+.sc-join-btn.leave {
+  background: #d93025; /* red */
+  color: white;
+}
 
 /* ========================================= */
 /*           DARK MODE OVERRIDES             */

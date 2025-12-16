@@ -8,7 +8,8 @@ import {
   getPostById,
   getPersonalizedFeed,
   getPopularPosts,
-  getUserPosts
+  getUserPosts,
+  deletePost
 } from "../Controllers/PostController.js";
 
 import { 
@@ -18,31 +19,15 @@ import {
 
 const router = express.Router();
 
-/* -----------------------------
-   COMMUNITY & CREATE POST APIs
------------------------------- */
-
-// Communities dropdown for CreatePost page
 router.get("/communities",auth, getPostableCommunities);
 
-// Create a new post (TEMP no auth)
+// Create a new post 
 router.post("/",auth, createPost);
-
-/* -----------------------------
-      PERSONALIZED FEED
------------------------------- */
 
 // Get personalized feed (supports guest mode with no userId)
 router.get("/feed", getPersonalizedFeed);
 
 router.get("/popular", getPopularPosts);
-
-
-
-
-/* -----------------------------
-           COMMENTS
------------------------------- */
 
 // Create a top-level comment under a post
 router.post("/:postId/comments",auth, createComment);
@@ -50,24 +35,15 @@ router.post("/:postId/comments",auth, createComment);
 // Get all comments for a post
 router.get("/:postId/comments",auth, getCommentsForPost);
 
-
-
-
-/* -----------------------------
-       SEARCH & USER POSTS
------------------------------- */
-
 router.get("/search",auth, searchPosts);
 
 // Get user posts
 router.get("/me",auth,getUserPosts);
 
+//delete post
+router.delete("/:id",auth,deletePost);
 
-/* -----------------------------
-       SINGLE POST DETAILS
------------------------------- */
-
-// Must stay last!
+// Must stay last
 router.get("/:postId",auth, getPostById);
 
 export default router;

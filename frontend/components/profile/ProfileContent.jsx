@@ -11,6 +11,15 @@ export default function ProfileContent({ activeTab = 'Overview' }) {
   const [communities, setCommunities] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
+
+  const onLeave = (name)=>{
+    setCommunities((prev)=>prev.filter((c)=>c.name !== name))
+  }
+
+  const onDeletePost = (id) => {
+  setPosts((prev) => prev.filter((p) => p._id !== id));
+  };
+
   // ---------- FETCH DATA ----------
   useEffect(() => {
     async function fetchProfileData() {
@@ -68,7 +77,7 @@ export default function ProfileContent({ activeTab = 'Overview' }) {
               {hasPosts ? (
                 posts.map(post => (
                   <div key={post._id} className="profile-item-frame">
-                    <SearchItem type="post" data={post} />
+                    <SearchItem type="post" data={post} onDelete={onDeletePost} />
                   </div>
                 ))
               ) : (
@@ -85,7 +94,7 @@ export default function ProfileContent({ activeTab = 'Overview' }) {
               {hasCommunities ? (
                 communities.map(comm => (
                   <div key={comm._id} className="profile-item-frame">
-                    <SearchItem type="community" data={comm} />
+                    <SearchItem type="community" data={comm} member = {true} onLeave={onLeave}/>
                   </div>
                 ))
               ) : (

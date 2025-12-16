@@ -4,7 +4,8 @@ import {
   getCommunityByName,
   deleteCommunity,
   joinCommunity,
-  getUserCommunities
+  getUserCommunities,
+  leaveCommunity
 } from "../Controllers/CommunityController.js";
 import auth from "../Middleware/AuthMiddleware.js";
 
@@ -15,5 +16,6 @@ router.post("/:name/join", joinCommunity);
 router.post("/",createCommunity);
 router.get("/:name", getCommunityByName);
 router.delete("/:name",deleteCommunity);
+router.post("/:name/leave",leaveCommunity)
 
 export default router;

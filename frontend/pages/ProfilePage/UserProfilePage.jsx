@@ -12,6 +12,7 @@ import "../../components/profile/styles/tabs.css";
 import "../../components/profile/styles/content.css";
 import "../../components/profile/styles/sidebar.css";
 import "../../components/profile/styles/dark.css";
+import "./ProfilePage.css"
 
 const API_BASE = "http://localhost:5000";
 
@@ -70,23 +71,23 @@ useEffect(() => {
   return (
     <>
       <div className="profile-page-wrapper">
-        <LeftSidebar />
+        <LeftSidebar className = "sticky" />
 
         <div className="profile-page">
           <div className="profile-container">
             <main className="profile-main">
               {error && <div style={{ color: "red" }}>{error}</div>}
+              {user && <ProfileHeader className = "sticky" user={user} />}
 
-              {user && <ProfileHeader user={user} />}
+              <ProfileTabs className = "sticky" activeTab={activeTab} setActiveTab={setActiveTab} />
+        
 
-              <ProfileTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-
-              <ProfileContent activeTab={activeTab} user={user} />
+              <ProfileContent className = "profile-content"  activeTab={activeTab} user={user} />
             </main>
 
-            <aside className="profile-aside">
+            <aside className = "sticky profile-aside">
               {/*  pass currentUser so sidebar can decide if it's "my profile" */}
-              {user && <ProfileSidebar user={user} isMyProfile={isMyProfile} />}
+              {user && <ProfileSidebar className = "sticky" user={user} isMyProfile={isMyProfile} />}
             </aside>
           </div>
         </div>

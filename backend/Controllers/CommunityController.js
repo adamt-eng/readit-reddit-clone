@@ -154,7 +154,7 @@ export const joinCommunity = async (req, res) => {
 };
 
 
-/* ---------------- COMMUNITY SEARCH ---------------- */
+//community search
 export async function searchCommunities(req, res) {
   try {
     let { q = "", page = 1, limit = 20 } = req.query;
@@ -200,7 +200,6 @@ export async function getTopCommunities(req, res) {
 }
 
 
-
 //get user communities
 export async function getUserCommunities(req, res) {
   try {
@@ -228,6 +227,41 @@ export async function getUserCommunities(req, res) {
   }
 }
 
+//leave comm
+export const leaveCommunity = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
 
+    const { name } = req.params;
+
+    const community = await Community.findOne({ name: name.toLowerCase() });
+    if (!community) {
+      return res.status(404).json({ message: "Community not found" });
+    }
+
+    const membership = await Membership.findOne({
+      userId: req.user.id,
+      communityId: community._id,
+    });
+
+    if (!membership) {
+      return res.status(400).json({ message: "Not a member of this community" });
+    }
+
+    await Membership.deleteOne({ _id: membership._id });
+
+    await Community.findByIdAndUpdate(
+      community._id,
+      { $inc: { memberCount: -1 } }
+    );
+
+    return res.json({ message: "Left community successfully" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Leave community failed" });
+  }
+};
 
 
