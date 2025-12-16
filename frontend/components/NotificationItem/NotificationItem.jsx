@@ -3,6 +3,7 @@ import { useState, useRef } from "react";
 import "./NotificationItem.css";
 import { IoIosArrowForward } from "react-icons/io";
 import { FaTrash } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const notificationIcons = {
   profile_view: "https://cdn-icons-png.flaticon.com/512/1077/1077114.png",
@@ -55,13 +56,15 @@ function getNotificationContent(type, payload) {
 }
 
 export default function NotificationItem({ data, onRead }) {
-  const { isRead, type, payload,timeAgoFormatted} = data;
+  const { isRead, type, payload, timeAgoFormatted } = data;
   const [slidingOut, setSlidingOut] = useState(false);
   const ref = useRef(null);
+  const navigate = useNavigate();
 
   const SLIDE_DURATION_MS = 360;
 
-  const handleRead = () => {
+  const handleRead = (e) => {
+    e.stopPropagation();
     if (slidingOut) return;
 
     setSlidingOut(true);
@@ -72,6 +75,32 @@ export default function NotificationItem({ data, onRead }) {
     }, SLIDE_DURATION_MS);
   };
 
+  const handleNavigate = () => {
+    if (type === "profile_view" && payload?.actorId) {
+      navigate(`/user/${payload.actorId}`);
+      return;
+    }
+
+    if (
+      type === "post_upvote" ||
+      type === "post_downvote" ||
+      type === "comment_upvote" ||
+      type === "comment_downvote" ||
+      type === "comment_reply" ||
+      type === "comment"
+    ) {
+      if (payload?.postId) {
+        navigate(`/posts/${payload.postId}`);
+        return;
+      }
+    }
+
+    if (type === "private_message") {
+      navigate("/messages");
+      return;
+    }
+  };
+
   const icon = notificationIcons[type] || notificationIcons.default;
   const { title, message } = getNotificationContent(type, payload);
 
@@ -80,6 +109,7 @@ export default function NotificationItem({ data, onRead }) {
       ref={ref}
       role="button"
       tabIndex={0}
+      onClick={handleNavigate}
       className={[
         "notif-card",
         !isRead ? "notif-unread" : "",
@@ -94,9 +124,7 @@ export default function NotificationItem({ data, onRead }) {
       <div className="notif-main">
         <div className="notif-title">{title}</div>
 
-        <div className="notif-preview">
-          {message}
-        </div>
+        <div className="notif-preview">{message}</div>
 
         <div className="notif-time">{timeAgoFormatted}</div>
       </div>

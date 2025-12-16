@@ -45,10 +45,13 @@ async function buildNotificationData(type, payload) {
     break;
     case "comment_upvote":
       message = `${actorUsername} upvoted your comment in r/${communityName}`;
-      break;
+    break;
+    case "comment":
+      message = `${actorUsername} commented on your post in r/${communityName}`;
+    break;
     case "private_message":
       message = `${actorUsername} sent you a message`;
-      break;
+    break;
     case "comment_reply":
       message = `${actorUsername} replied to your comment in r/${communityName}`;
       break;

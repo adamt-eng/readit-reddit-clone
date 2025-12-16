@@ -119,6 +119,7 @@ useEffect(() => {
   socketRef.current.emit("register", user._id);
 
   const handleNotification = () => {
+    console.log("ana hena oxembellahh")
     fetchCount();
   };
 
@@ -127,7 +128,7 @@ useEffect(() => {
   return () => {
     socketRef.current.off("notification", handleNotification);
   };
-}, [user?._id]);
+}, [location]);
 
 
 
