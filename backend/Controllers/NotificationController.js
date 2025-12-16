@@ -37,6 +37,12 @@ async function buildNotificationData(type, payload) {
     case "post_upvote":
       message = `${actorUsername} upvoted your post in r/${communityName}`;
       break;
+    case "post_downvote":
+      message = `${actorUsername} upvoted your post in r/${communityName}`;
+    break;
+    case "comment_downvote":
+      message = `${actorUsername} upvoted your post in r/${communityName}`;
+    break;
     case "comment_upvote":
       message = `${actorUsername} upvoted your comment in r/${communityName}`;
       break;
@@ -57,6 +63,7 @@ async function buildNotificationData(type, payload) {
 }
 
 export async function createNotification({ userId, type, payload }) {
+  console.log("called")
   if (!userId || userId.toString() === payload.actorId?.toString()) return;
 
   const finalPayload = await buildNotificationData(type, payload);

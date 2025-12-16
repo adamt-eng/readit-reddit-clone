@@ -1,5 +1,7 @@
 import DmConversation from "../Models/DMConversation.js";
 import DmMessage from "../Models/DMMessage.js";
+import { createNotification } from "./NotificationController.js";
+
 
 const ensureOrder = (a, b) => (a.toString() < b.toString() ? [a, b] : [b, a]);
 
@@ -126,8 +128,9 @@ const createDMController = ({
 
             // emit to recipient if online via provided io/onlineUsers
             const convo = await DmConversation.findById(convoId);
+            let other
             if (convo && onlineUsers) {
-                const other = convo.userA.toString() === senderId.toString() ? convo.userB.toString() : convo.userA.toString();
+                other = convo.userA.toString() === senderId.toString() ? convo.userB.toString() : convo.userA.toString();
                 const socketId = onlineUsers.get(other);
                 if (socketId && io) {
                     io.to(socketId).emit("dm:new_message", {
@@ -138,7 +141,7 @@ const createDMController = ({
             }
             //send noti
             createNotification({
-              userId: recipientId,
+              userId: other,
               type: "private_message",
               payload: {
                 actorId: req.user.id, 

@@ -2,15 +2,16 @@ import mongoose from "mongoose";
 import Post from "../Models/Post.js";
 import Vote from "../Models/Votes.js";
 import Comment from "../Models/Comment.js";
+import { createNotification } from "./NotificationController.js";
+
 
 export const votePost = async (req, res) => {
   try {
     const userId = req.user?.id;
     const { id: postId } = req.params;
-    const { voteScore } = req.body; // +1 or -1
+    const { voteScore } = req.body;
 
-    /* ---------- VALIDATION ---------- */
-
+    //validations
     if (!userId) {
       return res.status(401).json({ message: "Not authenticated" });
     }
@@ -30,18 +31,16 @@ export const votePost = async (req, res) => {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    /* ---------- FIND EXISTING VOTE ---------- */
+    /*search existing votes */
 
     const existingVote = await Vote.findOne({ userId, postId });
 
-    /* ---------- CASE 1: NO PREVIOUS VOTE ---------- */
 
     if (!existingVote) {
       await Vote.create({
         userId,
         postId,
 
-    
         value: voteScore,
       });
 
@@ -50,10 +49,22 @@ export const votePost = async (req, res) => {
 
       await post.save();
 
+      //create noti
+      console.log("idsss",post.authorId, userId)
+    if ( post.authorId.toString() !== userId.toString()) {
+    await createNotification({
+      userId: post.authorId,
+      type: voteScore === 1? "post_upvote":"post_downvote",
+      payload: {
+        actorId: userId,
+        postId: post._id,
+        commentId: null,
+      },
+    });
+    }
       return res.json({ message: "Vote added", post });
     }
 
-    /* ---------- CASE 2: SAME VOTE → REMOVE ---------- */
 
     if (existingVote.value === voteScore) {
       await existingVote.deleteOne();
@@ -66,7 +77,6 @@ export const votePost = async (req, res) => {
       return res.json({ message: "Vote removed", post });
     }
 
-    /* ---------- CASE 3: CHANGE VOTE ---------- */
 
     if (existingVote.value === 1) {
       post.upvoteCount -= 1;
@@ -95,7 +105,6 @@ export const voteComment = async (req, res) => {
     const { commentId } = req.params;
     const { voteScore } = req.body; // +1 or -1
 
-    /* ---------- VALIDATION ---------- */
 
     if (!userId) {
       return res.status(401).json({ message: "Not authenticated" });
@@ -116,7 +125,6 @@ export const voteComment = async (req, res) => {
 
     const existingVote = await Vote.findOne({ userId, commentId });
 
-    /* ---------- CASE 1: NO PREVIOUS VOTE ---------- */
 
     if (!existingVote) {
       await Vote.create({
@@ -129,10 +137,23 @@ export const voteComment = async (req, res) => {
       else comment.downvoteCount += 1;
 
       await comment.save();
+
+      //create noti
+       if (comment.authorId.toString() !== comment.toString()) {
+      await createNotification({
+          userId: comment.authorId,
+          type: voteScore === 1 ? "comment_upvote":"comment_downvote",
+          payload: {
+            actorId: userId,
+            postId: comment.postId,
+            commentId: comment._id,
+          },
+        });
+      }
+
       return res.json({ message: "Vote added", comment });
     }
 
-    /* ---------- CASE 2: SAME VOTE → REMOVE ---------- */
 
     if (existingVote.value === voteScore) {
       await existingVote.deleteOne();
@@ -144,7 +165,6 @@ export const voteComment = async (req, res) => {
       return res.json({ message: "Vote removed", comment });
     }
 
-    /* ---------- CASE 3: SWITCH VOTE ---------- */
 
     if (existingVote.value === 1) {
       comment.upvoteCount -= 1;
@@ -165,10 +185,7 @@ export const voteComment = async (req, res) => {
   }
 };
 
-/**
- * GET /votes/posts/me
- * Returns: { postId: voteValue }
- */
+//get user votes
 export const getUserPostVotes = async (req, res) => {
   try {
     const userId = req.user?.id;
@@ -177,7 +194,7 @@ export const getUserPostVotes = async (req, res) => {
       return res.status(401).json({ message: "Not authenticated" });
     }
 
-    // Get only post votes (ignore comment votes)
+    // Get only post votes 
     const votes = await Vote.find(
       {
         userId,

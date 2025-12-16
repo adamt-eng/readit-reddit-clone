@@ -18,7 +18,7 @@ export const getCommentsForPost = async (req, res) => {
     comments.forEach(c => {
       map[c._id] = {
         ...c,
-        author: c.authorId.username, // ✅ normalize
+        author: c.authorId.username,
         replies: []
       };
     });
