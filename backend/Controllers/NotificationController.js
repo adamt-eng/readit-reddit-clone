@@ -75,7 +75,7 @@ export async function createNotification({ userId, type, payload }) {
       _io.to(socketId).emit("notification", notification);
     }
   }
-
+  console.log("new")
   return notification;
 }
 

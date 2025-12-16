@@ -93,7 +93,7 @@ export default function SearchItem({ type, data }) {
    * ----------------------------------------------------- */
   if (type === "user") {
     return (
-      <Link to={`/user/${data.username}`} className="su-container">
+      <Link to={`/user/${data._id}`} className="su-container">
         <img
           className="su-avatar"
           src={data.avatarUrl || `https://api.dicebear.com/7.x/thumbs/svg?seed=${data.username}`}

@@ -3,6 +3,8 @@ import "./Notifications.css";
 import NotificationItem from "../../components/NotificationItem/NotificationItem";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 import axios from "axios";
+import { io } from "socket.io-client";
+import { useRef } from "react";
 
 
 // Format date 
@@ -25,9 +27,41 @@ function formatTimeAgo(date) {
 }
 
 export default function Notifications() {
+  const [user,setUser] = useState({});
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showEarlier, setShowEarlier] = useState(false);
+
+  const socketRef = useRef(null);
+
+
+  const handleNotification = async (notification) => {
+    await axios.patch(`http://localhost:5000/notifications/${notification._id}/read`,{},{withCredentials:true})
+  const formatted = {
+    ...notification,
+    isRead: true, 
+    timeAgoFormatted: formatTimeAgo(notification.createdAt),
+  };
+  console.log("henanaaaa",formatted)
+  setNotifications((prev) => [formatted, ...prev]);
+};
+
+
+  //fetch user for real time updates
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost:5000/users/me",
+          { withCredentials: true }
+        );
+        setUser(res.data);
+        console.log("userrrr",res.data)
+      } catch (err) {
+        console.error("Failed to load user:", err);
+      }
+    }
+    fetchUser();},[])
 
   // fetch notis
   useEffect(() => {
@@ -54,6 +88,27 @@ export default function Notifications() {
     fetchNotifications();
   }, []);
 
+  //real time sockets
+  //create socket
+  useEffect(() => {
+    if (!socketRef.current) {
+      socketRef.current = io("http://localhost:5000");
+    }
+  }, []);
+  
+  // real time updates
+useEffect(() => {
+  console.log(user.id,socketRef.current)
+  if (!user?._id || !socketRef.current) return;
+  socketRef.current.emit("register", user._id);
+  socketRef.current.on("notification",handleNotification);
+  return () => {
+    socketRef.current.off("notification", handleNotification);
+  };
+}, [user?._id]);
+
+  
+
   // time based filtering
   const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
   const now = Date.now();
@@ -68,7 +123,6 @@ export default function Notifications() {
 
   
   // DELETE HANDLING
- 
   const deleteAll = () => {
     setNotifications([]);
 

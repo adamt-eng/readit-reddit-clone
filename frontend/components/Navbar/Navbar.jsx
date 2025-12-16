@@ -95,7 +95,7 @@ const fetchCount = async () => {
 
 const socketRef = useRef(null);
 
-//creeate socket
+//create socket
 useEffect(() => {
   if (!socketRef.current) {
     socketRef.current = io("http://localhost:5000");
@@ -236,13 +236,13 @@ useEffect(() => {
               <div className="profile-dropdown">
 
                 <Link
-  to="/user/me"
-  className="dropdown-item"
-  onClick={() => handleDropdownItemClick("profile")}
->
-  <FaUser className="dropdown-icon" />
-  <span>Profile</span>
-</Link>
+                  to="/user/me"
+                  className="dropdown-item"
+                  onClick={() => handleDropdownItemClick("profile")}
+                >
+                  <FaUser className="dropdown-icon" />
+                  <span>Profile</span>
+                </Link>
 
                 <div 
                   className="dropdown-item"
