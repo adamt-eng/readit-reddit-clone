@@ -22,17 +22,17 @@ export default function PostPage() {
       const data = await res.json();
 
       setPost({
-        id: data._id,
-        community: data.communityId?.name,
-        author: data.authorId?.username,
-        timeAgo: new Date(data.createdAt).toLocaleDateString(),
-        title: data.title,
+      id: data._id,
+      community: data.communityId?.name,
+      author: data.authorId?.username,
+      timeAgo: new Date(data.createdAt).toLocaleDateString(),
+      title: data.title,
         text: data.content,
         image: data.media?.url,
-        votes: data.upvoteCount - data.downvoteCount,
-        commentsCount: data.commentCount,
-        userVote: 0
-      });
+      votes: data.upvoteCount - data.downvoteCount,
+      commentsCount: data.commentCount,
+      userVote: 0
+    });
     };
 
     const fetchComments = async () => {
