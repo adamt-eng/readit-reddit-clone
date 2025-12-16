@@ -3,13 +3,15 @@ import "./AuthModal.css";
 import Login from "../Authentication/Login";
 import Signup from "../Authentication/Signup";
 
-export default function AuthModal({ mode, onClose, onLogin, darkMode, setShowAuthModal }) {
+export default function AuthModal({ mode, onClose, onLogin, setShowAuthModal }) {
+  console.log("called");
 
-  // Animation trigger
   useEffect(() => {
-    document.body.style.overflow = "hidden"; // Disable background scroll
+    console.log("called2");
+    document.body.style.overflow = "hidden";
+
     return () => {
-      document.body.style.overflow = ""; // Re-enable scroll
+      document.body.style.overflow = "";
     };
   }, []);
 
@@ -24,22 +26,14 @@ export default function AuthModal({ mode, onClose, onLogin, darkMode, setShowAut
   };
 
   return (
-    <div
-      className={`auth-overlay ${darkMode ? "dark-mode" : ""}`}
-      onClick={handleOverlayClick}
-    >
+    <div className="auth-overlay" onClick={handleOverlayClick}>
       <div className="auth-modal modal-animate">
         <button className="auth-close-btn" onClick={onClose}>×</button>
 
         {mode === "login" ? (
-          <Login
-            onLogin={onLogin}
-            darkMode={darkMode}
-            inModal
-            switchMode={switchMode}
-          />
+          <Login onLogin={onLogin} inModal switchMode={switchMode} />
         ) : (
-          <Signup onLogin={onLogin} darkMode={darkMode} inModal switchMode={switchMode} />
+          <Signup onLogin={onLogin} inModal switchMode={switchMode} />
         )}
       </div>
     </div>

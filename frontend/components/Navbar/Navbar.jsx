@@ -12,7 +12,7 @@ import "./Navbar.css";
 import profileFallback from "../../assets/profile.png";
 
 
-export default function Navbar({ setIsLoggedIn,setuser,user, isLoggedIn, darkMode, onToggleDarkMode, onLoginClick, onSignupClick }) {
+export default function Navbar({ setUser,user, isLoggedIn, darkMode, onToggleDarkMode, onLoginClick, onSignupClick }) {
   const navigate = useNavigate()
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -58,7 +58,7 @@ const handleLogout = async () => {
   } catch (err) {
     console.error("Logout error:", err);
   } finally {
-    setuser(null);
+    setUser(null);
     setNotisCount(0);
     navigate("/");
   }

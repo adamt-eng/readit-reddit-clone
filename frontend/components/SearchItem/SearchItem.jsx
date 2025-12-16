@@ -24,10 +24,8 @@ function formatTimeAgo(dateString) {
 
 export default function SearchItem({ type, data }) {
 
-  /** -----------------------------------------------------
-   * COMMUNITY RESULT
-   * navigates to: /community/:id
-   * ----------------------------------------------------- */
+   //COMMUNITY RESULT
+   // navigates to: /community/:id
   if (type === "community") {
     return (
       <Link to={`/community/${data.name}`} className="sc-container">
@@ -36,7 +34,6 @@ export default function SearchItem({ type, data }) {
           alt="community icon"
           className="sc-icon"
         />
-
         <div className="sc-info">
           <div className="sc-title">
             {data.name.startsWith("r/") ? data.name : "r/" + data.name}
@@ -49,31 +46,29 @@ export default function SearchItem({ type, data }) {
     );
   }
 
-  /** -----------------------------------------------------
-   * POST RESULT
-   * navigates to: /post/:id
-   * ----------------------------------------------------- */
+   //POST RESULT
+   // navigates to: /post/:id
+
   if (type === "post") {
     const timeAgo = formatTimeAgo(data.createdAt);
 
     return (
       <Link to={`/posts/${data._id}`} className="sp-container">
         <div className="sp-left">
-          <div className="info">
-           <div className="sp-meta">
-            <span className="sp-community">
-              <img
-              src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(data.communityName)}`}
-              alt="community icon"
-              className="sp-icon"
-            />
-              {data.communityName.startsWith("r/")
-                ? data.communityName
-                : "r/" + data.communityName}  •  {timeAgo}
-            </span>
-          </div>
+         <div className="sp-meta">
+          <img
+            src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(data.communityName)}`}
+            alt="community icon"
+            className="sp-icon"
+          />
+          <span className="sp-community">
+            {data.communityName.startsWith("r/")
+              ? data.communityName
+              : "r/" + data.communityName}
+          </span>
+          <span className="sp-time">• {timeAgo}</span>
+        </div>
 
-          </div>
 
           <div className="sp-title">{data.title}</div>
 
@@ -90,10 +85,8 @@ export default function SearchItem({ type, data }) {
     );
   }
 
-  /** -----------------------------------------------------
-   * USER RESULT
-   * navigates to: /user/:id
-   * ----------------------------------------------------- */
+  // USER RESULT
+   // navigates to: /user/:id
   if (type === "user") {
     return (
       <Link to={`/user/${data._id}`} className="su-container">

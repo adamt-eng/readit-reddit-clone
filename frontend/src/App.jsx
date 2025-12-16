@@ -61,7 +61,6 @@ useEffect(() => {
         withCredentials: true,
       });
       setCurrentUser(res.data);
-      setIsLoggedIn(true);
     } catch {
       setCurrentUser(null);
     } finally {
@@ -81,7 +80,7 @@ useEffect(() => {
         !currentUser?(<Navbar
           user={currentUser}
           isLoggedIn={false}
-          setCurrentUser={setCurrentUser}
+          setUser={setCurrentUser}
           darkMode={darkMode}
           onToggleDarkMode={toggleDarkMode}
           onLoginClick={openLoginModal}
@@ -89,7 +88,7 @@ useEffect(() => {
         />):(<Navbar
           user={currentUser}
           isLoggedIn={true}
-          setCurrentUser={setCurrentUser}
+          setUser={setCurrentUser}
           darkMode={darkMode}
           onToggleDarkMode={toggleDarkMode}
           onLoginClick={openLoginModal}
@@ -121,7 +120,6 @@ useEffect(() => {
           mode={showAuthModal}
           onClose={closeAuthModal}
           onLogin={handleLogin}
-          darkMode={darkMode}
           setShowAuthModal={setShowAuthModal}
         />
       )}

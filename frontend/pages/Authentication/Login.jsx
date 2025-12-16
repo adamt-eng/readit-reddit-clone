@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useState } from "react";
 
-export default function Login({ onLogin, darkMode, inModal, switchMode }) {
+export default function Login({ onLogin,inModal, switchMode }) {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -15,10 +15,11 @@ export default function Login({ onLogin, darkMode, inModal, switchMode }) {
     setError("");
 
     try {
+      console.log("logging in")
       const res = await axios.post(
         "http://localhost:5000/authentication/login",
         { email, password },
-        { withCredentials: true } // VERY IMPORTANT
+        { withCredentials: true }
       );
       onLogin();
 
