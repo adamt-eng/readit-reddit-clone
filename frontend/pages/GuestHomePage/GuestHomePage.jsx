@@ -91,6 +91,8 @@ export default function GuestHomePage({ darkMode, onLogin }) {
           title: p.title || "",
           content: p.content || "",
           upvotes: p.upvotes || 0,
+          downvotes : p.downvotes || 0,
+          voteCount : p.upvotes - p.downvotes,
           comments: p.comments || 0,
           time: formatTimeAgo(p.createdAt),
           userVote: 0,
