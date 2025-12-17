@@ -8,7 +8,6 @@ export default function TrendingPosts({
   darkMode,
   onVote,
   formatNumber,
-  onPostClick,
   onJoinCommunity,
   joinedCommunities,
   expandedPostId,
@@ -52,7 +51,6 @@ export default function TrendingPosts({
               // Pass all functionality props
               onVote={onVote}
               formatNumber={formatNumber}
-              onPostClick={onPostClick}
               onJoinCommunity={onJoinCommunity}
               joinedCommunities={joinedCommunities}
               expandedPostId={expandedPostId}

@@ -13,11 +13,9 @@ export default function PostCard({
   // Functionality props
   onVote,
   formatNumber,
-  onPostClick,
   onJoinCommunity,
   joinedCommunities = [],
   expandedPostId,
-  commentInputs = {},
   onCommentInputChange,
   onAddComment,
   onHidePost,
@@ -93,10 +91,7 @@ const handleJoinCommunity = (e) => {
     }
   };
 
-  const handleToggleComments = (e) => {
-    e.stopPropagation();
-    navigate(`posts/${post.id}`)
-  };
+
 
   const handleAddComment = () => {
     if (isGuest) {
@@ -123,6 +118,7 @@ const handleJoinCommunity = (e) => {
   };
 
   return (
+    <Link to = {`/posts/${post.id}`}>
     <div 
       className={`post-card ${viewMode}-view`}
       onClick={() => onPostClick?.(post.id)}
@@ -302,7 +298,6 @@ const handleJoinCommunity = (e) => {
           
           {/* Comment Button */}
           <button 
-            onClick={handleToggleComments}
             className="post-action-btn comment-btn"
           >
             <FaRegCommentAlt className="action-icon" />
@@ -319,72 +314,9 @@ const handleJoinCommunity = (e) => {
             <FaShare className="action-icon" />
             <span className="action-text">Share</span>
           </button>
-          
         </div>
-
-        {/* COMMENTS SECTION */}
-        {isCommentsExpanded && (
-          <div className="post-comments-section">
-            <div className="comments-header">
-              <h4>{post.commentsList.length} Comment{post.commentsList.length !== 1 ? 's' : ''}</h4>
-              {isGuest && (
-                <div className="guest-notice">
-                  <small>💡 Log in to vote and comment</small>
-                </div>
-              )}
-            </div>
-            
-            {/* Comments List */}
-            <div className="comments-list">
-              {post.commentsList.length > 0 ? (
-                post.commentsList.map(comment => (
-                  <Comment 
-                    key={comment.id} 
-                    comment={comment} 
-                    darkMode={darkMode}
-                    onVote={handleCommentVote}
-                    onReply={handleCommentReply}
-                    postId={post.id}
-                  />
-                ))
-              ) : (
-                <div className="no-comments">
-                  {isGuest ? (
-                    <>No comments yet. <button onClick={onPromptLogin} className="login-prompt-btn">Log in</button> to be the first to share your thoughts!</>
-                  ) : (
-                    "No comments yet. Be the first to share your thoughts!"
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Add Comment Section */}
-            <div className={`add-comment ${isGuest ? 'guest-disabled' : ''}`}>
-              <textarea 
-                placeholder={isGuest ? "Log in to add a comment..." : "What are your thoughts?"} 
-                className="comment-input"
-                rows="3"
-                value={commentInputs[post.id] || ""}
-                onChange={(e) => onCommentInputChange?.(post.id, e.target.value)}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (isGuest) onPromptLogin?.();
-                }}
-                readOnly={isGuest}
-              />
-              <div className="comment-actions-footer">
-                <button 
-                  className={`comment-btn ${isGuest ? 'guest-disabled-btn' : ''}`}
-                  onClick={handleAddComment}
-                  disabled={isGuest ? false : !commentInputs[post.id]?.trim()}
-                >
-                  {isGuest ? 'Log in to Comment' : 'Comment'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
+    </Link>
   );
 }

@@ -37,7 +37,6 @@ const HomePage = ({ darkMode, onStartCommunity }) => {
   const [page, setPage] = useState(1);
 const [hasMore, setHasMore] = useState(true);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
-  const [commentInputs, setCommentInputs] = useState({});
   const [posts, setPosts] = useState([]);
 const PAGE_LIMIT = 5;
 
@@ -241,24 +240,7 @@ useEffect(() => {
     return [];
   });
 
-  // Helper function to apply comment votes recursively
-  const applyCommentVotes = (comments, commentVotes) => {
-    return comments.map(comment => {
-      const savedVote = commentVotes[comment.id];
-      const updatedComment = {
-        ...comment,
-        userVote: savedVote !== undefined ? savedVote : comment.userVote,
-        upvotes: savedVote !== undefined ? comment.upvotes + savedVote : comment.upvotes
-      };
 
-      // Apply to replies recursively
-      if (comment.replies && comment.replies.length > 0) {
-        updatedComment.replies = applyCommentVotes(comment.replies, commentVotes);
-      }
-
-      return updatedComment;
-    });
-  };
 
   const sortOptions = ["Best", "New", "Top", "Rising"];
 
@@ -456,41 +438,6 @@ setJoinedCommunities(prev =>
   };
 
 
-  // Helper function to update comment votes (recursive for nested comments)
-  const updateCommentVote = (comments, commentId, voteType) => {
-    return comments.map(comment => {
-      if (comment.id === commentId) {
-        let newUpvotes = comment.upvotes;
-        let newUserVote = voteType;
-        
-        if (comment.userVote === voteType) {
-          newUserVote = 0;
-          newUpvotes -= voteType;
-        } 
-        else if (comment.userVote !== 0) {
-          newUpvotes = newUpvotes - comment.userVote + voteType;
-        }
-        else {
-          newUpvotes += voteType;
-        }
-        
-        return {
-          ...comment,
-          upvotes: newUpvotes,
-          userVote: newUserVote
-        };
-      }
-      
-      if (comment.replies && comment.replies.length > 0) {
-        return {
-          ...comment,
-          replies: updateCommentVote(comment.replies, commentId, voteType)
-        };
-      }
-      
-      return comment;
-    });
-  };
 
 
   // Add toggleExpand function for compact view
@@ -644,11 +591,9 @@ const handleVote = async (postId, voteType) => {
           darkMode={darkMode}
           onVote={handleVote}
           formatNumber={formatNumber}
-          onPostClick={handlePostClick}
           onJoinCommunity={handleJoinCommunity}
           joinedCommunities={joinedCommunities}
           expandedPostId={expandedPostId}
-          commentInputs={commentInputs}
           onHidePost={handleHidePost}
           onUnhidePost={handleUnhidePost}
           hiddenPosts={hiddenPosts}
