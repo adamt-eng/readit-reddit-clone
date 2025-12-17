@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Post from "../../components/Posts/Post/Post.jsx";
+import axios from "axios";
 
 export default function PostPage() {
   const { postId } = useParams();
@@ -13,15 +14,15 @@ export default function PostPage() {
 
   useEffect(() => {
     const fetchPost = async () => {
-      const res = await fetch(
+      try{
+      const res = await axios.get(
         `http://localhost:5000/posts/${postId}`,
-        { credentials: "include" }
+        { withCredentials: true }
       );
-      if (!res.ok) return;
 
-      const data = await res.json();
-
-      setPost({
+      const data = res.data;
+      console.log(res.data);
+     setPost({
       id: data._id,
       community: data.communityId?.name,
       author: data.authorId?.username,
@@ -31,8 +32,13 @@ export default function PostPage() {
         image: data.media?.url,
       votes: data.upvoteCount - data.downvoteCount,
       commentsCount: data.commentCount,
-      userVote: 0
-    });
+      userVote: data.userVote
+    });}
+      catch(err){
+        console.log("errror while fetching post ",err)
+      }
+
+     
     };
 
     const fetchComments = async () => {
@@ -66,24 +72,17 @@ export default function PostPage() {
   /* ---------------- POST VOTING ---------------- */
 
   const handlePostVote = async (voteScore) => {
-    const res = await fetch(
-      `http://localhost:5000/votes/posts/${postId}`,
-      {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ voteScore })
-      }
-    );
+    const res = await axios.post(`http://localhost:5000/votes/posts/${postId}`,{voteScore:voteScore},{withCredentials:true})
 
-    if (!res.ok) return;
-    const data = await res.json();
+    const data = await res.data;
 
     setPost((prev) => ({
       ...prev,
       votes: data.post.upvoteCount - data.post.downvoteCount,
       userVote: prev.userVote === voteScore ? 0 : voteScore
     }));
+
+    console.log(post)
   };
 
   /* ---------------- COMMENT VOTING ---------------- */

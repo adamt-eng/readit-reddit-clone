@@ -183,6 +183,22 @@ export const getPostById = async (req, res) => {
       return res.status(404).json({ message: "Post not found" });
     }
 
+    if(req.user?.id)
+    {
+    const userId = req.user.id;
+    const res = await Vote.findOne({ userId, postId }).select("value -_id");
+    let vote;
+    if(res)
+      vote = res.value || 0
+    console.log(vote,"jjsjjs")
+
+    if(!vote){
+      vote = 0;
+    }
+
+    post.userVote = vote;
+  }
+
     res.json(post);
   } catch (err) {
     console.error("Error fetching post", err);
