@@ -370,6 +370,7 @@ export const getPopularPosts = async (req, res) => {
     const pageNum = Number(page);
     const limitNum = Number(limit);
     const skip = (pageNum - 1) * limitNum;
+    const limitPlusOne = limitNum + 1;
 
     const posts = await Post.aggregate([
       {
@@ -377,39 +378,30 @@ export const getPopularPosts = async (req, res) => {
           isRemoved: false
         }
       },
-
-      /* ---------------------------
-         POPULARITY SCORE
-         total = upvotes + downvotes + comments
-      --------------------------- */
       {
         $addFields: {
           totalEngagement: {
             $add: [
               { $ifNull: ["$upvoteCount", 0] },
-              { $ifNull: ["$downvoteCount", 0] },
+              {
+                $multiply: [
+                  { $ifNull: ["$downvoteCount", 0] },
+                  -1
+                ]
+              },
               { $ifNull: ["$commentCount", 0] }
             ]
           }
         }
       },
-
-      /* ---------------------------
-         SORT BY POPULARITY
-      --------------------------- */
       {
         $sort: {
           totalEngagement: -1,
-          createdAt: -1 // stable tie-breaker
+          createdAt: -1
         }
       },
-
       { $skip: skip },
-      { $limit: limitNum },
-
-      /* ---------------------------
-         POPULATE COMMUNITY
-      --------------------------- */
+      { $limit: limitPlusOne },
       {
         $lookup: {
           from: "communities",
@@ -418,10 +410,6 @@ export const getPopularPosts = async (req, res) => {
           as: "community"
         }
       },
-
-      /* ---------------------------
-         POPULATE AUTHOR
-      --------------------------- */
       {
         $lookup: {
           from: "users",
@@ -430,35 +418,47 @@ export const getPopularPosts = async (req, res) => {
           as: "author"
         }
       },
-
-      { $unwind: "$community" },
-      { $unwind: "$author" }
+      {
+        $unwind: {
+          path: "$community",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $unwind: {
+          path: "$author",
+          preserveNullAndEmptyArrays: true
+        }
+      }
     ]);
 
+    const hasMore = posts.length > limitNum;
+    const finalPosts = hasMore ? posts.slice(0, limitNum) : posts;
+
     res.json({
-      posts: posts.map(p => ({
+      posts: finalPosts.map(p => ({
         _id: p._id,
         title: p.title,
         content: p.content,
         media: p.media,
-        community: p.community.name,
-        communityTitle: p.community.title,
-        user: p.author.username,
-        userAvatar: p.author.avatarUrl,
+        community: p.community?.name || null,
+        communityTitle: p.community?.title || null,
+        user: p.author?.username || null,
+        userAvatar: p.author?.avatarUrl || null,
         upvotes: p.upvoteCount || 0,
         downvotes: p.downvoteCount || 0,
         comments: p.commentCount || 0,
         createdAt: p.createdAt,
         type: p.media?.url ? "image" : "text"
       })),
-      hasMore: posts.length === limitNum
+      hasMore
     });
-
   } catch (err) {
     console.error("getPopularPosts error:", err);
     res.status(500).json({ message: "Failed to load popular posts" });
   }
 };
+
 
 
 //get user's post for profile

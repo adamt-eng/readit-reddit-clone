@@ -38,7 +38,7 @@ const HomePage = ({ darkMode, onStartCommunity }) => {
 const [hasMore, setHasMore] = useState(true);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [posts, setPosts] = useState([]);
-const PAGE_LIMIT = 5;
+const PAGE_LIMIT = 20;
 
   const navigate = useNavigate();
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
@@ -158,7 +158,7 @@ useEffect(() => {
         page === 1 ? fetchedPosts : [...prev, ...fetchedPosts]
       );
 
-      setHasMore(true);
+      setHasMore(res.data.hasMore);
       console.log(res.data.hasMore)
     } catch (err) {
       console.error("Error fetching feed:", err);
