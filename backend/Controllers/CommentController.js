@@ -1,7 +1,7 @@
 import Comment from "../Models/Comment.js";
 import Post from "../Models/Post.js";
 import Vote from "../Models/Votes.js";
-
+import User from "../Models/User.js"
 
 
 /* ---------------- GET COMMENTS ---------------- */
