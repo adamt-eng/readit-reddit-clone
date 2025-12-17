@@ -3,9 +3,8 @@ import mongoose from "mongoose";
 import User from '../Models/User.js';
 import { createNotification } from "./NotificationController.js";
 
-// ----------------------------------------
-// GET USER BY ID  -->  GET /users/:id
-// ----------------------------------------
+
+//get user profile by id-
 export const getUserById = async (req, res) => {
   try {
     // raw id from URL, may contain spaces or \n from copy-paste
@@ -40,10 +39,9 @@ createNotification({
     return res.status(500).json({ message: "Server error" });
   }
 };
+
+
 //get my profile
-// ----------------------------------------
-// GET USER BY ID  -->  GET /users/:id
-// ----------------------------------------
 export const getProfile = async (req, res) => {
   try {
     const userId = (req.user?.id || "").trim();
@@ -62,9 +60,9 @@ export const getProfile = async (req, res) => {
   }
 };
 
-// ----------------------------------------
-// SEARCH USERS  -->  GET /users/search?q=...
-// ----------------------------------------
+
+
+//search user-
 export const searchUsers = async (req, res) => {
   try {
     let { q = "", page = 1, limit = 20 } = req.query;
@@ -148,10 +146,7 @@ export const updateUserProfile = async (req, res) => {
   }
 };
 
-// ----------------------------------------
-// UPDATE MY PROFILE  -->  PATCH /users/me
-// Requires auth middleware (sets req.user.id)
-// ----------------------------------------
+//update profile
 export const updateMyProfile = async (req, res) => {
   try {
     const userId = (req.user?.id || "").trim();
@@ -190,6 +185,51 @@ export const updateMyProfile = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
+
+//getting user stats
+export const getUserStats = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // fetch counts in parallel
+    const [postsCount, communitiesCount, user] = await Promise.all([
+      Post.countDocuments({ authorId: userId, isRemoved: false }),
+      Membership.countDocuments({ userId }),
+      User.findById(userId).select("karma createdAt")
+    ]);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    /* ---------- FORMAT AGE ---------- */
+    const createdAt = new Date(user.createdAt);
+    const now = new Date();
+
+    const diffMs = now - createdAt;
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const months = Math.floor(days / 30);
+    const years = Math.floor(days / 365);
+
+    let age;
+    if (years > 0) age = `${years}y`;
+    else if (months > 0) age = `${months}mo`;
+    else age = `${days}d`;
+
+    res.json({
+      postsCount,
+      communitiesCount,
+      karma: user.karma || 0,
+      age
+    });
+
+  } catch (err) {
+    console.error("getUserStats error:", err);
+    res.status(500).json({ message: "Failed to load user stats" });
+  }
+};
+
 
 
 
