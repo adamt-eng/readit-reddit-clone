@@ -64,6 +64,10 @@ export const createPost = async (req, res) => {
       authorId: userId,
       createdAt: new Date()
     });
+    await User.findByIdAndUpdate(userId, {
+      $inc: { karma: 1 }
+    });
+
 
     res.status(201).json(post);
   } catch (err) {

@@ -40,8 +40,7 @@ export const getCommentsForPost = async (req, res) => {
   }
 };
 
-/* ---------------- CREATE COMMENT ---------------- */
-
+//add comment
 export const createComment = async (req, res) => {
   try {
     const { postId } = req.params;
@@ -64,6 +63,19 @@ export const createComment = async (req, res) => {
       isRemoved: false,
       createdAt: new Date()
     });
+
+    await User.findByIdAndUpdate(userId, {
+      $inc: { karma: 1 }
+    });
+
+    // +1 karma to post author 
+  const post = await Post.findById(postId).select("authorId");
+
+  if (post && post.authorId.toString() !== userId.toString()) {
+    await User.findByIdAndUpdate(post.authorId, {
+      $inc: { karma: 1 }
+    });
+  }
 
     await comment.populate("authorId", "username");
 
@@ -109,6 +121,18 @@ export const replyToComment = async (req, res) => {
       isRemoved: false,
       createdAt: new Date()
     });
+    
+    await User.findByIdAndUpdate(userId, {
+      $inc: { karma: 1 }
+    });
+    
+    // +1 karma to parent comment author
+  if (parent.authorId.toString() !== userId.toString()) {
+  await User.findByIdAndUpdate(parent.authorId, {
+    $inc: { karma: 1 }
+  });
+}
+
 
     await reply.populate("authorId", "username");
 

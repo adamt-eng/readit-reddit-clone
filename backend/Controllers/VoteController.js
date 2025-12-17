@@ -2,16 +2,18 @@ import mongoose from "mongoose";
 import Post from "../Models/Post.js";
 import Vote from "../Models/Votes.js";
 import Comment from "../Models/Comment.js";
+import User from "../Models/User.js";
 import { createNotification } from "./NotificationController.js";
 
 
+
+//votes posts
 export const votePost = async (req, res) => {
   try {
     const userId = req.user?.id;
     const { id: postId } = req.params;
     const { voteScore } = req.body;
 
-    //validations
     if (!userId) {
       return res.status(401).json({ message: "Not authenticated" });
     }
@@ -21,9 +23,7 @@ export const votePost = async (req, res) => {
     }
 
     if (![1, -1].includes(voteScore)) {
-      return res
-        .status(400)
-        .json({ message: "voteScore must be +1 or -1" });
+      return res.status(400).json({ message: "voteScore must be +1 or -1" });
     }
 
     const post = await Post.findById(postId);
@@ -31,40 +31,33 @@ export const votePost = async (req, res) => {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    /*search existing votes */
-
     const existingVote = await Vote.findOne({ userId, postId });
 
-
     if (!existingVote) {
-      await Vote.create({
-        userId,
-        postId,
-
-        value: voteScore,
-      });
+      await Vote.create({ userId, postId, value: voteScore });
 
       if (voteScore === 1) post.upvoteCount += 1;
       else post.downvoteCount += 1;
 
-      await post.save();
+      if (post.authorId.toString() !== userId.toString()) {
+        await User.findByIdAndUpdate(post.authorId, {
+          $inc: { karma: voteScore }
+        });
 
-      //create noti
-      console.log("idsss",post.authorId, userId)
-    if ( post.authorId.toString() !== userId.toString()) {
-    await createNotification({
-      userId: post.authorId,
-      type: voteScore === 1? "post_upvote":"post_downvote",
-      payload: {
-        actorId: userId,
-        postId: post._id,
-        commentId: null,
-      },
-    });
-    }
+        await createNotification({
+          userId: post.authorId,
+          type: voteScore === 1 ? "post_upvote" : "post_downvote",
+          payload: {
+            actorId: userId,
+            postId: post._id,
+            commentId: null
+          }
+        });
+      }
+
+      await post.save();
       return res.json({ message: "Vote added", post });
     }
-
 
     if (existingVote.value === voteScore) {
       await existingVote.deleteOne();
@@ -72,11 +65,15 @@ export const votePost = async (req, res) => {
       if (voteScore === 1) post.upvoteCount -= 1;
       else post.downvoteCount -= 1;
 
-      await post.save();
+      if (post.authorId.toString() !== userId.toString()) {
+        await User.findByIdAndUpdate(post.authorId, {
+          $inc: { karma: -voteScore }
+        });
+      }
 
+      await post.save();
       return res.json({ message: "Vote removed", post });
     }
-
 
     if (existingVote.value === 1) {
       post.upvoteCount -= 1;
@@ -86,8 +83,13 @@ export const votePost = async (req, res) => {
       post.upvoteCount += 1;
     }
 
-   
     existingVote.value = voteScore;
+
+    if (post.authorId.toString() !== userId.toString()) {
+      await User.findByIdAndUpdate(post.authorId, {
+        $inc: { karma: voteScore === 1 ? 2 : -2 }
+      });
+    }
 
     await existingVote.save();
     await post.save();
@@ -99,12 +101,12 @@ export const votePost = async (req, res) => {
   }
 };
 
+//comment vote
 export const voteComment = async (req, res) => {
   try {
     const userId = req.user?.id;
     const { commentId } = req.params;
-    const { voteScore } = req.body; // +1 or -1
-
+    const { voteScore } = req.body;
 
     if (!userId) {
       return res.status(401).json({ message: "Not authenticated" });
@@ -125,35 +127,31 @@ export const voteComment = async (req, res) => {
 
     const existingVote = await Vote.findOne({ userId, commentId });
 
-
     if (!existingVote) {
-      await Vote.create({
-        userId,
-        commentId,
-        value: voteScore
-      });
+      await Vote.create({ userId, commentId, value: voteScore });
 
       if (voteScore === 1) comment.upvoteCount += 1;
       else comment.downvoteCount += 1;
 
-      await comment.save();
+      if (comment.authorId.toString() !== userId.toString()) {
+        await User.findByIdAndUpdate(comment.authorId, {
+          $inc: { karma: voteScore }
+        });
 
-      //create noti
-       if (comment.authorId.toString() !== comment.toString()) {
-      await createNotification({
+        await createNotification({
           userId: comment.authorId,
-          type: voteScore === 1 ? "comment_upvote":"comment_downvote",
+          type: voteScore === 1 ? "comment_upvote" : "comment_downvote",
           payload: {
             actorId: userId,
             postId: comment.postId,
-            commentId: comment._id,
-          },
+            commentId: comment._id
+          }
         });
       }
 
+      await comment.save();
       return res.json({ message: "Vote added", comment });
     }
-
 
     if (existingVote.value === voteScore) {
       await existingVote.deleteOne();
@@ -161,10 +159,15 @@ export const voteComment = async (req, res) => {
       if (voteScore === 1) comment.upvoteCount -= 1;
       else comment.downvoteCount -= 1;
 
+      if (comment.authorId.toString() !== userId.toString()) {
+        await User.findByIdAndUpdate(comment.authorId, {
+          $inc: { karma: -voteScore }
+        });
+      }
+
       await comment.save();
       return res.json({ message: "Vote removed", comment });
     }
-
 
     if (existingVote.value === 1) {
       comment.upvoteCount -= 1;
@@ -175,6 +178,13 @@ export const voteComment = async (req, res) => {
     }
 
     existingVote.value = voteScore;
+
+    if (comment.authorId.toString() !== userId.toString()) {
+      await User.findByIdAndUpdate(comment.authorId, {
+        $inc: { karma: voteScore === 1 ? 2 : -2 }
+      });
+    }
+
     await existingVote.save();
     await comment.save();
 
@@ -185,7 +195,8 @@ export const voteComment = async (req, res) => {
   }
 };
 
-//get user votes
+
+//get users votes
 export const getUserPostVotes = async (req, res) => {
   try {
     const userId = req.user?.id;
@@ -194,16 +205,11 @@ export const getUserPostVotes = async (req, res) => {
       return res.status(401).json({ message: "Not authenticated" });
     }
 
-    // Get only post votes 
     const votes = await Vote.find(
-      {
-        userId,
-        postId: { $ne: null }
-      },
+      { userId, postId: { $ne: null } },
       { postId: 1, value: 1, _id: 0 }
     );
 
-    // Convert to map: { postId: value }
     const voteMap = {};
     for (const v of votes) {
       voteMap[v.postId.toString()] = v.value;
