@@ -9,11 +9,10 @@ height: calc(100vh - var(--navbar-height));
   transition: background-color 0.3s;
 }
 
-
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 15px;
 }
 
 .nav-section h4 {

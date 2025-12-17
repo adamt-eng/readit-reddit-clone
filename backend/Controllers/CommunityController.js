@@ -265,3 +265,53 @@ export const leaveCommunity = async (req, res) => {
 };
 
 
+//get all comms for explore
+export const getAllCommunities = async (req, res) => {
+  try {
+    const userId = req.user?.id || null;
+
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const [communities, total] = await Promise.all([
+      Community.find({})
+        .sort({ memberCount: -1, createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .select("name memberCount"),
+      Community.countDocuments()
+    ]);
+
+    if (!userId) {
+      return res.json({
+        results: communities.map(c => ({
+          ...c.toObject(),
+          isMember: false
+        })),
+        total
+      });
+    }
+
+    const memberships = await Membership.find(
+      { userId },
+      { communityId: 1 }
+    );
+
+    const memberSet = new Set(
+      memberships.map(m => m.communityId.toString())
+    );
+    const results = communities.map(c => ({
+      ...c.toObject(),
+      isMember: memberSet.has(c._id.toString())
+    }));
+
+    res.json({ results, total });
+
+  } catch (err) {
+    console.error("getAllCommunities error:", err);
+    res.status(500).json({ message: "Failed to load communities" });
+  }
+};
+
+

@@ -13,6 +13,7 @@ import Signup from "../pages/Authentication/Signup.jsx";
 import SearchResults from "../pages/SearchResults/SearchResults.jsx";
 import CommunityPage from "../pages/CommunityPage/CommunityPage.jsx";
 import Notifications from "../pages/Notifications/Notifications.jsx";
+import ExplorePage from "../pages/ExplorePage/ExplorePage.jsx"
 
 
 import PostPage from "../pages/PostPage/PostPage.jsx";
@@ -199,6 +200,18 @@ export default function AppRoutes({
           element={
             isLoggedIn ? (
               <SearchResults />
+            ) : (
+              <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
+            )
+          }
+        />
+
+        {/*explore*/}
+         <Route
+          path="/explore"
+          element={
+            isLoggedIn ? (
+              <ExplorePage />
             ) : (
               <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
             )

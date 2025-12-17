@@ -5,9 +5,9 @@ import {
   deleteCommunity,
   joinCommunity,
   getUserCommunities,
-  leaveCommunity
+  leaveCommunity,
+  getAllCommunities
 } from "../Controllers/CommunityController.js";
-import auth from "../Middleware/AuthMiddleware.js";
 
 const router = express.Router();
 
@@ -16,6 +16,7 @@ router.post("/:name/join", joinCommunity);
 router.post("/",createCommunity);
 router.get("/:name", getCommunityByName);
 router.delete("/:name",deleteCommunity);
-router.post("/:name/leave",leaveCommunity)
+router.post("/:name/leave",leaveCommunity);
+router.get("/",getAllCommunities);
 
 export default router;

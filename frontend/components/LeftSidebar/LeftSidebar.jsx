@@ -57,8 +57,18 @@ export default function LeftSidebar({
             <HiFire className="nav-icon" />
             <span>Popular</span>
           </NavLink>
+          <NavLink
+            to="/explore"
+            className={({ isActive }) =>
+              `nav-item ${isActive ? "active" : ""}`
+            }
+          >
+            <HiUserGroup className="nav-icon" />
+            <span>Explore Communities</span>
 
+          </NavLink>
         </div>
+        
 
         {/* ================= CREATE ================= */}
         {showStartCommunity && (
@@ -74,14 +84,8 @@ export default function LeftSidebar({
           </div>
         )}
 
-        {/* ================= RECENT ================= */}
-        <div className="nav-section">
-          <h4>RECENT</h4>
-          <div className="nav-item">
-            <HiUserGroup className="nav-icon" />
-            <span>r/Voltages</span>
-          </div>
-        </div>
+
+          
 
         {/* ================= RESOURCES ================= */}
         <div className="nav-section">
@@ -94,6 +98,7 @@ export default function LeftSidebar({
 
           <div className="nav-item">
             <HiSpeakerphone className="nav-icon" />
+
             <span>Advertise</span>
           </div>
 
