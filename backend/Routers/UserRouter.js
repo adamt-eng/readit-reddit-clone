@@ -7,7 +7,6 @@ import {
   getProfile,
   updateMyProfile,
   getUserStats,
-  getMyStats,
 } from "../Controllers/UserController.js";
 
 const router = express.Router();
@@ -23,8 +22,7 @@ router.patch("/me", auth, updateMyProfile);
 router.get("/:id", getUserById);
 
 //get user stats
-router.get("/stats/me",getMyStats);
-router.get("/stats/:id",getUserStats)
+router.get("/stats/:id",getUserStats);
 
 
 // /users/:id  (edit profile)

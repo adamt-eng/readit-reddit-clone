@@ -4,7 +4,7 @@ import "./CreatePostForm.css";
 
 const MAX_TITLE_LENGTH = 300;
 
-export default function CreatePostForm({ type, selectedCommunity }) {
+export default function CreatePostForm({ type = "post", selectedCommunity }) {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [url, setUrl] = useState("");

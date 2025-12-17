@@ -1,6 +1,9 @@
 // Controllers/UserController.js
 import mongoose from "mongoose";
 import User from '../Models/User.js';
+import Post from  '../Models/Post.js';
+import Membership from  '../Models/Membership.js';
+
 import { createNotification } from "./NotificationController.js";
 
 
@@ -187,49 +190,7 @@ export const updateMyProfile = async (req, res) => {
 };
 
 
-//getting my stats
-export const getMyStats = async (req, res) => {
-  try {
-    const userId = req.user.id;
-
-    // fetch counts in parallel
-    const [postsCount, communitiesCount, user] = await Promise.all([
-      Post.countDocuments({ authorId: userId, isRemoved: false }),
-      Membership.countDocuments({ userId }),
-      User.findById(userId).select("karma createdAt")
-    ]);
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    /* ---------- FORMAT AGE ---------- */
-    const createdAt = new Date(user.createdAt);
-    const now = new Date();
-
-    const diffMs = now - createdAt;
-    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    const months = Math.floor(days / 30);
-    const years = Math.floor(days / 365);
-
-    let age;
-    if (years > 0) age = `${years}y`;
-    else if (months > 0) age = `${months}mo`;
-    else age = `${days}d`;
-
-    res.json({
-      postsCount,
-      communitiesCount,
-      karma: user.karma || 0,
-      age
-    });
-
-  } catch (err) {
-    console.error("getUserStats error:", err);
-    res.status(500).json({ message: "Failed to load user stats" });
-  }
-};
-
+//getting user stats
 
 //get user stats
 export const getUserStats = async (req, res) => {
@@ -247,7 +208,7 @@ export const getUserStats = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    /* ---------- FORMAT AGE ---------- */
+    //format age
     const createdAt = new Date(user.createdAt);
     const now = new Date();
 

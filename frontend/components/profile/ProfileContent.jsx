@@ -74,7 +74,7 @@ const onDeleteComment = (id) => {
                   </div>
                 ))
               ) : (
-                <EmptyState title = {"You have'nt posted anything yet"} message = {"Once you post to a community the post will show up here!"}></EmptyState>
+                <EmptyState title = {"this user haven't posted anything yet"} message = {"Once this user post to a community the post will show up here!"}></EmptyState>
               )}
             </>
           )}
@@ -89,7 +89,7 @@ const onDeleteComment = (id) => {
                   </div>
                 ))
               ) : (
-                <EmptyState title = {"You are nowhere to be found in any community"} message = {"Join a community of your interes to dive into the world of reddit!"}></EmptyState>
+                <EmptyState title = {"this user are nowhere to be found in any community"} message = {"Join a community of this userr interes to dive into the world of reddit!"}></EmptyState>
               )}
             </>
           )}
@@ -110,7 +110,7 @@ const onDeleteComment = (id) => {
                   </div>
                 ))
               ) : (
-               <EmptyState title = {"You have no comments yet"} message = {"Maybe it's time to say your opinionn out loud?"}></EmptyState>
+               <EmptyState title = {"this user have no comments yet"} message = {"Maybe it's time to say this userr opinionn out loud?"}></EmptyState>
               )}
             </>
           )}
