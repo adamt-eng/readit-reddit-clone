@@ -15,8 +15,6 @@ export default function TrendingPosts({
   onHidePost,
   onUnhidePost,
   hiddenPosts = [],
-  onUpvote,
-  onDownvote,
   getThumbnailImage,
   toggleExpand,
   
@@ -59,8 +57,6 @@ export default function TrendingPosts({
               joinedCommunities={joinedCommunities}
               expandedPostId={expandedPostId}
               onHidePost={onHidePost}
-              onUpvote={onUpvote}
-              onDownvote={onDownvote}
               getThumbnailImage={getThumbnailImage}
               toggleExpand={toggleExpand}
               isGuest={isGuest}

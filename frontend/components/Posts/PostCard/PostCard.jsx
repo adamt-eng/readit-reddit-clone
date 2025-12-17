@@ -21,8 +21,6 @@ export default function PostCard({
   onCommentInputChange,
   onAddComment,
   onHidePost,
-  onUpvote,
-  onDownvote,
   onCommentVote,
   onCommentReply,
   getThumbnailImage,
@@ -292,7 +290,7 @@ const handleJoinCommunity = (e) => {
             >
               ⇧
             </button>
-            <span className="vote-count">{formatNumber?.(post.upvotes) || post.upvotes}</span>
+            <span className="vote-count">{formatNumber?.(post.voteCount) || post.voteCount}</span>
             <button 
               onClick={handleDownvote}
               className="vote-btn downvote"

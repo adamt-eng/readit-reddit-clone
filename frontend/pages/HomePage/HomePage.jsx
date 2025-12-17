@@ -132,6 +132,8 @@ useEffect(() => {
         title: p.title || "",
         content: p.content || "",
         upvotes: p.upvotes || 0,
+        downvotes: p.downvotes || 0,
+        voteCount: (p.upvotes||0) - (p.downvotes||0),
         comments: p.comments || 0,
         time: formatTimeAgo(p.createdAt),
         userVote: 0,
@@ -199,7 +201,6 @@ useEffect(() => {
         "http://localhost:5000/memberships/me",
         { withCredentials: true }
       );
-
 
       setJoinedCommunities(res.data);
       console.log("joined: ",joinedCommunities);
@@ -454,15 +455,6 @@ setJoinedCommunities(prev =>
     return darkMode ? "/compact-image-dark.png" : "/compact-image.png";
   };
 
-  // Handle comment voting
-  const handleCommentVote = (commentId, voteType) => {
-    setPosts(prevPosts =>
-      prevPosts.map(post => ({
-        ...post,
-        commentsList: updateCommentVote(post.commentsList, commentId, voteType)
-      }))
-    );
-  };
 
   // Helper function to update comment votes (recursive for nested comments)
   const updateCommentVote = (comments, commentId, voteType) => {
@@ -499,34 +491,6 @@ setJoinedCommunities(prev =>
       return comment;
     });
   };
-
-
-
-
-  // Toggle comments visibility - navigate to post page
-  const toggleComments = (postId) => {
-    console.log("Toggle comments for post:", postId);
-    
-    // Validate postId is not "feed" and looks like ObjectId
-    if (postId === "feed") {
-      console.error("Invalid postId 'feed' for toggleComments");
-      return;
-    }
-    
-    // Check if it looks like MongoDB ObjectId
-    const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(postId);
-    if (!isValidObjectId) {
-      console.error("Invalid postId format for toggleComments:", postId);
-      return;
-    }
-    
-    navigate(`/posts/${postId}`); // Use plural "posts" to match route
-  };
-
-
-
-
-
 
 
   // Add toggleExpand function for compact view
@@ -566,11 +530,11 @@ const handleVote = async (postId, voteType) => {
               ...post,
 
               // backend is source of truth
-              upvoteCount: updatedPost.upvoteCount,
-              downvoteCount: updatedPost.downvoteCount,
+              upvotes: updatedPost.upvoteCount,
+              downvotes: updatedPost.downvoteCount,
 
               // what you display in UI
-              upvotes:
+              voteCount:
                 updatedPost.upvoteCount - updatedPost.downvoteCount,
 
               // reflect current user vote
@@ -579,6 +543,7 @@ const handleVote = async (postId, voteType) => {
             }
           : post
       )
+     
     );
   } catch (err) {
     console.error("Error voting:", err);
