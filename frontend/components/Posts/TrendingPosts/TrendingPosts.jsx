@@ -8,21 +8,15 @@ export default function TrendingPosts({
   darkMode,
   onVote,
   formatNumber,
-  onToggleComments,
   onPostClick,
   onJoinCommunity,
   joinedCommunities,
   expandedPostId,
-  commentInputs,
-  onCommentInputChange,
-  onAddComment,
   onHidePost,
   onUnhidePost,
   hiddenPosts = [],
   onUpvote,
   onDownvote,
-  onCommentVote,
-  onCommentReply,
   getThumbnailImage,
   toggleExpand,
   
@@ -60,19 +54,13 @@ export default function TrendingPosts({
               // Pass all functionality props
               onVote={onVote}
               formatNumber={formatNumber}
-              onToggleComments={onToggleComments}
               onPostClick={onPostClick}
               onJoinCommunity={onJoinCommunity}
               joinedCommunities={joinedCommunities}
               expandedPostId={expandedPostId}
-              commentInputs={commentInputs}
-              onCommentInputChange={onCommentInputChange}
-              onAddComment={onAddComment}
               onHidePost={onHidePost}
               onUpvote={onUpvote}
               onDownvote={onDownvote}
-              onCommentVote={onCommentVote}
-              onCommentReply={onCommentReply}
               getThumbnailImage={getThumbnailImage}
               toggleExpand={toggleExpand}
               isGuest={isGuest}

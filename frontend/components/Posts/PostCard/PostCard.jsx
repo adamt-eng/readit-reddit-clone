@@ -2,7 +2,7 @@
 import { FaRegCommentAlt, FaShare, FaEllipsisH, FaExpand, FaCompress, FaBell, FaRegBookmark, FaEyeSlash, FaFlag } from "react-icons/fa";
 import Comment from "../../Comment/Comment";
 import "./PostCard.css";
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 
 export default function PostCard({
   // Post data
@@ -13,7 +13,6 @@ export default function PostCard({
   // Functionality props
   onVote,
   formatNumber,
-  onToggleComments,
   onPostClick,
   onJoinCommunity,
   joinedCommunities = [],
@@ -33,7 +32,7 @@ export default function PostCard({
   isGuest = false,
   onPromptLogin
 }) {
-  
+  const navigate = useNavigate();
   const isCommentsExpanded = expandedPostId === post.id;
 
   // Use the provided function or create a default
@@ -98,7 +97,7 @@ const handleJoinCommunity = (e) => {
 
   const handleToggleComments = (e) => {
     e.stopPropagation();
-    onToggleComments?.(post.id);
+    navigate(`posts/${post.id}`)
   };
 
   const handleAddComment = () => {

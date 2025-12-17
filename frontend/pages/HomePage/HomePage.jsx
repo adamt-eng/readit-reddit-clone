@@ -34,6 +34,13 @@ const formatTimeAgo = (dateString) => {
 
 const HomePage = ({ darkMode, onStartCommunity }) => {
   const [user, setUser] = useState(null);
+  const [page, setPage] = useState(1);
+const [hasMore, setHasMore] = useState(true);
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [commentInputs, setCommentInputs] = useState({});
+  const [posts, setPosts] = useState([]);
+const PAGE_LIMIT = 5;
+
   const navigate = useNavigate();
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
 
@@ -69,7 +76,7 @@ const HomePage = ({ darkMode, onStartCommunity }) => {
   const [sortBy, setSortBy] = useState(() => {
     try {
       const savedSortBy = localStorage.getItem('sortBy');
-      const sortOptions = ["Best","New", "Top", "Rising"];
+      const sortOptions = ["Best","New", "Top"];
       return sortOptions.includes(savedSortBy) ? savedSortBy : 'Best';
     } catch (error) {
       console.error('Error loading sort by from localStorage:', error);
@@ -98,24 +105,25 @@ useEffect(() => {
       setIsLoadingPosts(true);
 
       const sortByParam =
-        sortBy === "Best" ? "best" :
-        sortBy === "New" ? "new" :
+        sortBy === "Best" ? "best" : "best"
+        sortBy === "New" ? "new" : "best"
         sortBy === "Top" ? "top" : "best";
 
-      //choose endpoint based on URL
       const res = isPopular
         ? await axios.get("http://localhost:5000/posts/popular", {
-        withCredentials: true})
+            params: { page, limit: PAGE_LIMIT },
+            withCredentials: true
+          })
         : await axios.get("http://localhost:5000/posts/feed", {
-        params: {
-          sort: sortByParam,
-          limit: 50
-        },
-        withCredentials: true
-      });
+            params: {
+              sort: sortByParam,
+              page,
+              limit: PAGE_LIMIT
+            },
+            withCredentials: true
+          });
 
-
-      const transformedPosts = res.data.posts.map((p) => ({
+      const fetchedPosts = res.data.posts.map((p) => ({
         id: p._id,
         _id: p._id,
         community: p.community || "",
@@ -132,42 +140,41 @@ useEffect(() => {
         commentsList: [],
         type: p.type || "text"
       }));
-      console.log(res.data.posts);
-      
-      // load votes if logged in
+
+      // load votes
       try {
         const { data: voteMap } = await axios.get(
           "http://localhost:5000/votes/me",
           { withCredentials: true }
         );
 
-        transformedPosts.forEach(post => {
+        fetchedPosts.forEach(post => {
           post.userVote = voteMap[post.id] ?? 0;
         });
-      } catch {
-        // guest mode → ignore
-      }
+      } catch {}
 
-      setPosts(transformedPosts);
+      setPosts(prev =>
+        page === 1 ? fetchedPosts : [...prev, ...fetchedPosts]
+      );
+
+      setHasMore(true);
+      console.log(res.data.hasMore)
     } catch (err) {
       console.error("Error fetching feed:", err);
-      setPosts([]);
     } finally {
       setIsLoadingPosts(false);
     }
   }
 
   fetchFeed();
-}, [
-  sortBy,
-  expandedPosts,
-  isPopular
-]);
+}, [sortBy, expandedPosts, isPopular, page]);
 
+//reset paging
+useEffect(() => {
+  setPage(1);
+  setHasMore(true);
+}, [sortBy, isPopular]);
 
-  const [showSortDropdown, setShowSortDropdown] = useState(false);
-  const [commentInputs, setCommentInputs] = useState({});
-  const [posts, setPosts] = useState([]);
 
   // Initialize expandedPostId from localStorage
   const [expandedPostId, setExpandedPostId] = useState(() => {
@@ -493,47 +500,8 @@ setJoinedCommunities(prev =>
     });
   };
 
-  // Handle comment replies
-  const handleCommentReply = (commentId, replyText) => {
-    setPosts(prevPosts =>
-      prevPosts.map(post => ({
-        ...post,
-        commentsList: addCommentReply(post.commentsList, commentId, replyText)
-      }))
-    );
-  };
 
-  // Helper function to add reply to comment (recursive for nested comments)
-  const addCommentReply = (comments, commentId, replyText) => {
-    return comments.map(comment => {
-      if (comment.id === commentId) {
-        const newReply = {
-          id: Date.now(),
-          author: user?.username || "Anonymous",
-          avatar: user?.avatar || "/profile.png",
-          content: replyText,
-          upvotes: 1,
-          userVote: 0,
-          time: "Just now",
-          replies: []
-        };
-        
-        return {
-          ...comment,
-          replies: [...(comment.replies || []), newReply]
-        };
-      }
-      
-      if (comment.replies && comment.replies.length > 0) {
-        return {
-          ...comment,
-          replies: addCommentReply(comment.replies, commentId, replyText)
-        };
-      }
-      
-      return comment;
-    });
-  };
+
 
   // Toggle comments visibility - navigate to post page
   const toggleComments = (postId) => {
@@ -555,47 +523,11 @@ setJoinedCommunities(prev =>
     navigate(`/posts/${postId}`); // Use plural "posts" to match route
   };
 
-  // Handle comment input change
-  const handleCommentInputChange = (postId, value) => {
-    setCommentInputs(prev => ({
-      ...prev,
-      [postId]: value
-    }));
-  };
 
-  // Add a new comment
-  const handleAddComment = (postId) => {
-    const commentText = commentInputs[postId]?.trim();
-    if (!commentText) return;
 
-    const newComment = {
-      id: Date.now(),
-      author: user?.username || "Anonymous",
-      avatar: user?.avatar || "/profile.png",
-      content: commentText,
-      upvotes: 1,
-      userVote: 0,
-      time: "Just now",
-      replies: []
-    };
 
-    setPosts(prevPosts =>
-      prevPosts.map(post =>
-        post.id === postId
-          ? {
-              ...post,
-              comments: post.comments + 1,
-              commentsList: [...post.commentsList, newComment]
-            }
-          : post
-      )
-    );
 
-    setCommentInputs(prev => ({
-      ...prev,
-      [postId]: ""
-    }));
-  };
+
 
   // Add toggleExpand function for compact view
   const toggleExpand = (postId) => {
@@ -747,19 +679,14 @@ const handleVote = async (postId, voteType) => {
           darkMode={darkMode}
           onVote={handleVote}
           formatNumber={formatNumber}
-          onToggleComments={toggleComments}
           onPostClick={handlePostClick}
           onJoinCommunity={handleJoinCommunity}
           joinedCommunities={joinedCommunities}
           expandedPostId={expandedPostId}
           commentInputs={commentInputs}
-          onCommentInputChange={handleCommentInputChange}
-          onAddComment={handleAddComment}
           onHidePost={handleHidePost}
           onUnhidePost={handleUnhidePost}
           hiddenPosts={hiddenPosts}
-          onCommentVote={handleCommentVote}
-          onCommentReply={handleCommentReply}
           getThumbnailImage={getThumbnailImage}
           toggleExpand={toggleExpand}
           recentPosts={recentPosts}
@@ -767,6 +694,16 @@ const handleVote = async (postId, voteType) => {
           showRecentPosts={true}
           isLoading={isLoadingPosts}
         />
+        {hasMore && !isLoadingPosts && (
+        <div style={{ textAlign: "center", margin: "20px 0" }}>
+          <button
+            className="show-more-btn"
+            onClick={() => setPage(prev => prev + 1)}
+          >
+            Show more
+          </button>
+        </div>
+      )}
       </div>
 
       {/* Right Sidebar */}

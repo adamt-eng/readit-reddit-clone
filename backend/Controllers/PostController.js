@@ -192,10 +192,6 @@ export const getPostById = async (req, res) => {
 
 
 
-// Helper function to calculate hours since creation
-const hoursSinceCreation = (createdAt) => {
-  return (Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60);
-};
 
 /* ---------- IMPROVED PERSONALIZED FEED ---------- */
 export const getPersonalizedFeed = async (req, res) => {
@@ -203,199 +199,124 @@ export const getPersonalizedFeed = async (req, res) => {
     const userId = req.user?.id || null;
     const { page = 1, limit = 20, sort = "best" } = req.query;
 
-    const pageNum = Number(page);
-    const limitNum = Number(limit);
+    const pageNum = Math.max(1, Number(page));
+    const limitNum = Math.max(1, Number(limit));
     const skip = (pageNum - 1) * limitNum;
-    const now = new Date();
 
-    /* =======================
-       GUEST FEED (NO USER)
-    ======================= */
-    if (!userId) {
-      const guestPosts = await Post.aggregate([
-        { $match: { isRemoved: false } },
+    /* ============================
+       BASE MATCH
+    ============================ */
 
-        // engagement score
+    let baseMatch = { isRemoved: false };
+
+    // Logged-in users → only joined communities
+    if (userId) {
+      const memberships = await Membership.find({ userId }).select("communityId");
+      const joinedCommunityIds = memberships.map(m => m.communityId);
+
+      if (joinedCommunityIds.length === 0) {
+        return res.json({ posts: [], hasMore: false });
+      }
+
+      baseMatch.communityId = { $in: joinedCommunityIds };
+    }
+
+    /* ============================
+       USER INTERACTIONS
+    ============================ */
+
+    let interactedPostIds = [];
+
+    if (userId) {
+      const [votes, comments] = await Promise.all([
+        Vote.find({ userId, postId: { $ne: null } }).select("postId"),
+        Comment.find({ authorId: userId }).select("postId")
+      ]);
+
+      interactedPostIds = [
+        ...new Set([
+          ...votes.map(v => v.postId.toString()),
+          ...comments.map(c => c.postId.toString())
+        ])
+      ];
+    }
+
+    /* ============================
+       SORT DEFINITIONS (STABLE)
+    ============================ */
+
+    let sortStage;
+
+    if (sort === "new") {
+      sortStage = { createdAt: -1, _id: -1 };
+    } else if (sort === "top") {
+      sortStage = { upvoteCount: -1, createdAt: -1 };
+    } else {
+      // best
+      // priority handled by query structure, not scores
+      sortStage = { createdAt: -1, _id: -1 };
+    }
+
+    /* ============================
+       PHASE 1 — NON-INTERACTED
+    ============================ */
+
+    const nonInteracted = await Post.aggregate([
+      {
+        $match: {
+          ...baseMatch,
+          ...(interactedPostIds.length
+            ? { _id: { $nin: interactedPostIds.map(id => new mongoose.Types.ObjectId(id)) } }
+            : {})
+        }
+      },
+      { $sort: sortStage },
+      { $skip: skip },
+      { $limit: limitNum },
+      { $lookup: { from: "communities", localField: "communityId", foreignField: "_id", as: "community" } },
+      { $lookup: { from: "users", localField: "authorId", foreignField: "_id", as: "author" } },
+      { $unwind: "$community" },
+      { $unwind: "$author" }
+    ]);
+
+    let posts = nonInteracted;
+
+    /* ============================
+       PHASE 2 — FALLBACK (INTERACTED)
+    ============================ */
+
+    if (posts.length < limitNum && interactedPostIds.length) {
+      const remaining = limitNum - posts.length;
+
+      const interacted = await Post.aggregate([
         {
-          $addFields: {
-            engagementScore: {
-              $add: [
-                { $multiply: ["$upvoteCount", 0.1] },
-                { $multiply: ["$commentCount", 0.5] }
-              ]
-            },
-            hoursSince: {
-              $divide: [{ $subtract: [now, "$createdAt"] }, 3600000]
-            }
+          $match: {
+            ...baseMatch,
+            _id: { $in: interactedPostIds.map(id => new mongoose.Types.ObjectId(id)) }
           }
         },
-
-        // hot score
-        {
-          $addFields: {
-            hotScore: {
-              $divide: [
-                { $add: ["$engagementScore", 1] },
-                { $add: ["$hoursSince", 2] }
-              ]
-            }
-          }
-        },
-
-        { $sort: sort === "new"
-            ? { createdAt: -1 }
-            : sort === "top"
-              ? { upvoteCount: -1 }
-              : { hotScore: -1 }
-        },
-
-        { $skip: skip },
-        { $limit: limitNum },
-
-        { $lookup: {
-            from: "communities",
-            localField: "communityId",
-            foreignField: "_id",
-            as: "community"
-        }},
-        { $lookup: {
-            from: "users",
-            localField: "authorId",
-            foreignField: "_id",
-            as: "author"
-        }},
+        { $sort: sortStage },
+        { $skip: Math.max(0, skip - nonInteracted.length) },
+        { $limit: remaining },
+        { $lookup: { from: "communities", localField: "communityId", foreignField: "_id", as: "community" } },
+        { $lookup: { from: "users", localField: "authorId", foreignField: "_id", as: "author" } },
         { $unwind: "$community" },
         { $unwind: "$author" }
       ]);
 
-      return res.json({ posts: formatPosts(guestPosts), hasMore: guestPosts.length === limitNum });
+      posts = [...posts, ...interacted];
     }
 
-    /* =======================
-       USER PERSONALIZATION
-    ======================= */
+    /* ============================
+       HAS MORE (CORRECT)
+    ============================ */
 
-    const memberships = await Membership.find({ userId }).select("communityId");
-    const joinedCommunityIds = memberships.map(m => m.communityId);
-
-    const votes = await Vote.find({ userId, postId: { $ne: null } })
-      .sort({ createdAt: -1 })
-      .limit(100)
-      .populate("postId", "communityId");
-
-    const votedCommunityIds = [
-      ...new Set(
-        votes
-          .map(v => v.postId?.communityId?.toString())
-          .filter(Boolean)
-      )
-    ];
-
-    /* =======================
-       AGGREGATION PIPELINE
-    ======================= */
-
-    const pipeline = [
-      { $match: { isRemoved: false } },
-
-      {
-        $addFields: {
-          isJoinedCommunity: {
-            $in: ["$communityId", joinedCommunityIds]
-          },
-          isInterestedCommunity: {
-            $in: ["$communityId", votedCommunityIds.map(id => new mongoose.Types.ObjectId(id))]
-          }
-        }
-      },
-
-      {
-        $addFields: {
-          baseScore: {
-            $add: [
-              { $cond: ["$isJoinedCommunity", 100, 0] },
-              { $cond: ["$isInterestedCommunity", 50, 0] }
-            ]
-          }
-        }
-      },
-
-      {
-        $addFields: {
-          engagementScore: {
-            $add: [
-              { $multiply: ["$upvoteCount", 0.1] },
-              { $multiply: ["$commentCount", 0.5] }
-            ]
-          },
-          hoursSince: {
-            $divide: [{ $subtract: [now, "$createdAt"] }, 3600000]
-          }
-        }
-      },
-
-      {
-        $addFields: {
-          recencyScore: {
-            $max: [0, { $subtract: [10, { $multiply: ["$hoursSince", 0.5] }] }]
-          }
-        }
-      },
-
-      {
-        $addFields: {
-          personalizedScore: {
-            $add: ["$baseScore", "$engagementScore", "$recencyScore"]
-          },
-          hotScore: {
-            $divide: [
-              { $add: ["$engagementScore", "$baseScore", 1] },
-              { $add: ["$hoursSince", 2] }
-            ]
-          }
-        }
-      }
-    ];
-
-    /* =======================
-       SORTING MODES
-    ======================= */
-    if (sort === "new") {
-      pipeline.push({ $sort: { createdAt: -1 } });
-    } else if (sort === "top") {
-      pipeline.push({ $sort: { upvoteCount: -1, baseScore: -1 } });
-    } else if (sort === "hot") {
-      pipeline.push({ $sort: { hotScore: -1 } });
-    } else {
-      // best (default)
-      pipeline.push({ $sort: { personalizedScore: -1 } });
-    }
-
-    pipeline.push(
-      { $skip: skip },
-      { $limit: limitNum },
-
-      { $lookup: {
-          from: "communities",
-          localField: "communityId",
-          foreignField: "_id",
-          as: "community"
-      }},
-      { $lookup: {
-          from: "users",
-          localField: "authorId",
-          foreignField: "_id",
-          as: "author"
-      }},
-      { $unwind: "$community" },
-      { $unwind: "$author" }
-    );
-
-    const posts = await Post.aggregate(pipeline);
+    const totalRemaining = await Post.countDocuments(baseMatch);
+    const hasMore = skip + posts.length < totalRemaining;
 
     res.json({
       posts: formatPosts(posts),
-      hasMore: posts.length === limitNum
+      hasMore
     });
 
   } catch (err) {
@@ -403,6 +324,7 @@ export const getPersonalizedFeed = async (req, res) => {
     res.status(500).json({ message: "Failed to load feed" });
   }
 };
+
 
 /* ---------- FORMATTER ---------- */
 function formatPosts(posts) {
