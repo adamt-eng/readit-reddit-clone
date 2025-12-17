@@ -64,7 +64,7 @@ useEffect(() => {
   return (
     <div className="sr-layout">
       <div className="sr-sidebar">
-        <LeftSidebar showStartCommunity={false} />
+        <LeftSidebar showStartCommunity={true} />
       </div>
 
       <div className="sr-wrapper">

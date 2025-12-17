@@ -132,7 +132,8 @@ useEffect(() => {
         commentsList: [],
         type: p.type || "text"
       }));
-
+      console.log(res.data.posts);
+      
       // load votes if logged in
       try {
         const { data: voteMap } = await axios.get(
