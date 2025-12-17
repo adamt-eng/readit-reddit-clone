@@ -1,4 +1,4 @@
-export default function EmptyState() {
+export default function EmptyState({title,message}) {
   return (
     <div className="empty-state">
       <img
@@ -6,9 +6,9 @@ export default function EmptyState() {
         alt="Snoo"
         className="empty-snoo"
       />
-      <h2 className="empty-title">You don't have any posts yet</h2>
+      <h2 className="empty-title">{title}</h2>
       <p className="empty-text">
-        Once you post to a community, it'll show up here. If you'd rather hide your posts, update your settings.
+        {message}
       </p>
     </div>
   );

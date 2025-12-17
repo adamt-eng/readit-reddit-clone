@@ -1,5 +1,7 @@
 import Comment from "../Models/Comment.js";
 import Post from "../Models/Post.js";
+import Vote from "../Models/Votes.js";
+
 
 /* ---------------- GET COMMENTS ---------------- */
 
@@ -49,7 +51,7 @@ export const createComment = async (req, res) => {
       return res.status(400).json({ message: "Content is required" });
     }
 
-    // ✅ REAL logged-in user
+    // logged-in user
     const userId = req.user.id;
 
     const comment = await Comment.create({
@@ -125,3 +127,93 @@ export const replyToComment = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
+//get user comments for profile
+export const getUserComments = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const comments = await Comment.find({
+      authorId: userId,
+      isRemoved: false
+    })
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "postId",
+        populate: {
+          path: "communityId",
+          select: "name"
+        }
+      });
+
+    const results = comments.map(c => ({
+      _id: c._id,
+      content: c.content,
+      postId: c.postId?._id,
+      communityName: c.postId?.communityId?.name || "",
+      createdAt: c.createdAt
+    }));
+
+    res.json(results);
+  } catch (err) {
+    console.error("getUserComments error:", err);
+    res.status(500).json({ message: "Failed to load comments" });
+  }
+};
+
+
+//delete a comment
+export const deleteComment = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { commentId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(commentId)) {
+      return res.status(400).json({ message: "Invalid comment ID" });
+    }
+
+    const rootComment = await Comment.findById(commentId);
+    if (!rootComment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    // only author can delete
+    if (rootComment.authorId.toString() !== userId) {
+      return res.status(403).json({ message: "Not allowed to delete this comment" });
+    }
+
+    const allComments = [rootComment._id];
+    const queue = [rootComment._id];
+
+    while (queue.length) {
+      const parentId = queue.shift();
+
+      const replies = await Comment.find(
+        { parentId },
+        { _id: 1 }
+      );
+
+      for (const r of replies) {
+        allComments.push(r._id);
+        queue.push(r._id);
+      }
+    }
+
+    await Vote.deleteMany({
+      commentId: { $in: allComments }
+    });
+
+    await Comment.deleteMany({
+      _id: { $in: allComments }
+    });
+
+    res.json({ message: "Comment and all replies deleted successfully" });
+
+  } catch (err) {
+    console.error("deleteComment error:", err);
+    res.status(500).json({ message: "Failed to delete comment" });
+  }
+};
+
+

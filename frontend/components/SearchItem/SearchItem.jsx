@@ -26,7 +26,7 @@ function formatTimeAgo(dateString) {
   return `${years}y ago`;
 }
 
-export default function SearchItem({ type, data, member = false,onLeave = null, onDelete = null}) {
+export default function SearchItem({ type, data, member = false,onLeave = null, onDelete = null ,isNotSearch = false}) {
   const[isMember,setIsMember] = useState(member);
 
   // COMMUNITY RESULT
@@ -42,8 +42,7 @@ export default function SearchItem({ type, data, member = false,onLeave = null, 
           onLeave(data.name);
       } else {
         await axios.post(`http://localhost:5000/communities/${data.name}/join`,{},{withCredentials:true}); 
-                setIsMember(true);
-
+            setIsMember(true);
       }
     }
     catch(err){
@@ -69,12 +68,12 @@ export default function SearchItem({ type, data, member = false,onLeave = null, 
         </div>
 
         {/* JOIN / LEAVE BUTTON */}
-        <button
+        {isNotSearch&&(<button
           className={`sc-join-btn ${isMember ? "leave" : "join"}`}
           onClick={handleMembership}
         >
           {isMember ? "Leave" : "Join"}
-        </button>
+        </button>)}
       </Link>
     );
   }
@@ -163,6 +162,61 @@ if (type === "post") {
       </Link>
     );
   }
+
+  // comment
+if (type === "comment") {
+  const timeAgo = formatTimeAgo(data.createdAt);
+
+  const handleDelete = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      await axios.delete(
+        `http://localhost:5000/comments/${data._id}`,
+        { withCredentials: true }
+      );
+
+      if (onDelete) {
+        onDelete(data._id);
+      }
+    } catch (err) {
+      console.error("Failed to delete comment:", err);
+    }
+  };
+
+  return (
+    <Link to={`/posts/${data.postId}`} className="sp-container">
+      <div className="sp-left">
+        <div className="sp-meta">
+          <img
+            src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(data.communityName)}`}
+            alt="community icon"
+            className="sp-icon"
+          />
+          <span className="sp-community">
+            {data.communityName.startsWith("r/")
+              ? data.communityName
+              : "r/" + data.communityName}
+          </span>
+          <span className="sp-time">• {timeAgo}</span>
+        </div>
+
+        <div className="sp-title">
+          {data.content}
+        </div>
+      </div>
+
+      {onDelete && (
+        <FaTrash
+          className="sp-delete-btn"
+          onClick={handleDelete}
+        />
+      )}
+    </Link>
+  );
+}
+
 
   return null;
 }

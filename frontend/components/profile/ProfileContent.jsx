@@ -10,6 +10,12 @@ export default function ProfileContent({ activeTab = 'Overview' }) {
   const [posts, setPosts] = useState([]);
   const [communities, setCommunities] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [comments, setComments] = useState([]);
+
+const onDeleteComment = (id) => {
+  setComments((prev) => prev.filter((c) => c._id !== id));
+};
+
 
 
   const onLeave = (name)=>{
@@ -25,15 +31,16 @@ export default function ProfileContent({ activeTab = 'Overview' }) {
     async function fetchProfileData() {
       try {
         setIsLoading(true);
-        // Fetching the user's own posts and communities from the APIs
-        const [postsRes, communitiesRes] = await Promise.all([
+        const [postsRes, communitiesRes, commentsRes] = await Promise.all([
           axios.get(`${API_URL}/posts/me`, { withCredentials: true }),
-          axios.get(`${API_URL}/communities/me`, { withCredentials: true })
+          axios.get(`${API_URL}/communities/me`, { withCredentials: true }),
+          axios.get(`${API_URL}/comments/me`, { withCredentials: true })
         ]);
 
-        // APIs return the array directly as per your controller logic
         setPosts(postsRes.data || []);
         setCommunities(communitiesRes.data || []);
+        setComments(commentsRes.data || []);
+
       } catch (err) {
         console.error("Error fetching profile data:", err);
       } finally {
@@ -49,41 +56,25 @@ export default function ProfileContent({ activeTab = 'Overview' }) {
 
   return (
     <div className="card profile-content">
-      {/* CREATE POST BUTTON — ALWAYS VISIBLE ON PROFILE */}
       {activeTab === "Posts"&&<CreatePostButton />}
 
       {isLoading ? (
         <div style={{ padding: '40px', textAlign: 'center' }}>Loading...</div>
       ) : (
         <div className="profile-items-container">
-          {/* OVERVIEW TAB */}
-          {activeTab === 'Overview' && (
-            <>
-              {hasPosts ? (
-                posts.map(post => (
-                  <div key={post._id} className="profile-item-frame">
-                    <SearchItem type="post" data={post} />
-                  </div>
-                ))
-              ) : (
-                <EmptyState />
-              )}
-            </>
-          )}
+
 
           {/* POSTS TAB */}
-          {activeTab === 'Posts' && (
+          {(activeTab === 'Posts')&& (
             <>
               {hasPosts ? (
                 posts.map(post => (
                   <div key={post._id} className="profile-item-frame">
-                    <SearchItem type="post" data={post} onDelete={onDeletePost} />
+                    <SearchItem type="post" data={post} onDelete={onDeletePost} isNotSearch = {true} />
                   </div>
                 ))
               ) : (
-                <div className="empty-tab-message">
-                  This user has no posts yet.
-                </div>
+                <EmptyState title = {"You have'nt posted anything yet"} message = {"Once you post to a community the post will show up here!"}></EmptyState>
               )}
             </>
           )}
@@ -94,13 +85,31 @@ export default function ProfileContent({ activeTab = 'Overview' }) {
               {hasCommunities ? (
                 communities.map(comm => (
                   <div key={comm._id} className="profile-item-frame">
-                    <SearchItem type="community" data={comm} member = {true} onLeave={onLeave}/>
+                    <SearchItem type="community" data={comm} member = {true} onLeave={onLeave} isNotSearch = {true} />
                   </div>
                 ))
               ) : (
-                <div className="empty-tab-message">
-                  This user hasn't joined any communities.
-                </div>
+                <EmptyState title = {"You are nowhere to be found in any community"} message = {"Join a community of your interes to dive into the world of reddit!"}></EmptyState>
+              )}
+            </>
+          )}
+
+          {/* COMMENTS TAB */}
+          {activeTab === 'Comments' && (
+            <>
+              {comments.length > 0 ? (
+                comments.map(comment => (
+                  <div key={comment._id} className="profile-item-frame">
+                    <SearchItem
+                      type="comment"
+                      data={comment}
+                      onDelete={onDeleteComment}
+                      isNotSearch = {true}
+                    />
+                  </div>
+                ))
+              ) : (
+               <EmptyState title = {"You have no comments yet"} message = {"Maybe it's time to say your opinionn out loud?"}></EmptyState>
               )}
             </>
           )}

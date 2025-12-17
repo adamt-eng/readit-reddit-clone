@@ -18,7 +18,7 @@ const API_BASE = "http://localhost:5000";
 
 export default function UserProfilePage() {
   const { id: userId } = useParams(); 
-  const [activeTab, setActiveTab] = useState("Overview");
+  const [activeTab, setActiveTab] = useState("Posts");
   const [isMyProfile,setIsMyProfile]=useState(false)
   const [user, setUser] = useState(null);
   const [error, setError] = useState("");
