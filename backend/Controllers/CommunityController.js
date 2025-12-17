@@ -203,7 +203,7 @@ export async function getTopCommunities(req, res) {
 //get user communities
 export async function getUserCommunities(req, res) {
   try {
-    const userId = req.user.id;
+    const userId = req.params.id;
 
     const memberships = await Membership.find({ userId })
       .populate({

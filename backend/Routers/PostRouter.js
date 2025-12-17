@@ -38,7 +38,7 @@ router.get("/:postId/comments",auth, getCommentsForPost);
 router.get("/search",auth, searchPosts);
 
 // Get user posts
-router.get("/me",auth,getUserPosts);
+router.get("/users/:id",auth,getUserPosts);
 
 //delete post
 router.delete("/:id",auth,deletePost);

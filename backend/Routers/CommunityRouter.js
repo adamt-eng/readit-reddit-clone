@@ -11,7 +11,7 @@ import auth from "../Middleware/AuthMiddleware.js";
 
 const router = express.Router();
 
-router.get("/me",getUserCommunities);
+router.get("/users/:id",getUserCommunities);
 router.post("/:name/join", joinCommunity);
 router.post("/",createCommunity);
 router.get("/:name", getCommunityByName);

@@ -156,7 +156,7 @@ export const replyToComment = async (req, res) => {
 //get user comments for profile
 export const getUserComments = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.params.id;
 
     const comments = await Comment.find({
       authorId: userId,

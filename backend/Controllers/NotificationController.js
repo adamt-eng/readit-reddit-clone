@@ -67,7 +67,7 @@ async function buildNotificationData(type, payload) {
 
 export async function createNotification({ userId, type, payload }) {
   console.log("called")
-  if (!userId || userId.toString() === payload.actorId?.toString()) return;1``
+  if (!userId || userId.toString() === payload.actorId?.toString()) return;
 
   const finalPayload = await buildNotificationData(type, payload);
 

@@ -526,7 +526,7 @@ export const getPopularPosts = async (req, res) => {
 //get user's post for profile
 export async function getUserPosts(req, res) {
   try {
-    const userId = req.user.id; // From auth middleware
+    const userId = req.params.id; 
 
     const posts = await Post.find({ authorId: userId, isRemoved: false })
       .populate("communityId", "name")

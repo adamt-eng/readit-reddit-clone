@@ -6,7 +6,7 @@ import SearchItem from "../../components/SearchItem/SearchItem";
 
 const API_URL = "http://localhost:5000";
 
-export default function ProfileContent({ activeTab = 'Overview' }) {
+export default function ProfileContent({ activeTab = 'Posts', user = null, isMyProfile = false }) {
   const [posts, setPosts] = useState([]);
   const [communities, setCommunities] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,9 +32,9 @@ const onDeleteComment = (id) => {
       try {
         setIsLoading(true);
         const [postsRes, communitiesRes, commentsRes] = await Promise.all([
-          axios.get(`${API_URL}/posts/me`, { withCredentials: true }),
-          axios.get(`${API_URL}/communities/me`, { withCredentials: true }),
-          axios.get(`${API_URL}/comments/me`, { withCredentials: true })
+          axios.get(`${API_URL}/posts/users/${user._id}`, { withCredentials: true }),
+          axios.get(`${API_URL}/communities/users/${user._id}`, { withCredentials: true }),
+          axios.get(`${API_URL}/comments/users/${user._id}`, { withCredentials: true })
         ]);
 
         setPosts(postsRes.data || []);
@@ -70,7 +70,7 @@ const onDeleteComment = (id) => {
               {hasPosts ? (
                 posts.map(post => (
                   <div key={post._id} className="profile-item-frame">
-                    <SearchItem type="post" data={post} onDelete={onDeletePost} isNotSearch = {true} />
+                    <SearchItem type="post" data={post} onDelete={onDeletePost} isNotSearch = {true} isMyProfile = {isMyProfile} />
                   </div>
                 ))
               ) : (
@@ -85,7 +85,7 @@ const onDeleteComment = (id) => {
               {hasCommunities ? (
                 communities.map(comm => (
                   <div key={comm._id} className="profile-item-frame">
-                    <SearchItem type="community" data={comm} member = {true} onLeave={onLeave} isNotSearch = {true} />
+                    <SearchItem type="community" data={comm} member = {true} onLeave={onLeave} isNotSearch = {true} isMyProfile = {isMyProfile} />
                   </div>
                 ))
               ) : (
@@ -105,6 +105,7 @@ const onDeleteComment = (id) => {
                       data={comment}
                       onDelete={onDeleteComment}
                       isNotSearch = {true}
+                      isMyProfile = {isMyProfile}
                     />
                   </div>
                 ))

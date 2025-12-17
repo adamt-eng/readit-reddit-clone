@@ -45,7 +45,7 @@ useEffect(() => {
           : `${API_BASE}/users/${userId}`;
 
       const res = await axios.get(url, {
-        withCredentials: true, // send cookie
+        withCredentials: true,
       });
 
       setUser(res.data);
@@ -82,7 +82,7 @@ useEffect(() => {
               <ProfileTabs className = "sticky" activeTab={activeTab} setActiveTab={setActiveTab} />
         
 
-              <ProfileContent className = "profile-content"  activeTab={activeTab} user={user} />
+              <ProfileContent className = "profile-content"  activeTab={activeTab} user={user} isMyProfile = {isMyProfile} />
             </main>
 
             <aside className = "sticky profile-aside">

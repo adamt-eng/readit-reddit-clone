@@ -26,7 +26,7 @@ function formatTimeAgo(dateString) {
   return `${years}y ago`;
 }
 
-export default function SearchItem({ type, data, member = false,onLeave = null, onDelete = null ,isNotSearch = false}) {
+export default function SearchItem({ type, data, member = false,onLeave = null, onDelete = null ,isNotSearch = false, isMyProfile = false}) {
   const[isMember,setIsMember] = useState(member);
 
   // COMMUNITY RESULT
@@ -68,7 +68,7 @@ export default function SearchItem({ type, data, member = false,onLeave = null, 
         </div>
 
         {/* JOIN / LEAVE BUTTON */}
-        {isNotSearch&&(<button
+        {(isNotSearch&&isMyProfile)&&(<button
           className={`sc-join-btn ${isMember ? "leave" : "join"}`}
           onClick={handleMembership}
         >
@@ -125,7 +125,7 @@ if (type === "post") {
         </div>
       </div>
 
-      {onDelete && (
+      {(onDelete && isMyProfile )&&(
         <FaTrash
           className="sp-delete-btn"
           onClick={handleDelete}
@@ -207,7 +207,7 @@ if (type === "comment") {
         </div>
       </div>
 
-      {onDelete && (
+      {(onDelete && isMyProfile)&&(
         <FaTrash
           className="sp-delete-btn"
           onClick={handleDelete}

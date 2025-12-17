@@ -6,6 +6,6 @@ const router = express.Router();
 
 router.post("/posts/:id", votePost);
 router.post("/comments/:commentId",  voteComment);
-router.get("/me",getUserPostVotes)
+router.get("/me",getUserPostVotes);
 
 export default router;
