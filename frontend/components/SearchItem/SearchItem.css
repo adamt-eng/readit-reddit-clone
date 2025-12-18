@@ -1,7 +1,4 @@
-/* ============================= */
 /* COMMON STRUCTURE */
-/* ============================= */
-
 .su-container,
 .sc-container {
   display: flex;
@@ -10,10 +7,7 @@
   text-align: left;
 }
 
-/* ============================= */
 /* AVATARS / ICONS */
-/* ============================= */
-
 .su-avatar,
 .sc-icon {
   width: 40px;
@@ -27,29 +21,24 @@
   border-radius: 50%;
 }
 
-/* ============================= */
 /* USERS */
-/* ============================= */
-
 .su-name {
   font-size: 15px;
   font-weight: 600;
+  color: var(--text-primary);
 }
 
 .su-handle {
   font-size: 13px;
-  color: #7c7c7c;
+  color: var(--text-muted);
 }
 
-/* ============================= */
 /* POSTS */
-/* ============================= */
-
 .sp-container {
   display: flex;
   justify-content: space-between;
   gap: 14px;
-  color: #1a1a1b;
+  color: var(--text-primary);
   text-align: left;
 }
 
@@ -59,19 +48,19 @@
 
 .sp-meta {
   font-size: 13px;
-  color: #7c7c7c;
+  color: var(--text-muted);
 }
 
 .sp-title {
   font-size: 17px;
   font-weight: 600;
   margin-bottom: 8px;
-  color: #1a1a1b;
+  color: var(--text-primary);
 }
 
 .sp-sub {
   font-size: 13px;
-  color: #7c7c7c;
+  color: var(--text-muted);
 }
 
 .sp-thumb {
@@ -83,15 +72,16 @@
 
 /* Post header layout */
 .info {
-    display: flex;
+  display: flex;
   align-items: center;
-  padding: 0px 0;
+  padding: 0;
   cursor: pointer;
-  border-radius: 0px;
+  border-radius: 0;
   text-align: left;
   text-decoration: none;
   color: inherit;
 }
+
 .sp-meta {
   display: flex;
   align-items: center;
@@ -99,22 +89,19 @@
   margin-bottom: 10px;
   padding: 0;
 }
-/* ============================= */
-/* POST DELETE BUTTON */
-/* ============================= */
 
+/* POST DELETE BUTTON */
 .sp-delete-btn {
   margin-left: 12px;
   font-size: 16px;
-  color: #9a9a9a;
+  color: var(--text-muted);
   cursor: pointer;
   flex-shrink: 0;
-
   transition: color 0.15s ease, transform 0.15s ease;
 }
 
 .sp-delete-btn:hover {
-  color: #e53935; /* Reddit-like red */
+  color: var(--accent);
   transform: scale(1.1);
 }
 
@@ -122,11 +109,7 @@
   transform: scale(0.95);
 }
 
-
-/* ============================= */
 /* COMMUNITIES */
-/* ============================= */
-
 .sc-container {
   padding: 6px 0;
   cursor: pointer;
@@ -138,7 +121,7 @@
 .sc-title {
   font-size: 16px;
   font-weight: 600;
-  color: #1a1a1b;
+  color: var(--text-primary);
 }
 
 .sc-info {
@@ -148,10 +131,11 @@
 }
 
 .sc-members {
-  color: #7c7c7c;
+  color: var(--text-muted);
   font-size: 13px;
 }
 
+/* JOIN / LEAVE BUTTON — ORANGE ACCENT ONLY */
 .sc-join-btn {
   margin-left: auto;
   padding: 6px 14px;
@@ -160,67 +144,34 @@
   font-weight: 600;
   cursor: pointer;
   border: none;
+  background: var(--accent);
+  color: #ffffff;
+  transition: background-color 0.15s ease, transform 0.15s ease;
 }
 
-.sc-join-btn.join {
-  background: #ff4500; /* orange */
-  color: white;
+.sc-join-btn:hover {
+  background: var(--accent-hover);
 }
 
+.sc-join-btn:active {
+  transform: scale(0.96);
+}
+
+/* leave uses same orange theme (no behavior change requested) */
 .sc-join-btn.leave {
-  background: #d93025; /* red */
-  color: white;
+  background: var(--accent);
+  color: #ffffff;
 }
 
-/* ========================================= */
-/*           DARK MODE OVERRIDES             */
-/* ========================================= */
-
-.appdark-mode .su-handle,
-.appdark-mode .sp-meta,
-.appdark-mode .sp-sub,
-.appdark-mode .sc-members {
-  color: var(--muted); /* softer gray */
-}
-
-.appdark-mode .su-name,
-.appdark-mode .sc-title,
-.appdark-mode .sp-title,
-.appdark-mode .sp-container {
-  color: var(--text);
-}
-
-/* Post thumbnail */
-.appdark-mode .sp-thumb {
-  filter: brightness(0.85);
-}
-
-/* Generic containers */
-.appdark-mode .sc-container:hover,
-.appdark-mode .info:hover {
-  background: rgba(255,255,255,0.06);
-}
-
-/* Prevent inherited dark-link blue */
-.appdark-mode .info,
-.appdark-mode .sc-container {
-  color: var(--text);
-}
-
-/* Avatar borders (if any appear visually too bright) */
-.appdark-mode .su-avatar,
-.appdark-mode .sc-icon,
-.appdark-mode .sp-icon {
-  background: #2a2a2a;
-}
+/* META */
 .sp-community {
   font-weight: 500;
 }
 
-
 .sp-time {
   white-space: nowrap;
 }
+
 /* Force post meta to stay left like Reddit */
 .sp-meta {
   margin-left: 0 !important;
@@ -228,14 +179,12 @@
   align-self: flex-start;
 }
 
-
 /* Lock post header layout */
 .info {
   justify-content: flex-start !important;
   text-align: left;
   width: 100%;
 }
-
 
 /* Prevent meta from being pushed right */
 .info .sp-meta {
@@ -246,4 +195,3 @@
 .sp-icon {
   margin-right: 6px;
 }
-

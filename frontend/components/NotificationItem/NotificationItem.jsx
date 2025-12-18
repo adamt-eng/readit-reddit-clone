@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useState, useRef } from "react";
 import "./NotificationItem.css";
 import { IoIosArrowForward } from "react-icons/io";
@@ -55,7 +54,7 @@ function getNotificationContent(type, payload) {
   }
 }
 
-export default function NotificationItem({ data, onRead }) {
+export default function NotificationItem({ data, onDelete }) {
   const { isRead, type, payload, timeAgoFormatted } = data;
   const [slidingOut, setSlidingOut] = useState(false);
   const ref = useRef(null);
@@ -63,7 +62,7 @@ export default function NotificationItem({ data, onRead }) {
 
   const SLIDE_DURATION_MS = 360;
 
-  const handleRead = (e) => {
+  const handleDelete = (e) => {
     e.stopPropagation();
     if (slidingOut) return;
 
@@ -71,7 +70,7 @@ export default function NotificationItem({ data, onRead }) {
 
     setTimeout(() => {
       setSlidingOut(false);
-      onRead && onRead();
+      onDelete && onDelete();
     }, SLIDE_DURATION_MS);
   };
 
@@ -131,7 +130,7 @@ export default function NotificationItem({ data, onRead }) {
 
       <div className="notif-right">
         <IoIosArrowForward size={20} className="notif-arrow" />
-        <FaTrash onClick={handleRead} size={18} className="notif-menu" />
+        <FaTrash onClick={handleDelete} size={18} className="notif-menu" />
       </div>
     </div>
   );

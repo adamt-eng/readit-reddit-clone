@@ -1,5 +1,6 @@
 import "./Auth.css";
 import axios from "axios";
+import Readit from "../../assets/Readit.png";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
@@ -21,7 +22,7 @@ export default function Signup({ onLogin, inModal, switchMode }) {
 
     try {
       await axios.post(
-        "http://localhost:5000/authentication/signup",
+        `${import.meta.env.VITE_API_URL}/authentication/signup`,
         { email, username, password },
         { withCredentials: true }
       );
@@ -52,12 +53,10 @@ export default function Signup({ onLogin, inModal, switchMode }) {
       {!inModal && (
         <div className="auth-left">
           <img
-            src="/assets/reddit-logo-text.png"
-            alt="reddit"
+            src={Readit}
+            alt="Belal's Readit Logo"
             className="auth-logo side-logo"
           />
-          <h1>Create your account</h1>
-          <p>Join millions of people on Reddit</p>
         </div>
       )}
 

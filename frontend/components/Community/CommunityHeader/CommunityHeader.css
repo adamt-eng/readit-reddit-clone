@@ -1,28 +1,30 @@
 .communityHeader {
-  background: white;
-  border-bottom: 1px solid #edeff1;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-default);
   font-family: "IBM Plex Sans", sans-serif;
 }
 
-/* banner */
+/*BANNER*/
+
 .bannerContainer {
-  height: 104px;
+  height: 200px;
   overflow: hidden;
-  background: #d32f2f;
+  background: var(--accent); /* fallback if no banner image */
 }
 
 .banner {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;         /* IMPORTANT: removes weird gaps */
+  display: block;
 }
 
-/* header content aligned with the same width as .communityContent */
+/*HEADER CONTENT*/
+
 .info {
-  max-width: 1200px;      /* MATCH CommunityPage.css */
+  max-width: 1200px; /* MATCH CommunityPage.css */
   margin: 0 auto;
-  padding: 0 24px 16px;   /* MATCH CommunityPage padding */
+  padding: 0 24px 16px; /* MATCH CommunityPage padding */
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -30,23 +32,25 @@
   position: relative;
 }
 
-/* icon overlaps the banner */
+/*COMMUNITY ICON*/
+
 .communityIcon {
-  width: 56px;
-  height: 56px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
-  border: 3px solid white;
+  border: 3px solid var(--bg-surface);
   position: absolute;
-  left: 24px;            /* match padding */
-  top: -20px;
-  background: white;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  left: 24px;
+  top: -40px;
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
   object-fit: cover;
 }
 
-/* text */
+/*TEXT*/
+
 .textInfo {
-  margin-left: 80px;     /* space for icon */
+  margin-left: 104px;
   flex: 1;
   padding-top: 12px;
   min-width: 0;
@@ -56,16 +60,17 @@
   font-size: 24px;
   font-weight: 700;
   margin: 0 0 2px 0;
-  color: #1a1a1b;
+  color: var(--text-primary);
 }
 
 .description {
   font-size: 14px;
-  color: #787c7e;
+  color: var(--text-secondary);
   margin: 0;
 }
 
-/* buttons */
+/*BUTTONS*/
+
 .buttonGroup {
   display: flex;
   gap: 10px;
@@ -75,8 +80,8 @@
 
 .createPostBtn,
 .joinBtn {
-  background: #0079d3;
-  color: white;
+  background: var(--accent);
+  color: #fff;
   border: none;
   padding: 7px 18px;
   border-radius: 999px;
@@ -84,14 +89,16 @@
   font-size: 14px;
   white-space: nowrap;
   cursor: pointer;
+  transition: background-color 0.15s;
 }
 
 .createPostBtn:hover,
 .joinBtn:hover {
-  background: #0061a8;
+  background: var(--accent-hover);
 }
 
-/* responsive: stack buttons under title on small screens */
+/*RESPONSIVE*/
+
 @media (max-width: 700px) {
   .info {
     flex-direction: column;

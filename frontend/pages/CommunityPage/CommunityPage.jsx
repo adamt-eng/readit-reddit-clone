@@ -1,11 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "./CommunityPage.css";
 import { useParams } from "react-router-dom";
-
-import alienImg from "../../assets/alienr.jpg";
-
 import CommunityHeader from "../../components/Community/CommunityHeader/CommunityHeader.jsx";
-import SortBar from "../../components/SortBar/SortBar.jsx";
 import PostList from "../../components/Posts/PostList/PostList.jsx";
 import CommunitySidebar from "../../components/Community/CommunitySideBar/CommunitySidebar.jsx";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar.jsx";
@@ -13,39 +9,36 @@ import CreateCommunityModal from "../../components/Community/CreateCommunityModa
 
 function CommunityPage() {
   const { communityName } = useParams();
+
   const [community, setCommunity] = useState(null);
   const [posts, setPosts] = useState([]);
+
   const [expandedPostId, setExpandedPostId] = useState(null);
   const [commentInputs, setCommentInputs] = useState({});
 
-  // 🔹 modal state lives HERE now
-  const [isCreateCommunityOpen, setIsCreateCommunityOpen] = useState(false);
+  const [isMember, setIsMember] = useState(false);
+  const [role, setRole] = useState(null); // "moderator" | "member" | null
 
-  const openCreateCommunity = () => setIsCreateCommunityOpen(true);
-  const closeCreateCommunity = () => setIsCreateCommunityOpen(false);
-
-  // toggle showing comments for a post
   const handleToggleComments = (postId) => {
     setExpandedPostId((prev) => (prev === postId ? null : postId));
   };
 
-  // update the comment textarea for a specific post
   const handleCommentInputChange = (postId, text) => {
     setCommentInputs((prev) => ({ ...prev, [postId]: text }));
   };
 
-  // add a new comment (frontend only)
   const handleAddComment = (postId) => {
     const text = (commentInputs[postId] || "").trim();
     if (!text) return;
 
     setPosts((prevPosts) =>
       prevPosts.map((p) => {
-        if (p.id !== postId) return p;
+        const pid = p._id || p.id;
+        if (pid !== postId) return p;
 
         const newComment = {
           id: Date.now(),
-          author: "YourUser", // TEMP until backend
+          author: "YourUser",
           content: text,
           time: "now",
           upvotes: 0,
@@ -58,65 +51,101 @@ function CommunityPage() {
           commentsList: [newComment, ...(p.commentsList || [])],
           comments: (p.comments || 0) + 1,
         };
-      })
+      }),
     );
 
     setCommentInputs((prev) => ({ ...prev, [postId]: "" }));
   };
 
   useEffect(() => {
-    console.log("URL param communityName:", communityName);
-
     const fetchCommunityData = async () => {
-      const communityData = {
-        name: communityName, 
-        banner: "../../assets/moviebanner.jpg",
-        icon: "../../assets/movieicon.webp",
-        description: "Movie Details, Movie Details",
-      };
+      try {
+        //community info
+        const commRes = await fetch(
+          `${import.meta.env.VITE_API_URL}/communities/${communityName}`,
+          { credentials: "include" },
+        );
+        const commData = await commRes.json().catch(() => ({}));
 
-      const postsData = [
-        {
-          id: 1,
-          title: "During the dinner scene ...",
-          content: "During the dinner scene ...",
-          image: alienImg,
-          community: communityName, 
-          user: "Cassrole",
-          userAvatar: "../../assets/movieicon.webp",
-          time: "1hr ago",
-          upvotes: 0,
-          comments: 0,
-          commentsList: [],
-          userVote: 0,
-          isExpanded: false,
-        },
-      ];
+        if (!commRes.ok) {
+          console.error("Community fetch failed:", commData);
+          setCommunity({
+            name: communityName,
+            description: "",
+            memberCount: 0,
+          });
+        } else {
+          setCommunity(commData);
+        }
 
-      setCommunity(communityData);
-      setPosts(postsData);
+        // posts
+        const postsRes = await fetch(
+          `${import.meta.env.VITE_API_URL}/posts/community/${communityName}`,
+          { credentials: "include" },
+        );
+        const postsData = await postsRes.json().catch(() => []);
+
+        if (!postsRes.ok) {
+          console.error("Posts fetch failed:", postsData);
+          setPosts([]);
+        } else {
+          setPosts(
+          Array.isArray(postsData)
+            ? postsData.map((p) => ({
+                ...p,
+                id: p._id,
+              }))
+            : []
+);
+
+        }
+
+        //membership + role
+        const memRes = await fetch(
+          `${import.meta.env.VITE_API_URL}/communities/${communityName}/membership`,
+          { credentials: "include" },
+        );
+        const memData = await memRes.json().catch(() => ({}));
+
+        if (memRes.ok) {
+          setIsMember(!!memData.isMember);
+          setRole(memData.role || null);
+        } else {
+          setIsMember(false);
+          setRole(null);
+        }
+      } catch (err) {
+        console.error("Fetch error:", err);
+        setPosts([]);
+        setCommunity({ name: communityName, description: "", memberCount: 0 });
+        setIsMember(false);
+        setRole(null);
+      }
     };
 
     fetchCommunityData();
-  }, [communityName]); 
+  }, [communityName]);
 
   if (!community) return null;
 
   return (
     <div className="pageShell">
-      <LeftSidebar onOpenCreateCommunity={openCreateCommunity} />
-
+      <LeftSidebar/>
       <div className="mainWrapper">
         <div className="communityPage">
-          <CommunityHeader community={community} />
+          <CommunityHeader
+            community={community}
+            isMember={isMember}
+            setIsMember={setIsMember}
+          />
 
           <div className="communityContent">
             <div className="left">
-              <SortBar />
               <PostList
                 posts={posts}
                 viewMode="card"
                 expandedPostId={expandedPostId}
+                showJoined = {false}
                 onToggleComments={handleToggleComments}
                 commentInputs={commentInputs}
                 onCommentInputChange={handleCommentInputChange}
@@ -125,15 +154,17 @@ function CommunityPage() {
             </div>
 
             <div className="right">
-              <CommunitySidebar community={community} />
+              <CommunitySidebar
+                community={community}
+                isMember={isMember}
+                setIsMember={setIsMember}
+                isModerator={role === "moderator"}
+                onCommunityUpdated={(updated) => setCommunity(updated)}
+              />
             </div>
           </div>
         </div>
       </div>
-
-      {isCreateCommunityOpen && (
-        <CreateCommunityModal onClose={closeCreateCommunity} />
-      )}
     </div>
   );
 }

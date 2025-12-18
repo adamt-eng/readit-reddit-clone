@@ -3,11 +3,13 @@ import "./AuthModal.css";
 import Login from "../Authentication/Login";
 import Signup from "../Authentication/Signup";
 
-export default function AuthModal({ mode, onClose, onLogin, setShowAuthModal }) {
-  console.log("called");
-
+export default function AuthModal({
+  mode,
+  onClose,
+  onLogin,
+  setShowAuthModal,
+}) {
   useEffect(() => {
-    console.log("called2");
     document.body.style.overflow = "hidden";
 
     return () => {
@@ -28,7 +30,9 @@ export default function AuthModal({ mode, onClose, onLogin, setShowAuthModal }) 
   return (
     <div className="auth-overlay" onClick={handleOverlayClick}>
       <div className="auth-modal modal-animate">
-        <button className="auth-close-btn" onClick={onClose}>×</button>
+        <button className="auth-close-btn" onClick={onClose}>
+          ×
+        </button>
 
         {mode === "login" ? (
           <Login onLogin={onLogin} inModal switchMode={switchMode} />

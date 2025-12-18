@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import './styles/CreatePostButton.css';
+import "./styles/CreatePostButton.css";
 
 export default function CreatePostButton() {
   return (

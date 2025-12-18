@@ -26,16 +26,28 @@ export default function AboutSection({ user }) {
 
       <hr />
 
-      <h4 style={{ margin: '16px 0 12px', fontWeight: 'bold' }}>Achievements</h4>
+      <h4 style={{ margin: "16px 0 12px", fontWeight: "bold" }}>
+        Achievements
+      </h4>
       <div className="achievement">
         <div className="achievement-icon">Shield</div>
         <div>
-          <div style={{ fontWeight: '600', fontSize: '14px' }}>Joined Reddit: Secured Account</div>
-          <div style={{ fontSize: '12px', color: '#555' }}>Verified email</div>
+          <div style={{ fontWeight: "600", fontSize: "14px" }}>
+            Joined Readit: Secured Account
+          </div>
+          <div style={{ fontSize: "12px", color: "#555" }}>Verified email</div>
         </div>
       </div>
-      <div style={{ textAlign: 'right', marginTop: '12px' }}>
-        <button style={{ color: '#0079d3', background: 'none', border: 'none', fontSize: '13px', cursor: 'pointer' }}>
+      <div style={{ textAlign: "right", marginTop: "12px" }}>
+        <button
+          style={{
+            color: "#0079d3",
+            background: "none",
+            border: "none",
+            fontSize: "13px",
+            cursor: "pointer",
+          }}
+        >
           View All
         </button>
       </div>

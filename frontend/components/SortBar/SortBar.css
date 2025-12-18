@@ -1,6 +1,6 @@
 .sortBar {
-  background: #f6f7f8;
-  border: 1px solid #edeff1;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
   border-radius: 999px;
   padding: 4px;
   display: inline-flex;
@@ -16,17 +16,17 @@
   background: transparent;
   font-weight: 500;
   font-size: 14px;
-  color: #1a1a1b;
+  color: var(--text-primary);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background-color 0.15s, color 0.15s;
 }
 
 .sortButton:hover {
-  background: rgba(0,0,0,0.05);
+  background: var(--bg-elevated);
 }
 
 .sortButton.active {
-  background: #ff4500 !important;
-  color: white !important;
+  background: var(--accent-upvote) !important;
+  color: #ffffff !important;
   font-weight: 700;
 }

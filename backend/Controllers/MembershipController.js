@@ -10,33 +10,32 @@ export const getMyJoinedCommunities = async (req, res) => {
     }
 
     const communities = await Membership.aggregate([
-     {
+      {
         $match: {
-          userId: new mongoose.Types.ObjectId(userId)
-        }
+          userId: new mongoose.Types.ObjectId(userId),
+        },
       },
       {
         $lookup: {
           from: "communities",
           localField: "communityId",
           foreignField: "_id",
-          as: "community"
-        }
+          as: "community",
+        },
       },
       {
-        $unwind: "$community"
+        $unwind: "$community",
       },
       {
         $project: {
           _id: 0,
-          name: "$community.name"
-        }
-      }
+          name: "$community.name",
+        },
+      },
     ]);
 
     // return only array of names
-    const communityNames = communities.map(c => c.name);
-    console.log(communityNames);
+    const communityNames = communities.map((c) => c.name);
     res.json(communityNames);
   } catch (err) {
     console.error("getMyJoinedCommunities error:", err);

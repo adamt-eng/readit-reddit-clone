@@ -9,42 +9,106 @@ export default function PostPage() {
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [isSummaryMode, setIsSummaryMode] = useState(false);
+  const [originalText, setOriginalText] = useState("");
+  const [typingText, setTypingText] = useState("");
 
-  /* ---------------- LOAD POST + COMMENTS ---------------- */
 
+const handleGenerateSummary = async () => {
+  try {
+    setIsSummarizing(true);
+    setTypingText("");
+
+    if (!originalText) {
+      setOriginalText(post.text);
+    }
+
+    const res = await axios.get(
+      `${import.meta.env.VITE_API_URL}/ai-summary/${post.id}`,
+      { withCredentials: true }
+    );
+
+    const summary = res.data.summaryText;
+
+    setIsSummaryMode(true);
+    setPost((prev) => ({
+      ...prev,
+      text: "",
+    }));
+
+    // WORD-BY-WORD TYPING EFFECT
+    const words = summary.split(" ");
+    let index = 0;
+
+    const interval = setInterval(() => {
+      index++;
+
+      setTypingText(words.slice(0, index).join(" "));
+
+      if (index >= words.length) {
+        clearInterval(interval);
+        setIsSummarizing(false);
+
+        // Finalize text
+        setPost((prev) => ({
+          ...prev,
+          text: summary,
+        }));
+      }
+    }, 35); // typing speed (ms per word)
+
+  } catch (err) {
+    console.error("Error generating summary:", err);
+    setIsSummarizing(false);
+  }
+};
+
+
+const handleShowOriginal = () => {
+  setPost((prev) => ({
+    ...prev,
+    text: originalText,
+  }));
+  setIsSummaryMode(false);
+};
+
+
+  /* LOAD POST + COMMENTS */
   useEffect(() => {
     const fetchPost = async () => {
-      try{
-      const res = await axios.get(
-        `http://localhost:5000/posts/${postId}`,
-        { withCredentials: true }
-      );
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/posts/${postId}`,
+          { withCredentials: true },
+        );
 
-      const data = res.data;
-      console.log(res.data);
-     setPost({
-      id: data._id,
-      community: data.communityId?.name,
-      author: data.authorId?.username,
-      timeAgo: new Date(data.createdAt).toLocaleDateString(),
-      title: data.title,
-        text: data.content,
-        image: data.media?.url,
-      votes: data.upvoteCount - data.downvoteCount,
-      commentsCount: data.commentCount,
-      userVote: data.userVote
-    });}
-      catch(err){
-        console.log("errror while fetching post ",err)
+        const data = res.data;
+        console.log(res.data);
+        setPost({
+          id: data._id,
+          community: data.communityId?.name,
+          communityIcon: data.communityId?.iconUrl,
+          author: data.authorId?.username,
+          timeAgo: new Date(data.createdAt).toLocaleDateString(),
+          title: data.title,
+          text: data.content,
+          image: data.media?.url
+            ? `${import.meta.env.VITE_API_URL}${data.media.url}`
+            : null,
+          votes: data.upvoteCount - data.downvoteCount,
+          commentsCount: data.commentCount,
+          userVote: data.userVote,
+        });
+      } catch (err) {
+        console.log("Error while fetching post ", err);
       }
-
-     
     };
 
     const fetchComments = async () => {
       const res = await fetch(
-        `http://localhost:5000/posts/${postId}/comments`,
-        { credentials: "include" }
+        `${import.meta.env.VITE_API_URL}/posts/${postId}/comments`,
+        { credentials: "include" },
       );
       if (!res.ok) return;
 
@@ -58,75 +122,97 @@ export default function PostPage() {
           timeAgo: new Date(c.createdAt).toLocaleDateString(),
           votes: (c.upvoteCount || 0) - (c.downvoteCount || 0),
           userVote: 0,
-          replies: normalize(c.replies || [])
+          replies: normalize(c.replies || []),
         }));
 
       setComments(normalize(data));
     };
 
-    Promise.all([fetchPost(), fetchComments()]).then(() =>
-      setLoading(false)
-    );
+    Promise.all([fetchPost(), fetchComments()]).then(() => setLoading(false));
   }, [postId]);
 
-  /* ---------------- POST VOTING ---------------- */
-
+  /* POST VOTING */
   const handlePostVote = async (voteScore) => {
-    const res = await axios.post(`http://localhost:5000/votes/posts/${postId}`,{voteScore:voteScore},{withCredentials:true})
+    const res = await axios.post(
+      `${import.meta.env.VITE_API_URL}/votes/posts/${postId}`,
+      { voteScore: voteScore },
+      { withCredentials: true },
+    );
 
-    const data = await res.data;
+    const updatedPost = res.data.post;
+
+    // Fetch the updated vote state from backend to get accurate userVote
+    const voteRes = await fetch(
+      `${import.meta.env.VITE_API_URL}/votes/me`,
+      { credentials: "include" }
+    );
+
+    if (!voteRes.ok) {
+      console.error("Failed to fetch vote state");
+      return;
+    }
+
+    const voteData = await voteRes.json();
 
     setPost((prev) => ({
       ...prev,
-      votes: data.post.upvoteCount - data.post.downvoteCount,
-      userVote: prev.userVote === voteScore ? 0 : voteScore
+      votes: updatedPost.upvoteCount - updatedPost.downvoteCount,
+      userVote: voteData.posts?.[postId] ?? 0,
     }));
-
-    console.log(post)
   };
 
-  /* ---------------- COMMENT VOTING ---------------- */
-
+  /* COMMENT VOTING */
   const handleCommentVote = async (commentId, voteType) => {
     const res = await fetch(
-      `http://localhost:5000/votes/comments/${commentId}`,
+      `${import.meta.env.VITE_API_URL}/votes/comments/${commentId}`,
       {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ voteScore: voteType })
-      }
+        body: JSON.stringify({ voteScore: voteType }),
+      },
     );
 
     if (!res.ok) return;
     const data = await res.json();
+
+    // Fetch the updated vote state from backend to get accurate userVote
+    const voteRes = await fetch(
+      `${import.meta.env.VITE_API_URL}/votes/me`,
+      { credentials: "include" }
+    );
+
+    if (!voteRes.ok) {
+      console.error("Failed to fetch vote state");
+      return;
+    }
+
+    const voteData = await voteRes.json();
 
     const updateVotes = (arr) =>
       arr.map((c) =>
         c.id === commentId
           ? {
               ...c,
-              votes:
-                data.comment.upvoteCount - data.comment.downvoteCount,
-              userVote: c.userVote === voteType ? 0 : voteType
+              votes: data.comment.upvoteCount - data.comment.downvoteCount,
+              userVote: voteData.comments?.[commentId] ?? 0,
             }
-          : { ...c, replies: updateVotes(c.replies) }
+          : { ...c, replies: updateVotes(c.replies) },
       );
 
     setComments(updateVotes);
   };
 
-  /* ---------------- COMMENT CREATE ---------------- */
-
+  /* COMMENT CREATE */
   const handleComment = async (postId, text) => {
     const res = await fetch(
-      `http://localhost:5000/posts/${postId}/comments`,
+      `${import.meta.env.VITE_API_URL}/posts/${postId}/comments`,
       {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: text })
-      }
+        body: JSON.stringify({ content: text }),
+      },
     );
 
     if (!res.ok) return;
@@ -139,27 +225,26 @@ export default function PostPage() {
       timeAgo: new Date(data.createdAt).toLocaleDateString(),
       votes: 0,
       userVote: 0,
-      replies: []
+      replies: [],
     };
 
     setComments((prev) => [newComment, ...prev]);
     setPost((prev) => ({
       ...prev,
-      commentsCount: prev.commentsCount + 1
+      commentsCount: prev.commentsCount + 1,
     }));
   };
 
-  /* ---------------- COMMENT REPLY ---------------- */
-
+  /* COMMENT REPLY */
   const handleReply = async (commentId, text) => {
     const res = await fetch(
-      `http://localhost:5000/comments/${commentId}/reply`,
+      `${import.meta.env.VITE_API_URL}/comments/${commentId}/reply`,
       {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: text })
-      }
+        body: JSON.stringify({ content: text }),
+      },
     );
 
     if (!res.ok) return;
@@ -172,32 +257,38 @@ export default function PostPage() {
       timeAgo: new Date(data.createdAt).toLocaleDateString(),
       votes: 0,
       userVote: 0,
-      replies: []
+      replies: [],
     };
 
     const insertReply = (arr) =>
       arr.map((c) =>
         c.id === commentId
           ? { ...c, replies: [...c.replies, reply] }
-          : { ...c, replies: insertReply(c.replies) }
+          : { ...c, replies: insertReply(c.replies) },
       );
 
     setComments(insertReply);
   };
 
-  /* ---------------- RENDER ---------------- */
-
+  /* RENDER */
   if (loading || !post) return <div>Loading...</div>;
 
   return (
-    <Post
-      post={post}
-      comments={comments}
-      onUpvote={() => handlePostVote(1)}
-      onDownvote={() => handlePostVote(-1)}
-      onComment={handleComment}
-      onVote={handleCommentVote}
-      onReply={handleReply}
-    />
+ <Post
+  post={post}
+  comments={comments}
+  onUpvote={() => handlePostVote(1)}
+  onDownvote={() => handlePostVote(-1)}
+  onComment={handleComment}
+  onVote={handleCommentVote}
+  onReply={handleReply}
+  isSummarizing={isSummarizing}
+  isSummaryMode={isSummaryMode}
+  onGenerateSummary={handleGenerateSummary}
+  onShowOriginal={handleShowOriginal}
+  typingText={typingText}
+/>
+
+
   );
 }

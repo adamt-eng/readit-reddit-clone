@@ -6,7 +6,13 @@ const PostSchema = new Schema(
     communityId: { type: Schema.Types.ObjectId, ref: "Community", required: true },
     authorId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     title: { type: String, required: true },
-    content: { type: String, required: true },
+    content: {
+      type: String,
+      required: function () {
+        return this.type === "text";
+      },
+  },
+
     media: {
       url: { type: String, default: "" }
     },

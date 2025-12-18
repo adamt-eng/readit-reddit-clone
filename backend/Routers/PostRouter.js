@@ -4,46 +4,51 @@ import {
   getPostableCommunities,
   createPost,
   searchPosts,
-  getPostsByUser,
   getPostById,
   getPersonalizedFeed,
   getPopularPosts,
   getUserPosts,
-  deletePost
+  deletePost,
+  getPostsByCommunity,
+  getGuestFeed,
 } from "../Controllers/PostController.js";
 
-import { 
+import {
   getCommentsForPost,
-  createComment
+  createComment,
 } from "../Controllers/CommentController.js";
 
 const router = express.Router();
 
-router.get("/communities",auth, getPostableCommunities);
+router.get("/communities", auth, getPostableCommunities);
 
-// Create a new post 
-router.post("/",auth, createPost);
+// Create a new post
+router.post("/", auth, createPost);
 
-// Get personalized feed (supports guest mode with no userId)
-router.get("/feed", getPersonalizedFeed);
+router.get("/community/:name",auth, getPostsByCommunity);
+
+// Get personalized feed
+router.get("/feed/me",auth, getPersonalizedFeed);
+
+router.get("/feed/guest", getGuestFeed);
 
 router.get("/popular", getPopularPosts);
 
 // Create a top-level comment under a post
-router.post("/:postId/comments",auth, createComment);
+router.post("/:postId/comments", auth, createComment);
 
 // Get all comments for a post
-router.get("/:postId/comments",auth, getCommentsForPost);
+router.get("/:postId/comments", auth, getCommentsForPost);
 
-router.get("/search",auth, searchPosts);
+router.get("/search", auth, searchPosts);
 
 // Get user posts
-router.get("/users/:id",auth,getUserPosts);
+router.get("/users/:id", auth, getUserPosts);
 
 //delete post
-router.delete("/:id",auth,deletePost);
+router.delete("/:id", auth, deletePost);
 
 // Must stay last
-router.get("/:postId",auth, getPostById);
+router.get("/:postId", auth, getPostById);
 
 export default router;

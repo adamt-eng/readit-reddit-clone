@@ -1,4 +1,4 @@
-const tabs = ['Posts', 'Communities','Comments'];
+const tabs = ["Posts", "Communities", "Comments"];
 
 export default function ProfileTabs({ activeTab, setActiveTab }) {
   return (
@@ -7,7 +7,7 @@ export default function ProfileTabs({ activeTab, setActiveTab }) {
         <button
           key={tab}
           onClick={() => setActiveTab(tab)}
-          className={`profile-tab ${activeTab === tab ? 'active' : ''}`}
+          className={`profile-tab ${activeTab === tab ? "active" : ""}`}
         >
           {tab}
         </button>

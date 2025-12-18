@@ -3,9 +3,7 @@ import "./PostTabs.css";
 export default function PostTabs({ activeTab, setActiveTab }) {
   const tabs = [
     { key: "post", label: "Text" },
-    { key: "image", label: "Images & Video" },
-    { key: "link", label: "Link" },
-    // { key: "poll", label: "Poll" },
+    { key: "image", label: "Images" },
   ];
   return (
     <div className="tabs">

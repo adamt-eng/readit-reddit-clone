@@ -1,15 +1,15 @@
-import { useState, useLayoutEffect, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar/Navbar.jsx";
+import FloatingDM from "../components/FloatingDM/FloatingDM.jsx";
 import AppRoutes from "./routes.jsx";
 import AuthModal from "../pages/Authentication/AuthModal.jsx";
+import axios from "axios";
 import "./App.css";
-import axios from "axios"
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
-  const [darkMode, setDarkMode] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isFloatingDMOpen, setIsFloatingDMOpen] = useState(false);
 
   // "false" = hidden, "login" = login modal, "signup" = signup modal
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -18,46 +18,42 @@ function App() {
   const openSignupModal = () => setShowAuthModal("signup");
   const closeAuthModal = () => setShowAuthModal(false);
 
-  const location = useLocation();
-  const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";
-
- 
-
-  
-useEffect(() => {
-  const fetchMe = async () => {
-    try {
-      const res = await axios.get(
-        "http://localhost:5000/users/me",
-        { withCredentials: true }
-      );
-      setCurrentUser(res.data);
-    } catch (err) {
-      console.log("Error fetching user:", err);
+  const openFloatingDM = () => {
+    if (!currentUser) {
+      openLoginModal();
+      return;
     }
+    setIsFloatingDMOpen(true);
   };
 
-  fetchMe();
-}, []);
+  const closeFloatingDM = () => setIsFloatingDMOpen(false);
 
-  useLayoutEffect(() => {
-    const savedDarkMode = localStorage.getItem("darkMode");
-    const isDark = savedDarkMode === "true";
-    setDarkMode(isDark);
-    document.body.classList.toggle("dark-mode", isDark);
-    setIsLoading(false);
+  const location = useLocation();
+  const isAuthPage =
+    location.pathname === "/login" || location.pathname === "/signup";
+
+  useEffect(() => {
+    const fetchMe = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/users/me`,
+          { withCredentials: true },
+        );
+        console.log("Fetched user: ", res.data);
+
+        setCurrentUser(res.data);
+      } catch {
+        console.log("Not logged in");
+      }
+    };
+
+    fetchMe();
   }, []);
 
-  useLayoutEffect(() => {
-    if (!isLoading) {
-      localStorage.setItem("darkMode", darkMode);
-      document.body.classList.toggle("dark-mode", darkMode);
-    }
-  }, [darkMode, isLoading]);
 
   const handleLogin = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/users/me", {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/users/me`, {
         withCredentials: true,
       });
       setCurrentUser(res.data);
@@ -68,53 +64,32 @@ useEffect(() => {
     }
   };
 
+  return (
+    <div className={"app"}>
+      {!isAuthPage &&
+        (<Navbar
+            user={currentUser}
+            setUser={setCurrentUser}
+            onLoginClick={openLoginModal}
+            onSignupClick={openSignupModal}
+            onOpenFloatingDM={openFloatingDM}
+          />)}
 
-  const toggleDarkMode = () => setDarkMode((prev) => !prev);
-
-  if (isLoading) return <div className="app-loading" />;
-
-   return (
-    <div className={`app${darkMode ? "dark-mode" : ""}`}>
-      {/* NAVBAR always visible except when visiting actual auth pages */}
-      {!isAuthPage && (
-        !currentUser?(<Navbar
+      {currentUser && (
+        <FloatingDM
+          isOpen={isFloatingDMOpen}
+          onClose={closeFloatingDM}
           user={currentUser}
-          isLoggedIn={false}
-          setUser={setCurrentUser}
-          darkMode={darkMode}
-          onToggleDarkMode={toggleDarkMode}
-          onLoginClick={openLoginModal}
-          onSignupClick={openSignupModal}
-        />):(<Navbar
-          user={currentUser}
-          isLoggedIn={true}
-          setUser={setCurrentUser}
-          darkMode={darkMode}
-          onToggleDarkMode={toggleDarkMode}
-          onLoginClick={openLoginModal}
-          onSignupClick={openSignupModal}
-        />)
+        />
       )}
 
-      {/* Routes for ALL pages */}
-      {!currentUser?(<AppRoutes
-        darkMode={darkMode}
-        toggleDarkMode={toggleDarkMode}
+      <AppRoutes
         onLogin={handleLogin}
-        isLoggedIn={false}
         currentUser={currentUser}
-        setCurrentUser={setCurrentUser} 
-      />):(<AppRoutes
-        darkMode={darkMode}
-        toggleDarkMode={toggleDarkMode}
-        onLogin={handleLogin}
-        isLoggedIn={true}
-        currentUser={currentUser}
-        setCurrentUser={setCurrentUser} 
-        />)}
+        setCurrentUser={setCurrentUser}
+        setShowAuth={setShowAuthModal}
+      />
 
-
-      {/* Auth Modal */}
       {showAuthModal && (
         <AuthModal
           mode={showAuthModal}

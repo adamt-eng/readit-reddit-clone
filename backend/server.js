@@ -6,6 +6,12 @@ import cookieParser from "cookie-parser";
 import http from "http";
 import { Server } from "socket.io";
 
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 import auth from "./Middleware/AuthMiddleware.js";
 
 import AuthRouter from "./Routers/AuthRouter.js";
@@ -29,28 +35,33 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // static uploads
-app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static(path.join(__dirname, "Uploads")));
 
 // body + cookies
 app.use(express.json());
 app.use(cookieParser());
 
 // cors
+const allowedOrigins =
+  process.env.NODE_ENV === "production"
+    ? ["https://readit-reddit-clone.vercel.app"]
+    : ["http://localhost:5173", "http://localhost:5174"];
+
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: allowedOrigins,
     credentials: true,
   })
 );
 
 // routes
 app.use("/authentication", AuthRouter);
-app.use("/posts", PostRouter);
+app.use("/posts", PostRouter); //inyternal auth
 app.use("/users",auth, UserRouter);
 app.use("/votes", auth, VoteRouter);
-app.use("/communities", auth, CommunityRouter);
-app.use("/search", auth, SearchRouter);
-app.use("/upload", auth, UploadRouter);
+app.use("/communities",auth, CommunityRouter);
+app.use("/search", SearchRouter); //internal auth
+app.use("/upload",auth, UploadRouter);
 app.use("/ai-summary", auth, AiSummaryRouter);
 app.use("/comments", auth, CommentRouter);
 app.use("/memberships", auth, MembershipRouter);
@@ -66,10 +77,14 @@ const server = http.createServer(app);
 
 export const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin:
+      process.env.NODE_ENV === "production"
+        ? "https://readit-reddit-clone.vercel.app"
+        : true,
     credentials: true,
   },
 });
+
 
 // online users map
 export const onlineUsers = new Map();
@@ -96,7 +111,7 @@ io.on("connection", (socket) => {
 });
 
 // socket-aware routes
-app.use("/dm", DMRouter({ io, onlineUsers }));
+app.use("/dm",auth, DMRouter({ io, onlineUsers }));
 app.use("/notifications", auth, NotificationRouter({ io, onlineUsers }));
 
 // start server

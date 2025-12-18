@@ -1,20 +1,20 @@
-/* components/Navbar/Navbar.css */
 :root {
-  --navbar-height: 56px;
+  --navbar-height: 60px;
 }
+
+/* NAVBAR */
 
 .navbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 8px 20px;
-  background: white;
-  border-bottom: 1px solid #edeff1;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-default);
   position: sticky;
   top: 0;
   z-index: 1000;
   height: var(--navbar-height);
-
   transition: background-color 0.3s, border-color 0.3s;
 }
 
@@ -30,8 +30,9 @@
 }
 
 .nav-logo-text {
-  width: 80px;
-  height: 25px;
+  height: 100px;
+  width: auto;
+  margin-top: 15px;
 }
 
 .nav-logo {
@@ -45,6 +46,8 @@
   margin: 0 20px;
 }
 
+/* SEARCH */
+
 .search-container {
   position: relative;
   width: 100%;
@@ -53,19 +56,25 @@
 .nav-search {
   width: 100%;
   padding: 10px 16px;
-  border: 1px solid #edeff1;
   border-radius: 20px;
-  background: #f6f7f8;
-  color: black;
+
+  background: var(--search-bg);
+  border: 1px solid var(--search-border);
+
+  color: var(--text-primary);
   font-size: 14px;
   outline: none;
-  border-color: #ff4500;
-  transition: all 0.3s;
+
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.nav-search::placeholder {
+  color: var(--text-muted);
 }
 
 .nav-search:focus {
-  background: white;
-  border-color: #0079d3;
+  background: var(--bg-surface);
+  border-color: var(--search-border-focus);
 }
 
 .search-icon {
@@ -73,43 +82,46 @@
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #878a8c;
+  color: var(--text-muted);
 }
 
+/* AUTH BUTTONS */
 
-.login-btn, .signup-btn {
+.login-btn,
+.signup-btn {
   padding: 8px 25px;
   border-radius: 20px;
   font-weight: bold;
   cursor: pointer;
   font-size: 14px;
-  border: 1px solid #ff4500;
   transition: all 0.2s;
   margin-left: 10px;
 }
 
 .login-btn {
   background: transparent;
-  color: #ff4500;
+  color: var(--accent);
+  border: 1px solid var(--accent);
 }
 
 .login-btn:hover {
-  background: #f0f8ff;
+  background: var(--bg-surface);
 }
 
 .signup-btn {
-  background: #ff4500;
-  color: white;
+  background: var(--accent);
+  color: #fff;
   border: none;
 }
 
 .signup-btn:hover {
-  background: #b44117;
+  background: var(--accent-hover);
 }
 
-/* Logged-in navbar styles */
+/* LOGGED IN */
+
 .nav-right.logged-in {
-  display:flex;
+  display: flex;
   gap: 4px;
 }
 
@@ -118,7 +130,7 @@
   border: none;
   padding: 8px;
   border-radius: 4px;
-  color: #878a8c;
+  color: var(--text-secondary);
   cursor: pointer;
   position: relative;
   transition: background-color 0.2s;
@@ -128,26 +140,23 @@
 }
 
 .nav-icon-btn:hover {
-  background: #f6f7f8;
-  
+  background: var(--bg-page);
 }
 
-/* Create Post Button - No Background */
+/* Create Post */
 .create-post-btn {
   padding: 16px 12px;
   border-radius: 20px;
-  background-color: white;
-  border-color: white;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
   font-weight: 600;
   font-size: 14px;
   transition: all 0.2s;
 }
 
 .create-post-btn:hover {
-  background: none;
- 
+  background: var(--bg-page);
 }
-
 
 .create-text {
   font-size: 13px;
@@ -155,18 +164,14 @@
   padding: 5px;
 }
 
-.nav-icon {
-  width: 16px;
-  height: 16px;
-  color: #878a8c; /* Default color for light mode */
-}
+/* NOTIFICATIONS */
 
 .notification-badge {
   position: absolute;
   top: 4px;
   right: 4px;
-  background: #ff4500;
-  color: white;
+  background: var(--accent);
+  color: #fff;
   border-radius: 50%;
   width: 13px;
   height: 13px;
@@ -175,6 +180,8 @@
   align-items: center;
   justify-content: center;
 }
+
+/* PROFILE */
 
 .profile-menu-container {
   position: relative;
@@ -193,7 +200,7 @@
 }
 
 .profile-btn:hover {
-  background: #f6f7f8;
+  background: var(--bg-page);
 }
 
 .profile-avatar {
@@ -206,39 +213,31 @@
 .profile-name {
   font-size: 14px;
   font-weight: 600;
-  color: #1c1c1c;
+  color: var(--text-primary);
 }
 
 .dropdown-icon {
   width: 14px;
   height: 14px;
   transition: transform 0.2s ease;
-  color: #1c1c1c; /* Default color for light mode */
+  color: var(--text-primary);
 }
 
 .dropdown-icon.open {
   transform: rotate(180deg);
 }
 
-/* Dark mode specific styles for all icons */
-.appdark-mode .dropdown-icon {
-  color: #ffffff !important; /* Force white color in dark mode */
-}
-
-.appdark-mode .nav-icon,
-.appdark-mode .appdark-mode-icon {
-  color: #ffffff !important; /* Force white color for all nav icons in dark mode */
-}
+/* DROPDOWN */
 
 .profile-dropdown {
   position: absolute;
   top: 100%;
   right: 0;
   margin-top: 8px;
-  background: white;
-  border: 1px solid #edeff1;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
   min-width: 200px;
   z-index: 1000;
 }
@@ -248,125 +247,44 @@
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  border: none;
   background: none;
   width: 100%;
-  text-align: left;
   font-size: 14px;
-  color: #1c1c1c;
+  color: var(--text-primary);
   cursor: pointer;
   transition: background-color 0.1s;
 }
 
 .profile-dropdown .dropdown-item:hover {
-  background: #f6f7f8;
+  background: var(--bg-page);
 }
 
 .profile-dropdown .dropdown-divider {
   height: 1px;
-  background: #edeff1;
+  background: var(--border-default);
   margin: 4px 0;
 }
 
 .logout-btn {
-  color: #ff4500;
+  color: var(--accent);
 }
 
-/* Dark mode styles */
-.appdark-mode .navbar {
-  background: #1a1a1b;
-  border-bottom-color: #343536;
-}
+/* RESPONSIVE */
 
-.appdark-mode .nav-search {
-  background: #272729;
-  border-color: #ff4500;
-  color: #d7dadc;
-}
-
-.appdark-mode .nav-search:focus {
-  background: #1a1a1b;
-  border-color: #d7dadc;
-}
-
-.appdark-mode .nav-icon-btn {
-  color: #d7dadc;
-}
-
-.appdark-mode .nav-icon-btn:hover {
-  background: #272729;
-}
-
-.appdark-mode .create-post-btn {
-  background: none;
-  
-}
-
-.appdark-mode .create-post-btn:hover {
-  background: none;
-}
-
-.appdark-mode .profile-btn:hover {
-  background: #272729;
-}
-
-.appdark-mode .profile-dropdown {
-  background: #1a1a1b;
-  border-color: #343536;
-  color: #d7dadc;
-}
-
-.appdark-mode .profile-dropdown .dropdown-item {
-  color: #d7dadc;
-}
-
-.appdark-mode .profile-dropdown .dropdown-item:hover {
-  background: #272729;
-}
-
-.appdark-mode .profile-dropdown .dropdown-divider {
-  background: #343536;
-}
-
-.appdark-mode .profile-name {
-  color: #d7dadc;
-}
-
-.appdark-mode .login-btn,
-.appdark-mode .signup-btn {
-  border-color: #ff4500;
-  color: #ff4500;
-}
-
-.appdark-mode .login-btn:hover {
-  background: #272729;
-}
-
-.appdark-mode .signup-btn {
-  background: #ff4500;
-  color: white;
-}
-
-.appdark-mode .signup-btn:hover {
-  background: #e03c00;
-}
-
-/* Responsive design for smaller screens */
 @media (max-width: 768px) {
   .create-text {
     display: none;
   }
-  
+
   .create-post-btn {
     padding: 8px;
   }
-  
+
   .profile-name {
     display: none;
   }
-  
+
   .nav-right.logged-in {
     gap: 4px;
   }
 }
-

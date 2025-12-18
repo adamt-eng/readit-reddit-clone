@@ -5,7 +5,6 @@ export default function TrendingPosts({
   // Common props
   posts,
   viewMode,
-  darkMode,
   onVote,
   formatNumber,
   onJoinCommunity,
@@ -16,12 +15,11 @@ export default function TrendingPosts({
   hiddenPosts = [],
   getThumbnailImage,
   toggleExpand,
-  
+
   // Guest-specific props
   isGuest = false,
-  onPromptLogin
+  onPromptLogin,
 }) {
-  
   return (
     <div className="trending-posts">
       {/* Main Posts Container - ONLY this part */}
@@ -32,7 +30,7 @@ export default function TrendingPosts({
             return (
               <div key={post.id} className="post-hidden-message">
                 <span>Post hidden</span>
-                <button 
+                <button
                   className="undo-btn"
                   onClick={(e) => onUnhidePost?.(post.id, e)}
                 >
@@ -47,7 +45,6 @@ export default function TrendingPosts({
               key={post.id}
               post={post}
               viewMode={viewMode}
-              darkMode={darkMode}
               // Pass all functionality props
               onVote={onVote}
               formatNumber={formatNumber}

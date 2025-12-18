@@ -1,240 +1,189 @@
-import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 
 import HomePage from "../pages/HomePage/HomePage.jsx";
 import GuestHomePage from "../pages/GuestHomePage/GuestHomePage.jsx";
 import UserProfilePage from "../pages/ProfilePage/UserProfilePage.jsx";
 import EditProfilePage from "../pages/EditProfile/EditProfilePage.jsx";
-import CreatePost from "../components/Posts/CreatePost/CreatePost.jsx";
 import DirectMessages from "../pages/Direct Messages/DirectMessages.jsx";
-import CreateCommunityModal from "../components/Community/CreateCommunityModal/CreateCommunityModal.jsx";
 import Login from "../pages/Authentication/Login.jsx";
 import Signup from "../pages/Authentication/Signup.jsx";
 import SearchResults from "../pages/SearchResults/SearchResults.jsx";
 import CommunityPage from "../pages/CommunityPage/CommunityPage.jsx";
 import Notifications from "../pages/Notifications/Notifications.jsx";
-import ExplorePage from "../pages/ExplorePage/ExplorePage.jsx"
-
-
+import ExplorePage from "../pages/ExplorePage/ExplorePage.jsx";
 import PostPage from "../pages/PostPage/PostPage.jsx";
+import CreatePost from "../components/Posts/CreatePost/CreatePost.jsx";
 
 export default function AppRoutes({
-  darkMode,
-  toggleDarkMode,
   currentUser,
   onLogin,
   setCurrentUser,
-  isLoggedIn,
+  setShowAuth,
 }) {
-  const [showCommunityModal, setShowCommunityModal] = useState(false);
-
-  const openCommunityModal = () => setShowCommunityModal(true);
-  const closeCommunityModal = () => setShowCommunityModal(false);
 
   return (
     <>
       <Routes>
-        {/* Home page - shows different content based on login status */}
         <Route
           path="/"
           element={
-            isLoggedIn ? (
-              <HomePage
-                darkMode={darkMode}
-                onStartCommunity={openCommunityModal}
-              />
+            currentUser ? (
+              <HomePage/>
             ) : (
-              <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
+              <GuestHomePage setShowAuth={setShowAuth} onLogin={onLogin} />
             )
           }
         />
 
-        {/* Guest route for logged-out users */}
         <Route
           path="/guest"
           element={
-            !isLoggedIn ? (
-              <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
+            !currentUser ? (
+              <GuestHomePage setShowAuth={setShowAuth} onLogin={onLogin} />
             ) : (
               <HomePage
                 user={currentUser}
-                darkMode={darkMode}
-                onStartCommunity={openCommunityModal}
               />
             )
           }
         />
 
-        {/* User profile */}
         <Route
           path="/user/:id"
           element={
-            isLoggedIn ? (
-              <UserProfilePage/>
+            currentUser ? (
+              <UserProfilePage />
             ) : (
-              <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
+              <GuestHomePage setShowAuth={setShowAuth} onLogin={onLogin} />
             )
           }
         />
 
-        {/* Community Page */}
         <Route
           path="/community/:communityName"
           element={
-            isLoggedIn ? (
+            currentUser ? (
               <CommunityPage />
             ) : (
-              <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
+              <GuestHomePage setShowAuth={setShowAuth} onLogin={onLogin} />
             )
           }
         />
 
-        {/* Notifications */}
         <Route
           path="/notifications"
           element={
-            isLoggedIn ? (
+            currentUser ? (
               <Notifications />
             ) : (
-              <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
+              <GuestHomePage setShowAuth={setShowAuth} onLogin={onLogin} />
             )
           }
         />
 
-        {/* Edit profile */}
         <Route
-  path="/edit-profile"
-  element={
-    isLoggedIn ? (
-      <EditProfilePage
-        setCurrentUser={setCurrentUser} 
-      />
-    ) : (
-      <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
-    )
-  }
-/>
+          path="/edit-profile"
+          element={
+            currentUser ? (
+              <EditProfilePage setCurrentUser={setCurrentUser} />
+            ) : (
+              <GuestHomePage setShowAuth={setShowAuth} onLogin={onLogin} />
+            )
+          }
+        />
 
-        {/* Edit profile */}
-<Route
-  path="/popular"
-  element={
-    isLoggedIn ? (
-      <HomePage
-        darkMode={darkMode}
-        onStartCommunity={openCommunityModal}
-      />
-    ) : (
-      <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
-    )
-  }
-/>
+        <Route
+          path="/popular"
+          element={
+            currentUser ? (
+              <HomePage/>
+            ) : (
+              <GuestHomePage setShowAuth={setShowAuth} onLogin={onLogin} />
+            )
+          }
+        />
 
-
-        {/* Create post */}
         <Route
           path="/create-post"
           element={
-            isLoggedIn ? (
-              <CreatePost
-                isDark={darkMode}
-                toggleDarkMode={toggleDarkMode}
-                currentUser={currentUser}
-              />
+            currentUser ? (
+              <CreatePost currentUser={currentUser} />
             ) : (
-              <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
+              <GuestHomePage setShowAuth={setShowAuth} onLogin={onLogin} />
             )
           }
         />
 
-        {/* Direct Messages */}
         <Route
           path="/messages"
           element={
-            isLoggedIn ? (
-              <DirectMessages darkMode={darkMode} currentUser={currentUser} />
+            currentUser ? (
+              <DirectMessages currentUser={currentUser} />
             ) : (
-              <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
+              <GuestHomePage setShowAuth={setShowAuth} onLogin={onLogin} />
             )
           }
         />
 
-        {/* Login */}
         <Route
           path="/login"
           element={
-            !isLoggedIn ? (
-              <Login onLogin={onLogin} darkMode={darkMode} />
+            !currentUser ? (
+              <Login onLogin={onLogin} />
             ) : (
               <HomePage
                 user={currentUser}
-                darkMode={darkMode}
-                onStartCommunity={openCommunityModal}
               />
             )
           }
         />
 
-        {/* Signup */}
         <Route
           path="/signup"
           element={
-            !isLoggedIn ? (
-              <Signup darkMode={darkMode} onSignup={onLogin} />
+            !currentUser ? (
+              <Signup onSignup={onLogin} />
             ) : (
               <HomePage
                 user={currentUser}
-                darkMode={darkMode}
-                onStartCommunity={openCommunityModal}
               />
             )
           }
         />
 
-        {/*post page*/}
-
-
-        {/* Search */}
         <Route
           path="/search"
           element={
-            isLoggedIn ? (
+            currentUser ? (
               <SearchResults />
             ) : (
-              <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
+              <GuestHomePage setShowAuth={setShowAuth} onLogin={onLogin} />
             )
           }
         />
 
-        {/*explore*/}
-         <Route
+        <Route
           path="/explore"
           element={
-            isLoggedIn ? (
+            currentUser ? (
               <ExplorePage />
             ) : (
-              <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
+              <GuestHomePage setShowAuth={setShowAuth} onLogin={onLogin} />
             )
           }
         />
 
-        {/*THE ONLY ROUTE YOU WERE MISSING */}
         <Route
           path="/posts/:postId"
           element={
-            isLoggedIn ? (
+            currentUser ? (
               <PostPage />
             ) : (
-              <GuestHomePage onLogin={onLogin} darkMode={darkMode} />
+              <GuestHomePage setShowAuth={setShowAuth} onLogin={onLogin} />
             )
           }
         />
-
       </Routes>
-      {showCommunityModal && (
-      <CreateCommunityModal onClose={closeCommunityModal} darkMode={darkMode} />
-)}
-
     </>
   );
 }

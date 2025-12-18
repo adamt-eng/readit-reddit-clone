@@ -1,4 +1,5 @@
 import express from "express";
+import { changeMyPassword } from "../Controllers/UserController.js";
 import auth from "../Middleware/AuthMiddleware.js";
 import {
   getUserById,
@@ -15,17 +16,18 @@ const router = express.Router();
 router.get("/search", searchUsers);
 
 // MY PROFILE (no ID in URL)
-router.get("/me", auth, getProfile);
-router.patch("/me", auth, updateMyProfile);
+router.get("/me",  getProfile);
+router.patch("/me", updateMyProfile);
 
 // /users/:id  (get profile)
 router.get("/:id", getUserById);
 
 //get user stats
-router.get("/stats/:id",getUserStats);
-
+router.get("/stats/:id", getUserStats);
 
 // /users/:id  (edit profile)
 router.patch("/:id", updateUserProfile);
+
+router.patch("/me/password", changeMyPassword);
 
 export default router;

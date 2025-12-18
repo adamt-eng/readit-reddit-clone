@@ -3,26 +3,33 @@
   padding: 0 20px;
   position: sticky;
   top: var(--navbar-height);
-height: calc(100vh - var(--navbar-height));
+  height: calc(100vh - var(--navbar-height));
   overflow-y: auto;
   flex-shrink: 0;
   transition: background-color 0.3s;
 }
 
+/* NAV */
 .sidebar-nav {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
+.nav-section {
+  margin-bottom: 8px;
+}
+
 .nav-section h4 {
   font-size: 10px;
   font-weight: 700;
-  color: #878a8c;
+  color: var(--text-muted);
   text-transform: uppercase;
   margin-bottom: 8px;
   padding: 0 16px;
 }
+
+/* ITEMS */
 
 .nav-item {
   display: flex;
@@ -32,72 +39,38 @@ height: calc(100vh - var(--navbar-height));
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
-  color: #1c1c1c;
-  transition: background-color 0.2s;
+  color: var(--text-primary);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.nav-item:first-child {
+  padding-top: 16px;
 }
 
 .nav-item:hover {
-  background: #f6f7f8;
+  background-color: var(--hover-overlay);
 }
 
 .nav-item.active {
   font-weight: 600;
-  background: #f6f7f8;
+  background-color: var(--hover-overlay);
 }
+
+/* ICONS */
 
 .nav-icon {
   width: 20px;
   height: 20px;
-  color: #878a8c;
+  color: var(--text-muted);
   transition: color 0.2s;
 }
 
-.nav-item.active .nav-icon {
-  color: #1c1c1c;
-}
-
+.nav-item.active .nav-icon,
 .nav-item:hover .nav-icon {
-  color: #1c1c1c;
+  color: var(--text-primary);
 }
 
-/* Responsive */
-@media (max-width: 1200px) {
-  .left-sidebar {
-    display: none;
-  }
-}
-
-/* Dark mode */
-.dark-mode .left-sidebar {
-  background: black;
-}
-
-.dark-mode .sidebar-nav .nav-item {
-  color: #d7dadc;
-}
-
-.dark-mode .sidebar-nav .nav-item:hover {
-  background: #272729;
-}
-
-.dark-mode .sidebar-nav .nav-item.active {
-  background: #272729;
-  color: #d7dadc;
-}
-
-.dark-mode .nav-section h4 {
-  color: #818384;
-}
-
-.dark-mode .nav-icon {
-  color: #818384;
-}
-
-.dark-mode .nav-item.active .nav-icon,
-.dark-mode .nav-item:hover .nav-icon {
-  color: #d7dadc;
-}
-/* components/LeftSidebar/LeftSidebar.css - Add these styles */
+/* START COMMUNITY */
 
 .start-community-btn {
   display: flex;
@@ -110,41 +83,29 @@ height: calc(100vh - var(--navbar-height));
   text-align: left;
   cursor: pointer;
   font-size: 14px;
-  color: #878a8c;
-  transition: background-color 0.2s;
+  color: var(--text-primary);
+  transition: background-color 0.2s, color 0.2s;
   border-radius: 4px;
   margin: 4px 0;
 }
 
 .start-community-btn:hover {
-  background: #f6f7f8;
-  color: #1c1c1c;
+  background-color: var(--hover-overlay);
+  color: var(--text-primary);
 }
 
 .start-community-btn .nav-icon {
-  color: #878a8c;
-  transition: color 0.2s;
+  color: var(--text-muted);
 }
 
 .start-community-btn:hover .nav-icon {
-  color: #1c1c1c;
+  color: var(--text-primary);
 }
 
-/* Ensure the nav-section has proper spacing */
-.nav-section {
-  margin-bottom: 8px;
-}
+/* RESPONSIVE */
 
-/* Dark mode */
-.dark-mode .start-community-btn {
-  color: #d7dadc;
-}
-
-.dark-mode .start-community-btn:hover {
-  background: #272729;
-  color: #d7dadc;
-}
-
-.dark-mode .start-community-btn:hover .nav-icon {
-  color: #d7dadc;
+@media (max-width: 1200px) {
+  .left-sidebar {
+    display: none;
+  }
 }

@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "./Notifications.css";
 import NotificationItem from "../../components/NotificationItem/NotificationItem";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 import axios from "axios";
-import { io } from "socket.io-client";
-import { useRef } from "react";
+import { useSocket } from "../../context/SocketContext";
 
-
-// Format date 
+// Format date
 function formatTimeAgo(date) {
   const diff = Date.now() - new Date(date).getTime();
 
@@ -27,49 +25,57 @@ function formatTimeAgo(date) {
 }
 
 export default function Notifications() {
-  const [user,setUser] = useState({});
+  const socket = useSocket();
+  const [user, setUser] = useState({});
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showEarlier, setShowEarlier] = useState(false);
 
-  const socketRef = useRef(null);
 
+//update ui notis and mark as read
+const handleNotification = async (notification) => {
+  setNotifications((prev) => {
+    if (prev.some((n) => n._id === notification._id)) return prev;
 
-  const handleNotification = async (notification) => {
-    await axios.patch(`http://localhost:5000/notifications/${notification._id}/read`,{},{withCredentials:true})
-  const formatted = {
-    ...notification,
-    isRead: true, 
-    timeAgoFormatted: formatTimeAgo(notification.createdAt),
-  };
-  console.log("henanaaaa",formatted)
-  setNotifications((prev) => [formatted, ...prev]);
+    const formatted = {
+      ...notification,
+      isRead: true,
+      timeAgoFormatted: formatTimeAgo(notification.createdAt),
+    };
+
+    return [formatted, ...prev];
+  });
+
+  await axios.patch(
+    `${import.meta.env.VITE_API_URL}/notifications/${notification._id}/read`,
+    {},
+    { withCredentials: true }
+  );
 };
 
-
-  //fetch user for real time updates
+  // fetch user for real time updates
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/users/me",
-          { withCredentials: true }
+          `${import.meta.env.VITE_API_URL}/users/me`,
+          { withCredentials: true },
         );
         setUser(res.data);
-        console.log("userrrr",res.data)
       } catch (err) {
         console.error("Failed to load user:", err);
       }
-    }
-    fetchUser();},[])
+    };
+    fetchUser();
+  }, []);
 
   // fetch notis
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/notifications",
-          { withCredentials: true }
+          `${import.meta.env.VITE_API_URL}/notifications`,
+          { withCredentials: true },
         );
 
         const formatted = res.data.map((n) => ({
@@ -88,46 +94,34 @@ export default function Notifications() {
     fetchNotifications();
   }, []);
 
-  //real time sockets
-  //create socket
-  useEffect(() => {
-    if (!socketRef.current) {
-      socketRef.current = io("http://localhost:5000");
-    }
-  }, []);
-  
   // real time updates
-useEffect(() => {
-  console.log(user.id,socketRef.current)
-  if (!user?._id || !socketRef.current) return;
-  socketRef.current.emit("register", user._id);
-  socketRef.current.on("notification",handleNotification);
-  return () => {
-    socketRef.current.off("notification", handleNotification);
-  };
-}, [user?._id]);
-
-  
+  useEffect(() => {
+    if (!user?._id || !socket) return;
+    socket.emit("register", user._id);
+    socket.on("notification", handleNotification);
+    return () => {
+      socket.off("notification", handleNotification);
+    };
+  }, [user._id, user.id, socket]);
 
   // time based filtering
   const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
   const now = Date.now();
 
   const recent = notifications.filter(
-    (n) => now - new Date(n.createdAt).getTime() <= THREE_DAYS_MS
+    (n) => now - new Date(n.createdAt).getTime() <= THREE_DAYS_MS,
   );
 
   const older = notifications.filter(
-    (n) => now - new Date(n.createdAt).getTime() > THREE_DAYS_MS
+    (n) => now - new Date(n.createdAt).getTime() > THREE_DAYS_MS,
   );
 
-  
   // DELETE HANDLING
   const deleteAll = () => {
     setNotifications([]);
 
     axios
-      .delete("http://localhost:5000/notifications", {
+      .delete(`${import.meta.env.VITE_API_URL}/notifications`, {
         withCredentials: true,
       })
       .catch(() => {});
@@ -135,29 +129,21 @@ useEffect(() => {
 
   const markOne = (id) => {
     setNotifications(
-      notifications.map((n) =>
-        n._id === id ? { ...n, isRead: true } : n
-      )
+      notifications.filter((n) => (n._id!==id)),
     );
 
     axios
-      .patch(
-        `http://localhost:5000/notifications/${id}/read`,
-        {},
-        { withCredentials: true }
+      .delete(
+        `${import.meta.env.VITE_API_URL}/notifications/${id}`,
+        { withCredentials: true },
       )
       .catch(() => {});
   };
 
-
   return (
-    <div className="page-container">
-      {/* LEFT SIDEBAR */}
-      <LeftSidebar />
-
-      {/* MAIN CONTENT */}
+    <div style={{ display: "flex" }}>
+      <LeftSidebar/>
       <div className="notifs-page">
-        {/* Sticky Header */}
         <div className="notifs-header">
           <h2>Notifications</h2>
 
@@ -168,12 +154,10 @@ useEffect(() => {
           )}
         </div>
 
-        {/* LOADING STATE */}
         {loading ? (
           <div className="no-new-message">Loading...</div>
         ) : (
           <div className="notifs-list">
-            {/* RECENT NOTIFICATIONS */}
             {recent.length > 0 ? (
               <>
                 <h3 className="section-title">New</h3>
@@ -182,7 +166,7 @@ useEffect(() => {
                   <NotificationItem
                     key={n._id}
                     data={n}
-                    onRead={() => markOne(n._id)}
+                    onDelete={() => markOne(n._id)}
                   />
                 ))}
               </>
@@ -192,7 +176,6 @@ useEffect(() => {
               </div>
             )}
 
-            {/* EXPAND OLDER */}
             {older.length > 0 && (
               <button
                 className="expand-earlier-btn"
@@ -204,7 +187,6 @@ useEffect(() => {
               </button>
             )}
 
-            {/* OLDER NOTIFICATIONS */}
             {showEarlier && older.length > 0 && (
               <>
                 <h3 className="section-title">Older</h3>

@@ -1,13 +1,12 @@
 import Community from "../Models/Community.js";
-import Post from "../Models/Post.js"; // only if you need posts
 import Membership from "../Models/Membership.js";
+import Post from "../Models/Post.js";
 
-// ----------------------------------------------------
 // CREATE COMMUNITY
-// ----------------------------------------------------
 export const createCommunity = async (req, res) => {
   try {
-    const { name, title, description, bannerUrl, iconUrl, nsfw } = req.body || {};
+    const { name, title, description, bannerUrl, iconUrl, nsfw } =
+      req.body || {};
 
     if (!name || !description) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -22,7 +21,7 @@ export const createCommunity = async (req, res) => {
       name: name.toLowerCase(),
       title: title || name,
       description,
-      createdBy: req.user.id, 
+      createdBy: req.user.id,
       createdAt: new Date(),
       nsfw: nsfw || false,
       memberCount: 1,
@@ -32,10 +31,10 @@ export const createCommunity = async (req, res) => {
 
     const saved = await community.save();
     await Membership.create({
-      userId: req.user.id,        
+      userId: req.user.id,
       communityId: saved._id,
-      role: "moderator",            
-      joinedAt: new Date()
+      role: "moderator",
+      joinedAt: new Date(),
     });
 
     return res.status(201).json(saved);
@@ -45,10 +44,7 @@ export const createCommunity = async (req, res) => {
   }
 };
 
-// ----------------------------------------------------
 // GET COMMUNITY BY NAME
-// /communities/:name
-// ----------------------------------------------------
 export const getCommunityByName = async (req, res) => {
   try {
     const { name } = req.params;
@@ -65,10 +61,7 @@ export const getCommunityByName = async (req, res) => {
   }
 };
 
-// ----------------------------------------------------
 // DELETE COMMUNITY
-// /communities/:name
-// ----------------------------------------------------
 export const deleteCommunity = async (req, res) => {
   try {
     // must be logged in (auth middleware should set req.user.id)
@@ -91,17 +84,20 @@ export const deleteCommunity = async (req, res) => {
     });
 
     if (!membership || membership.role !== "moderator") {
-      return res.status(403).json({ message: "Only moderators can delete this community"});
+      return res
+        .status(403)
+        .json({ message: "Only moderators can delete this community" });
     }
 
     // only moderators can delete
     if (membership.role !== "moderator") {
-      return res.status(403).json({ message: "Only moderators can delete this community" });
+      return res
+        .status(403)
+        .json({ message: "Only moderators can delete this community" });
     }
 
-    // optional cleanup
     await Membership.deleteMany({ communityId: community._id });
-    // await Post.deleteMany({ communityId: community._id }); // if you want delete posts too
+    await Post.deleteMany({ communityId: community._id });
 
     await Community.deleteOne({ _id: community._id });
 
@@ -112,7 +108,6 @@ export const deleteCommunity = async (req, res) => {
   }
 };
 
-
 // Join Community
 export const joinCommunity = async (req, res) => {
   try {
@@ -120,14 +115,16 @@ export const joinCommunity = async (req, res) => {
       return res.status(401).json({ message: "Not authenticated" });
     }
 
-    const community = await Community.findOne({ name: req.params.name.toLowerCase() });
+    const community = await Community.findOne({
+      name: req.params.name.toLowerCase(),
+    });
     if (!community) {
       return res.status(404).json({ message: "Community not found" });
     }
 
     const exists = await Membership.findOne({
       userId: req.user.id,
-      communityId: community._id
+      communityId: community._id,
     });
 
     if (exists) {
@@ -135,16 +132,15 @@ export const joinCommunity = async (req, res) => {
     }
 
     await Membership.create({
-    userId: req.user.id,
-    communityId: community._id,
-    role: "member",
-    joinedAt: new Date()
-  });
+      userId: req.user.id,
+      communityId: community._id,
+      role: "member",
+      joinedAt: new Date(),
+    });
 
-  await Community.findByIdAndUpdate(
-  community._id,
-  { $inc: { memberCount: 1 } }
-  );
+    await Community.findByIdAndUpdate(community._id, {
+      $inc: { memberCount: 1 },
+    });
 
     res.json({ message: "Joined community" });
   } catch (err) {
@@ -153,8 +149,7 @@ export const joinCommunity = async (req, res) => {
   }
 };
 
-
-//community search
+// Community search
 export async function searchCommunities(req, res) {
   try {
     let { q = "", page = 1, limit = 20 } = req.query;
@@ -165,8 +160,8 @@ export async function searchCommunities(req, res) {
     const query = {
       $or: [
         { name: { $regex: q, $options: "i" } },
-        { description: { $regex: q, $options: "i" } }
-      ]
+        { description: { $regex: q, $options: "i" } },
+      ],
     };
 
     const total = await Community.countDocuments(query);
@@ -176,19 +171,17 @@ export async function searchCommunities(req, res) {
       .limit(Number(limit));
 
     res.json({ results: communities, total });
-
   } catch (err) {
     console.error("searchCommunities error:", err);
     res.status(500).json({ error: "Server error while searching communities" });
   }
 }
 
-
-///get top communities
+// Get top communities
 export async function getTopCommunities(req, res) {
   try {
     const communities = await Community.find({})
-      .sort({ memberCount: -1 })   // highest first
+      .sort({ memberCount: -1 }) // highest first
       .limit(5)
       .select("name memberCount iconUrl bannerUrl");
 
@@ -199,8 +192,7 @@ export async function getTopCommunities(req, res) {
   }
 }
 
-
-//get user communities
+// Get user communities
 export async function getUserCommunities(req, res) {
   try {
     const userId = req.params.id;
@@ -217,17 +209,13 @@ export async function getUserCommunities(req, res) {
       .map((m) => m.communityId)
       .filter((c) => c !== null);
 
-    // Returning the array directly as requested
-    console.log(results);
-    
     res.json(results);
   } catch (err) {
-    console.error("getUserCommunities error:", err);
     res.status(500).json({ error: "Server error fetching communities" });
   }
 }
 
-//leave comm
+// Leave community
 export const leaveCommunity = async (req, res) => {
   try {
     if (!req.user || !req.user.id) {
@@ -247,15 +235,16 @@ export const leaveCommunity = async (req, res) => {
     });
 
     if (!membership) {
-      return res.status(400).json({ message: "Not a member of this community" });
+      return res
+        .status(400)
+        .json({ message: "Not a member of this community" });
     }
 
     await Membership.deleteOne({ _id: membership._id });
 
-    await Community.findByIdAndUpdate(
-      community._id,
-      { $inc: { memberCount: -1 } }
-    );
+    await Community.findByIdAndUpdate(community._id, {
+      $inc: { memberCount: -1 },
+    });
 
     return res.json({ message: "Left community successfully" });
   } catch (err) {
@@ -264,54 +253,128 @@ export const leaveCommunity = async (req, res) => {
   }
 };
 
-
-//get all comms for explore
+// Get all comms for explore
 export const getAllCommunities = async (req, res) => {
   try {
     const userId = req.user?.id || null;
-
+    const query = req.query.query||"";
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 20;
     const skip = (page - 1) * limit;
 
+
     const [communities, total] = await Promise.all([
-      Community.find({})
+      Community.find({ name: { $regex: query, $options: "i" }})
         .sort({ memberCount: -1, createdAt: -1 })
         .skip(skip)
-        .limit(limit)
-        .select("name memberCount"),
-      Community.countDocuments()
+        .limit(limit),
+      Community.countDocuments(),
     ]);
 
     if (!userId) {
       return res.json({
-        results: communities.map(c => ({
+        results: communities.map((c) => ({
           ...c.toObject(),
-          isMember: false
+          isMember: false,
         })),
-        total
+        total,
       });
     }
 
-    const memberships = await Membership.find(
-      { userId },
-      { communityId: 1 }
-    );
+    const memberships = await Membership.find({ userId }, { communityId: 1 });
 
-    const memberSet = new Set(
-      memberships.map(m => m.communityId.toString())
-    );
-    const results = communities.map(c => ({
+    const memberSet = new Set(memberships.map((m) => m.communityId.toString()));
+    const results = communities.map((c) => ({
       ...c.toObject(),
-      isMember: memberSet.has(c._id.toString())
+      isMember: memberSet.has(c._id.toString()),
     }));
 
     res.json({ results, total });
-
   } catch (err) {
     console.error("getAllCommunities error:", err);
     res.status(500).json({ message: "Failed to load communities" });
   }
 };
 
+export const getMembershipStatus = async (req, res) => {
+  try {
+    const community = await Community.findOne({
+      name: req.params.name.toLowerCase(),
+    });
 
+    if (!community) {
+      return res.status(404).json({ isMember: false, role: null });
+    }
+
+    const membership = await Membership.findOne({
+      userId: req.user.id,
+      communityId: community._id,
+    });
+
+    return res.json({
+      isMember: !!membership,
+      role: membership?.role || null,
+    });
+  } catch (err) {
+    console.error("getMembershipStatus error:", err);
+    return res.status(500).json({ isMember: false, role: null });
+  }
+};
+
+// UPDATE COMMUNITY (moderator only)
+export const updateCommunity = async (req, res) => {
+  try {
+    if (!req.user?.id) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    const { name } = req.params;
+    const community = await Community.findOne({ name: name.toLowerCase() });
+
+    if (!community) {
+      return res.status(404).json({ message: "Community not found" });
+    }
+
+    // must be moderator
+    const membership = await Membership.findOne({
+      userId: req.user.id,
+      communityId: community._id,
+    });
+
+    if (!membership || membership.role !== "moderator") {
+      return res
+        .status(403)
+        .json({ message: "Only moderators can edit this community" });
+    }
+
+    const { newName, description, bannerUrl, iconUrl, title } = req.body || {};
+
+    if (newName && newName.trim()) {
+      const normalized = newName.trim().toLowerCase().replace(/^r\//, "");
+      const exists = await Community.findOne({
+        name: normalized,
+        _id: { $ne: community._id },
+      });
+
+      if (exists) {
+        return res
+          .status(409)
+          .json({ message: "Community name already exists" });
+      }
+
+      community.name = normalized;
+      community.title = title || normalized;
+    }
+
+    if (typeof description === "string") community.description = description;
+    if (typeof bannerUrl === "string") community.bannerUrl = bannerUrl;
+    if (typeof iconUrl === "string") community.iconUrl = iconUrl;
+    if (typeof title === "string") community.title = title;
+
+    await community.save();
+    return res.json({ message: "Community updated", community });
+  } catch (err) {
+    console.error("updateCommunity error:", err);
+    return res.status(500).json({ message: "Failed to update community" });
+  }
+};

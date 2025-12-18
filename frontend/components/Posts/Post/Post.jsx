@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./Post.css";
 import Comment from "../../Comment/Comment.jsx";
+import Vote from "../../Vote/Vote.jsx";
 
 export default function Post({
   post,
@@ -14,7 +15,9 @@ export default function Post({
   isSummarizing,
   onGenerateSummary,
   onShowOriginal,
-}) {
+  typingText,
+}) 
+{
   const [commentText, setCommentText] = useState("");
 
   const handleCommentSubmit = (e) => {
@@ -24,10 +27,26 @@ export default function Post({
     setCommentText("");
   };
 
+  const handleSharePost = () => {
+  const url = `https://readit-reddit-clone.vercel.app/posts/${post.id}`;
+  navigator.clipboard.writeText(url);
+  alert("Post link copied to clipboard");
+};
+
+
   return (
     <div className="post-card">
-      {/* ---------- HEADER ---------- */}
+      {/* HEADER */}
       <div className="post-header">
+        <img 
+          className="post-community-avatar"
+          src={
+            post.communityIcon
+              ? `${import.meta.env.VITE_API_URL}${post.communityIcon}`
+              : `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(post.community)}`
+            }
+            alt={`r/${post.community}`}
+        />
         <span className="post-community">r/{post.community}</span>
         <span className="dot">•</span>
         <span className="post-author">Posted by u/{post.author}</span>
@@ -35,35 +54,39 @@ export default function Post({
         <span className="post-time">{post.timeAgo}</span>
       </div>
 
-      {/* ---------- CONTENT ---------- */}
+      {/* CONTENT */}
       <div className="post-content">
         {post.title && <div className="post-title">{post.title}</div>}
-
-        {post.text && <div className="post-body">{post.text}</div>}
 
         {post.image && (
           <div className="post-image">
             <img src={post.image} alt="post visual" />
           </div>
         )}
+
+        <div className="post-body">
+          {isSummarizing && typingText
+            ? typingText
+            : post.text}
+        </div>
+
       </div>
 
-      {/* ---------- ACTIONS ---------- */}
+
+      {/* ACTIONS */}
       <div className="post-actions">
-        <button
-          className={`vote-btn upvote ${post.userVote === 1 ? "active" : ""}`}
-          onClick={onUpvote}
-        >
-          ▲
-        </button>
+        <Vote
+          voteCount={post.votes}
+          userVote={post.userVote}
+          onUpvote={onUpvote}
+          onDownvote={onDownvote}
+          orientation="horizontal"
+          itemId={post.id}
+          itemType="post"
+        />
 
-        <span className="post-votes">{post.votes}</span>
-
-        <button
-          className={`vote-btn downvote ${post.userVote === -1 ? "active" : ""}`}
-          onClick={onDownvote}
-        >
-          ▼
+        <button className="action-btn" onClick={handleSharePost}>
+          🔗 Share
         </button>
 
         {isSummaryMode ? (
@@ -79,9 +102,10 @@ export default function Post({
             {isSummarizing ? "⏳ Summarizing..." : "✨ Summary"}
           </button>
         )}
+        
       </div>
 
-      {/* ---------- COMMENT FORM ---------- */}
+      {/* COMMENT FORM */}
       <form className="comment-form" onSubmit={handleCommentSubmit}>
         <textarea
           className="comment-input"
@@ -98,17 +122,23 @@ export default function Post({
         </button>
       </form>
 
-      {/* ---------- COMMENTS ---------- */}
+      {/*COMMENTS */}
       <div className="comments-list">
-        {comments.map((comment) => (
-          <Comment
-            key={comment.id}
-            comment={comment}
-            postId={post.id}
-            onVote={onVote}
-            onReply={onReply}
-          />
-        ))}
+        {comments.length > 0 ? (
+          comments.map((comment) => (
+            <Comment
+              key={comment.id}
+              comment={comment}
+              postId={post.id}
+              onVote={onVote}
+              onReply={onReply}
+            />
+          ))
+        ) : (
+          <div className="no-comments">
+            Be the first to comment on this post!
+          </div>
+        )}
       </div>
     </div>
   );

@@ -2,8 +2,9 @@ import "./Auth.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useState } from "react";
+import Readit from "../../assets/Readit.png";
 
-export default function Login({ onLogin,inModal, switchMode }) {
+export default function Login({ onLogin, inModal, switchMode }) {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -15,11 +16,12 @@ export default function Login({ onLogin,inModal, switchMode }) {
     setError("");
 
     try {
-      console.log("logging in")
-      const res = await axios.post(
-        "http://localhost:5000/authentication/login",
+      console.log("Logging in");
+
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}/authentication/login`,
         { email, password },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       onLogin();
 
@@ -31,26 +33,22 @@ export default function Login({ onLogin,inModal, switchMode }) {
 
   return (
     <div
-      className={`auth-page login-page  ${
-        inModal ? "auth-modal-content" : ""
-      }`}
+      className={`auth-page login-page  ${inModal ? "auth-modal-content" : ""}`}
     >
       {!inModal && (
         <div className="auth-left">
           <img
-            src="/assets/reddit-logo-text.png"
-            alt="reddit"
+            src={Readit}
+            alt="Belal's Readit Logo"
             className="auth-logo side-logo"
           />
-          <h1>Welcome back</h1>
-          <p>Log in to your Reddit account</p>
         </div>
       )}
 
       <div className="auth-right">
         <form className="auth-form" onSubmit={handleSubmit}>
           <h1>Welcome Back</h1>
-          <p>Log in to your Reddit account</p>
+          <p>Log in to your Readit account</p>
 
           {error && <p className="auth-error">{error}</p>}
 
@@ -77,7 +75,7 @@ export default function Login({ onLogin,inModal, switchMode }) {
           </button>
 
           <p className="auth-small">
-            New to Reddit?{" "}
+            New to Readit?{" "}
             {inModal ? (
               <button
                 type="button"

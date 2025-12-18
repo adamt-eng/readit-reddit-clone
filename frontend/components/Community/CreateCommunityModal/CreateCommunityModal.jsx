@@ -1,76 +1,116 @@
 import { useState } from "react";
 import "./CreateCommunityModal.css";
 
-const CreateCommunityModal = ({ onClose, darkMode }) => {
+const CreateCommunityModal = ({ onClose }) => {
   const [step, setStep] = useState(0);
 
-  // --- form state ---
+  const baseUrl = import.meta.env.VITE_API_URL;
+
   const [name, setName] = useState("r/AskDaveTaylor");
   const [description, setDescription] = useState(
-    "Reddit community for fans and people interested in both the Web site AskDaveTaylor.com and the YouTube channel AskDaveTaylor. Tech Q&A with a sense of humor. Let's go!"
+    "Reddit community for fans and people interested in both the Web site AskDaveTaylor.com and the YouTube channel AskDaveTaylor. Tech Q&A with a sense of humor. Let's go!",
   );
+
+  // store files (for real upload)
+  const [bannerFile, setBannerFile] = useState(null);
+  const [iconFile, setIconFile] = useState(null);
+
+  // store previews (UI only)
   const [bannerPreview, setBannerPreview] = useState(null);
   const [iconPreview, setIconPreview] = useState(null);
 
-  // --- step navigation (ONLY 0 and 1 now) ---
   const nextStep = () => setStep((s) => Math.min(s + 1, 1));
   const prevStep = () => setStep((s) => Math.max(s - 1, 0));
 
-  // --- handlers ---
   const handleBannerChange = (e) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setBannerPreview(url);
-    }
+    if (!file) return;
+
+    setBannerFile(file);
+    setBannerPreview(URL.createObjectURL(file)); // preview only
   };
 
   const handleIconChange = (e) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setIconPreview(url);
-    }
+    if (!file) return;
+
+    setIconFile(file);
+    setIconPreview(URL.createObjectURL(file)); // preview only
   };
 
-const handleCreate = async (e) => {
-  e.preventDefault();
+  const uploadFile = async (endpoint, fieldName, file) => {
+    const form = new FormData();
+    form.append(fieldName, file);
 
-  try {
-    const response = await fetch("http://localhost:5000/communities", {
+    const res = await fetch(`${baseUrl}${endpoint}`, {
       method: "POST",
       credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: name.replace(/^r\//, ""),
-        title: name,
-        description,
-        bannerUrl: bannerPreview || "",
-        iconUrl: iconPreview || "",
-        nsfw: false, // add later if needed
-      }),
+      body: form,
     });
 
-    const data = await response.json();
+    const data = await res.json().catch(() => ({}));
 
-    if (!response.ok) {
-      alert(data.message || "Error");
-      return;
+    if (!res.ok) {
+      throw new Error(data.message || "Upload failed");
     }
 
-    console.log("Created:", data);
-    alert("Community created!");
-    onClose();
-  } catch (error) {
-    console.error(error);
-    alert("Network error");
-  }
-};
+    return data;
+  };
 
+  const handleCreate = async (e) => {
+    e.preventDefault();
 
-  // --- small helpers ---
+    try {
+      const cleanName = name.replace(/^r\//, "").trim();
+
+      let finalBannerUrl = "";
+      let finalIconUrl = "";
+
+      // 1) upload banner if chosen
+      if (bannerFile) {
+        const up = await uploadFile(
+          "/upload/community/banner",
+          "banner",
+          bannerFile,
+        );
+        finalBannerUrl = up.bannerUrl; // "/uploads/community/banners/xxx.png"
+      }
+
+      // 2) upload icon if chosen
+      if (iconFile) {
+        const up = await uploadFile("/upload/community/icon", "icon", iconFile);
+        finalIconUrl = up.iconUrl; // "/uploads/community/icons/xxx.png"
+      }
+
+      // 3) create community with REAL URLs
+      const response = await fetch(`${baseUrl}/communities`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: cleanName,
+          title: `r/${cleanName}`,
+          description,
+          bannerUrl: finalBannerUrl,
+          iconUrl: finalIconUrl,
+          nsfw: false,
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        alert(data.message || "Error");
+        return;
+      }
+
+      alert("Community created!");
+      onClose();
+    } catch (error) {
+      console.error(error);
+      alert(error.message || "Network error");
+    }
+  };
 
   const renderStepDots = () => (
     <div className="cc-step-dots">
@@ -86,18 +126,17 @@ const handleCreate = async (e) => {
         className="cc-preview-banner"
         style={
           bannerPreview
-            ? { backgroundImage: `url(${bannerPreview})`, backgroundSize: "cover" }
+            ? {
+                backgroundImage: `url(${bannerPreview})`,
+                backgroundSize: "cover",
+              }
             : {}
         }
       />
       <div className="cc-preview-header">
         <div className="cc-preview-icon-wrapper">
           {iconPreview ? (
-            <img
-              src={iconPreview}
-              alt="icon"
-              className="cc-preview-icon-img"
-            />
+            <img src={iconPreview} alt="icon" className="cc-preview-icon-img" />
           ) : (
             <div className="cc-preview-icon-placeholder">r/</div>
           )}
@@ -113,7 +152,7 @@ const handleCreate = async (e) => {
     </div>
   );
 
-  // --- STEP 1: name + description ---
+  // Step 1: name + description
   const renderStep1 = () => (
     <div className="cc-step-body cc-step-columns">
       <div className="cc-left">
@@ -154,14 +193,14 @@ const handleCreate = async (e) => {
     </div>
   );
 
-  // --- STEP 2: style (banner + icon) ---
+  // Step 2: style (banner + icon)
   const renderStep2 = () => (
     <div className="cc-step-body cc-step-columns">
       <div className="cc-left">
         <h2 className="cc-title">Style your community</h2>
         <p className="cc-subtitle">
-          Adding visual flair will catch new members’ attention and help
-          establish your community’s culture. You can update this at any time.
+          Adding visual flair will catch new members’ attention. You can update
+          this at any time.
         </p>
 
         <div className="cc-style-row">
@@ -192,7 +231,7 @@ const handleCreate = async (e) => {
 
         {bannerPreview && (
           <p className="cc-hint">
-            (Preview only – no real cropping, just the image.)
+            (Preview only – will be uploaded on Create.)
           </p>
         )}
       </div>
@@ -201,21 +240,18 @@ const handleCreate = async (e) => {
     </div>
   );
 
-  // --- main render ---
   return (
-    <div className={`cc-overlay ${darkMode ? "dark" : ""}`}>
-      <div className={`cc-modal ${darkMode ? "dark" : ""}`}>
+    <div className="cc-overlay">
+      <div className="cc-modal">
         <div className="cc-header">
           <button className="cc-x" onClick={onClose}>
             ✕
           </button>
         </div>
 
-        {/* step content */}
         {step === 0 && renderStep1()}
         {step === 1 && renderStep2()}
 
-        {/* footer */}
         <div className="cc-footer">
           <div>{renderStepDots()}</div>
           <div className="cc-footer-buttons">

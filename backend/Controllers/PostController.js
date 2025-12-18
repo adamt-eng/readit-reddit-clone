@@ -4,8 +4,7 @@ import Membership from "../Models/Membership.js";
 import Post from "../Models/Post.js";
 import Vote from "../Models/Votes.js";
 import Comment from "../Models/Comment.js";
-
-
+import User from "../Models/User.js";
 
 // Get communities where the user is a member and can post
 export const getPostableCommunities = async (req, res) => {
@@ -16,16 +15,13 @@ export const getPostableCommunities = async (req, res) => {
       return res.status(401).json({ message: "Not authenticated" });
     }
 
-    const memberships = await Membership.find(
-      { userId },
-      { communityId: 1 }
-    );
+    const memberships = await Membership.find({ userId }, { communityId: 1 });
 
-    const communityIds = memberships.map(m => m.communityId);
+    const communityIds = memberships.map((m) => m.communityId);
 
     const communities = await Community.find(
       { _id: { $in: communityIds } },
-      { name: 1, title: 1 }
+      { name: 1, title: 1, iconUrl: 1 },
     );
 
     return res.json(communities);
@@ -35,7 +31,42 @@ export const getPostableCommunities = async (req, res) => {
   }
 };
 
-// Create a new post (TEMP: userId from request body)
+// GET POSTS BY COMMUNITY
+export const getPostsByCommunity = async (req, res) => {
+  try {
+    const { name } = req.params;
+
+    const community = await Community.findOne({ name: name.toLowerCase() });
+    if (!community) {
+      return res.status(404).json({ message: "Community not found" });
+    }
+
+    const posts = await Post.find({ communityId: community._id })
+      .populate("authorId", "username avatarUrl")
+      .sort({ createdAt: -1 });
+
+    const results = posts.map((p) => ({
+      _id: p._id,
+      title: p.title,
+      content: p.content,
+      image: p.media?.url || null,
+      community: community.name,
+      communityIcon: community.iconUrl || null,
+      user: p.authorId?.username || "",
+      userAvatar: p.authorId?.avatarUrl || "",
+      upvotes: p.upvoteCount || 0,
+      comments: p.commentCount || 0,
+      createdAt: p.createdAt,
+      type: p.media?.url ? "image" : "text",
+    }));
+
+    res.json(results);
+  } catch (err) {
+    console.error("getPostsByCommunity error:", err);
+    res.status(500).json({ message: "Failed to load community posts" });
+  }
+};
+
 export const createPost = async (req, res) => {
   try {
     const { title, content, type, communityId } = req.body;
@@ -47,12 +78,12 @@ export const createPost = async (req, res) => {
 
     const membership = await Membership.findOne({
       userId,
-      communityId
+      communityId,
     });
 
     if (!membership) {
       return res.status(403).json({
-        message: "You must join the community first"
+        message: "You must join the community first",
       });
     }
 
@@ -62,12 +93,11 @@ export const createPost = async (req, res) => {
       type,
       communityId,
       authorId: userId,
-      createdAt: new Date()
+      createdAt: new Date(),
     });
     await User.findByIdAndUpdate(userId, {
-      $inc: { karma: 1 }
+      $inc: { karma: 1 },
     });
-
 
     res.status(201).json(post);
   } catch (err) {
@@ -76,48 +106,50 @@ export const createPost = async (req, res) => {
   }
 };
 
-
-
-/* ---------------- POST SEARCH ---------------- */
 export async function searchPosts(req, res) {
   try {
-    let { q = "", page = 1, limit = 20, sort = "relevance", time = "all" } = req.query;
+    let {
+      q = "",
+      page = 1,
+      limit = 20,
+      sort = "relevance",
+      time = "all",
+    } = req.query;
+
     q = q.trim().toLowerCase();
     page = Number(page);
     limit = Number(limit);
 
     if (!q) return res.json({ results: [], total: 0 });
 
-    // --- TIME FILTER ---
     let timeFilter = {};
     const now = new Date();
 
     if (time === "24h") {
       timeFilter = { createdAt: { $gte: new Date(now - 24 * 60 * 60 * 1000) } };
     } else if (time === "7d") {
-      timeFilter = { createdAt: { $gte: new Date(now - 7 * 24 * 60 * 60 * 1000) } };
+      timeFilter = {
+        createdAt: { $gte: new Date(now - 7 * 24 * 60 * 60 * 1000) },
+      };
     } else if (time === "30d") {
-      timeFilter = { createdAt: { $gte: new Date(now - 30 * 24 * 60 * 60 * 1000) } };
+      timeFilter = {
+        createdAt: { $gte: new Date(now - 30 * 24 * 60 * 60 * 1000) },
+      };
     }
 
-    // --- SEARCH QUERY ---
     const query = {
       ...timeFilter,
-      $or: [
-        { title: { $regex: q, $options: "i" } },     // priority
-      ]
+      $or: [{ title: { $regex: q, $options: "i" } }],
     };
 
-    // --- SORT ---
     let sortOption = {};
     if (sort === "newest") sortOption = { createdAt: -1 };
     else if (sort === "oldest") sortOption = { createdAt: 1 };
-    else sortOption = {}; // relevance default (Mongo handles regex match quality)
 
     const total = await Post.countDocuments(query);
 
     const posts = await Post.find(query)
-      .populate("communityId", "name")
+      .populate("communityId", "name iconUrl")
       .populate("authorId", "username avatarUrl")
       .sort(sortOption)
       .skip((page - 1) * limit)
@@ -127,23 +159,28 @@ export async function searchPosts(req, res) {
       _id: p._id,
       title: p.title,
       content: p.content,
+
       communityName: p.communityId?.name || "",
+      iconUrl:
+        p.communityId?.iconUrl || null,
+
       author: p.authorId?.username || "",
       avatarUrl: p.authorId?.avatarUrl || "",
+
       upvoteCount: p.upvoteCount,
       commentCount: p.commentCount,
       createdAt: p.createdAt,
     }));
 
     res.json({ results: formatted, total });
-
   } catch (err) {
     console.error("searchPosts error:", err);
     res.status(500).json({ error: "Server error while searching posts" });
   }
 }
 
-/* ---------- GET ALL POSTS BY USER ---------- */
+
+/* GET ALL POSTS BY USER */
 export const getPostsByUser = async (req, res) => {
   try {
     // raw id from URL may contain spaces/newlines
@@ -152,22 +189,18 @@ export const getPostsByUser = async (req, res) => {
 
     // validate ObjectId first
     if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res
-        .status(400)
-        .json({ message: "Invalid user ID format", rawId });
+      return res.status(400).json({ message: "Invalid user ID format", rawId });
     }
 
     const posts = await Post.find({ authorId: userId })
-      .sort({ createdAt: -1 })              // newest first
+      .sort({ createdAt: -1 }) // newest first
       .populate("communityId", "name title")
       .select("-__v");
 
     return res.status(200).json(posts);
   } catch (err) {
     console.error("getPostsByUser error:", err);
-    return res
-      .status(500)
-      .json({ message: "Failed to load user posts" });
+    return res.status(500).json({ message: "Failed to load user posts" });
   }
 };
 
@@ -177,27 +210,27 @@ export const getPostById = async (req, res) => {
 
     const post = await Post.findById(postId)
       .populate("authorId", "username avatar")
-      .populate("communityId", "name");
+      .populate("communityId", "name iconUrl");
 
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    if(req.user?.id)
-    {
-    const userId = req.user.id;
-    const res = await Vote.findOne({ userId, postId }).select("value -_id");
-    let vote;
-    if(res)
-      vote = res.value || 0
-    console.log(vote,"jjsjjs")
+    if (req.user?.id) {
+      const userId = req.user.id;
+      const res = await Vote.findOne({ userId, postId }).select("value -_id");
+      let vote;
 
-    if(!vote){
-      vote = 0;
+      if (res) {
+        vote = res.value || 0;
+      }
+
+      if (!vote) {
+        vote = 0;
+      }
+
+      post.userVote = vote;
     }
-
-    post.userVote = vote;
-  }
 
     res.json(post);
   } catch (err) {
@@ -206,163 +239,222 @@ export const getPostById = async (req, res) => {
   }
 };
 
-
-
-
-/* ---------- IMPROVED PERSONALIZED FEED ---------- */
+/* PERSONALIZED FEED */
 export const getPersonalizedFeed = async (req, res) => {
   try {
-    const userId = req.user?.id || null;
+    const userId = req.user?.id;
+    const { page = 1, limit = 20, sort = "best" } = req.query;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const pageNum = Math.max(1, Number(page));
+    const limitNum = Math.max(1, Number(limit));
+    const skip = (pageNum - 1) * limitNum;
+
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+
+    const memberships = await Membership.find({
+      userId: userObjectId,
+    }).select("communityId");
+
+    const membershipCount = memberships.length;
+
+    if (!membershipCount) {
+      return res.json({
+        posts: [],
+        hasMore: false,
+        membershipCount: 0,
+      });
+    }
+
+    const communityIds = memberships.map(m => m.communityId);
+
+    let pipeline = [
+      {
+        $match: {
+          isRemoved: false,
+          communityId: { $in: communityIds },
+        },
+      },
+    ];
+
+
+    if (sort === "top") {
+      pipeline.push(
+        {
+          $addFields: {
+            score: {
+              $add: [
+                { $subtract: ["$upvoteCount", "$downvoteCount"] },
+                "$commentCount",
+              ],
+            },
+          },
+        },
+        { $sort: { score: -1, createdAt: -1 } }
+      );
+    }
+
+    if (sort === "new") {
+      pipeline.push({ $sort: { createdAt: -1, _id: -1 } });
+    }
+
+
+    pipeline.push(
+      {
+        $lookup: {
+          from: "communities",
+          localField: "communityId",
+          foreignField: "_id",
+          as: "community",
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "authorId",
+          foreignField: "_id",
+          as: "author",
+        },
+      },
+      { $unwind: "$community" },
+      { $unwind: "$author" },
+
+      { $skip: skip },
+      { $limit: limitNum }
+    );
+
+    let posts = await Post.aggregate(pipeline);
+
+    if (sort === "best") {
+      posts = posts.sort(() => Math.random() - 0.5);
+    }
+
+    const totalCount = await Post.countDocuments({
+      isRemoved: false,
+      communityId: { $in: communityIds },
+    });
+
+    const hasMore = skip + posts.length < totalCount;
+
+    res.json({
+      posts: formatPosts(posts),
+      hasMore,
+      membershipCount,
+    });
+  } catch (err) {
+    console.error("User feed error:", err);
+    res.status(500).json({ message: "Failed to load user feed" });
+  }
+};
+
+
+export const getGuestFeed = async (req, res) => {
+  try {
     const { page = 1, limit = 20, sort = "best" } = req.query;
 
     const pageNum = Math.max(1, Number(page));
     const limitNum = Math.max(1, Number(limit));
     const skip = (pageNum - 1) * limitNum;
 
-    /* ============================
-       BASE MATCH
-    ============================ */
+    let pipeline = [
+      { $match: { isRemoved: false } },
+    ];
 
-    let baseMatch = { isRemoved: false };
 
-    // Logged-in users → only joined communities
-    if (userId) {
-      const memberships = await Membership.find({ userId }).select("communityId");
-      const joinedCommunityIds = memberships.map(m => m.communityId);
-
-      if (joinedCommunityIds.length === 0) {
-        return res.json({ posts: [], hasMore: false });
-      }
-
-      baseMatch.communityId = { $in: joinedCommunityIds };
+    if (sort === "top") {
+      pipeline.push(
+        {
+          $addFields: {
+            score: {
+              $add: [
+                { $subtract: ["$upvoteCount", "$downvoteCount"] },
+                "$commentCount",
+              ],
+            },
+          },
+        },
+        { $sort: { score: -1, createdAt: -1 } }
+      );
     }
-
-    /* ============================
-       USER INTERACTIONS
-    ============================ */
-
-    let interactedPostIds = [];
-
-    if (userId) {
-      const [votes, comments] = await Promise.all([
-        Vote.find({ userId, postId: { $ne: null } }).select("postId"),
-        Comment.find({ authorId: userId }).select("postId")
-      ]);
-
-      interactedPostIds = [
-        ...new Set([
-          ...votes.map(v => v.postId.toString()),
-          ...comments.map(c => c.postId.toString())
-        ])
-      ];
-    }
-
-    /* ============================
-       SORT DEFINITIONS (STABLE)
-    ============================ */
-
-    let sortStage;
 
     if (sort === "new") {
-      sortStage = { createdAt: -1, _id: -1 };
-    } else if (sort === "top") {
-      sortStage = { upvoteCount: -1, createdAt: -1 };
-    } else {
-      // best
-      // priority handled by query structure, not scores
-      sortStage = { createdAt: -1, _id: -1 };
+      pipeline.push({ $sort: { createdAt: -1, _id: -1 } });
     }
 
-    /* ============================
-       PHASE 1 — NON-INTERACTED
-    ============================ */
 
-    const nonInteracted = await Post.aggregate([
+    pipeline.push(
       {
-        $match: {
-          ...baseMatch,
-          ...(interactedPostIds.length
-            ? { _id: { $nin: interactedPostIds.map(id => new mongoose.Types.ObjectId(id)) } }
-            : {})
-        }
-      },
-      { $sort: sortStage },
-      { $skip: skip },
-      { $limit: limitNum },
-      { $lookup: { from: "communities", localField: "communityId", foreignField: "_id", as: "community" } },
-      { $lookup: { from: "users", localField: "authorId", foreignField: "_id", as: "author" } },
-      { $unwind: "$community" },
-      { $unwind: "$author" }
-    ]);
-
-    let posts = nonInteracted;
-
-    /* ============================
-       PHASE 2 — FALLBACK (INTERACTED)
-    ============================ */
-
-    if (posts.length < limitNum && interactedPostIds.length) {
-      const remaining = limitNum - posts.length;
-
-      const interacted = await Post.aggregate([
-        {
-          $match: {
-            ...baseMatch,
-            _id: { $in: interactedPostIds.map(id => new mongoose.Types.ObjectId(id)) }
-          }
+        $lookup: {
+          from: "communities",
+          localField: "communityId",
+          foreignField: "_id",
+          as: "community",
         },
-        { $sort: sortStage },
-        { $skip: Math.max(0, skip - nonInteracted.length) },
-        { $limit: remaining },
-        { $lookup: { from: "communities", localField: "communityId", foreignField: "_id", as: "community" } },
-        { $lookup: { from: "users", localField: "authorId", foreignField: "_id", as: "author" } },
-        { $unwind: "$community" },
-        { $unwind: "$author" }
-      ]);
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "authorId",
+          foreignField: "_id",
+          as: "author",
+        },
+      },
+      { $unwind: "$community" },
+      { $unwind: "$author" },
 
-      posts = [...posts, ...interacted];
+      { $skip: skip },
+      { $limit: limitNum }
+    );
+
+    let posts = await Post.aggregate(pipeline);
+
+
+    if (sort === "best") {
+      posts = posts.sort(() => Math.random() - 0.5);
     }
 
-    /* ============================
-       HAS MORE (CORRECT)
-    ============================ */
-
-    const totalRemaining = await Post.countDocuments(baseMatch);
-    const hasMore = skip + posts.length < totalRemaining;
+    const totalCount = await Post.countDocuments({ isRemoved: false });
+    const hasMore = skip + posts.length < totalCount;
 
     res.json({
       posts: formatPosts(posts),
-      hasMore
+      hasMore,
     });
-
   } catch (err) {
-    console.error("Personalized feed error:", err);
-    res.status(500).json({ message: "Failed to load feed" });
+    console.error("Guest feed error:", err);
+    res.status(500).json({ message: "Failed to load guest feed" });
   }
 };
 
 
-/* ---------- FORMATTER ---------- */
+
+
+
+/* FORMATTER */
 function formatPosts(posts) {
-  return posts.map(p => ({
+  return posts.map((p) => ({
     _id: p._id,
     title: p.title,
     content: p.content,
     media: p.media,
     community: p.community.name,
     communityTitle: p.community.title,
+    communityIcon: p.community.iconUrl || null,
     user: p.author.username,
     userAvatar: p.author.avatarUrl,
     upvotes: p.upvoteCount || 0,
     downvotes: p.downvoteCount || 0,
     comments: p.commentCount || 0,
     createdAt: p.createdAt,
-    type: p.media?.url ? "image" : "text"
+    type: p.media?.url ? "image" : "text",
   }));
 }
 
-
-//popular
+// Popular
 export const getPopularPosts = async (req, res) => {
   try {
     const { page = 1, limit = 20 } = req.query;
@@ -375,8 +467,8 @@ export const getPopularPosts = async (req, res) => {
     const posts = await Post.aggregate([
       {
         $match: {
-          isRemoved: false
-        }
+          isRemoved: false,
+        },
       },
       {
         $addFields: {
@@ -384,21 +476,18 @@ export const getPopularPosts = async (req, res) => {
             $add: [
               { $ifNull: ["$upvoteCount", 0] },
               {
-                $multiply: [
-                  { $ifNull: ["$downvoteCount", 0] },
-                  -1
-                ]
+                $multiply: [{ $ifNull: ["$downvoteCount", 0] }, -1],
               },
-              { $ifNull: ["$commentCount", 0] }
-            ]
-          }
-        }
+              { $ifNull: ["$commentCount", 0] },
+            ],
+          },
+        },
       },
       {
         $sort: {
           totalEngagement: -1,
-          createdAt: -1
-        }
+          createdAt: -1,
+        },
       },
       { $skip: skip },
       { $limit: limitPlusOne },
@@ -407,36 +496,36 @@ export const getPopularPosts = async (req, res) => {
           from: "communities",
           localField: "communityId",
           foreignField: "_id",
-          as: "community"
-        }
+          as: "community",
+        },
       },
       {
         $lookup: {
           from: "users",
           localField: "authorId",
           foreignField: "_id",
-          as: "author"
-        }
+          as: "author",
+        },
       },
       {
         $unwind: {
           path: "$community",
-          preserveNullAndEmptyArrays: true
-        }
+          preserveNullAndEmptyArrays: true,
+        },
       },
       {
         $unwind: {
           path: "$author",
-          preserveNullAndEmptyArrays: true
-        }
-      }
+          preserveNullAndEmptyArrays: true,
+        },
+      },
     ]);
 
     const hasMore = posts.length > limitNum;
     const finalPosts = hasMore ? posts.slice(0, limitNum) : posts;
 
     res.json({
-      posts: finalPosts.map(p => ({
+      posts: finalPosts.map((p) => ({
         _id: p._id,
         title: p.title,
         content: p.content,
@@ -449,9 +538,9 @@ export const getPopularPosts = async (req, res) => {
         downvotes: p.downvoteCount || 0,
         comments: p.commentCount || 0,
         createdAt: p.createdAt,
-        type: p.media?.url ? "image" : "text"
+        type: p.media?.url ? "image" : "text",
       })),
-      hasMore
+      hasMore,
     });
   } catch (err) {
     console.error("getPopularPosts error:", err);
@@ -459,32 +548,36 @@ export const getPopularPosts = async (req, res) => {
   }
 };
 
-
-
-//get user's post for profile
+// Get user's post for profile
 export async function getUserPosts(req, res) {
   try {
-    const userId = req.params.id; 
+    const userId = req.params.id;
 
-    const posts = await Post.find({ authorId: userId, isRemoved: false })
-      .populate("communityId", "name")
+    const posts = await Post.find({
+      authorId: userId,
+      isRemoved: false,
+    })
+      .populate("communityId", "name iconUrl")
       .populate("authorId", "username avatarUrl")
       .sort({ createdAt: -1 });
 
-    // Format matches the "formatted" logic in your searchPosts
     const results = posts.map((p) => ({
       _id: p._id,
       title: p.title,
       content: p.content,
+
       communityName: p.communityId?.name || "",
+      iconUrl:
+        p.communityId?.iconUrl || null,
+
       author: p.authorId?.username || "",
       avatarUrl: p.authorId?.avatarUrl || "",
+
       upvoteCount: p.upvoteCount,
       commentCount: p.commentCount,
       createdAt: p.createdAt,
     }));
 
-    // Returning the array directly as requested
     res.json(results);
   } catch (err) {
     console.error("getUserPosts error:", err);
@@ -492,13 +585,13 @@ export async function getUserPosts(req, res) {
   }
 }
 
-//delete post
+
+// Delete post
 export const deletePost = async (req, res) => {
   try {
     const userId = req.user?.id;
-    const  postId  = req.params.id;
-    console.log("id is ",postId);
-    
+    const postId = req.params.id;
+    console.log("Post ID is ", postId);
 
     if (!userId) {
       return res.status(401).json({ message: "Not authenticated" });
@@ -511,22 +604,20 @@ export const deletePost = async (req, res) => {
 
     // Only author can delete
     if (post.authorId.toString() !== userId) {
-      return res.status(403).json({ message: "Not allowed to delete this post" });
+      return res
+        .status(403)
+        .json({ message: "Not allowed to delete this post" });
     }
 
-
     // Get all comment IDs under the post
-    const comments = await Comment.find(
-      { postId },
-      { _id: 1 }
-    );
+    const comments = await Comment.find({ postId }, { _id: 1 });
 
-    const commentIds = comments.map(c => c._id);
+    const commentIds = comments.map((c) => c._id);
 
-    // 2Delete votes on comments
+    // Delete votes on comments
     if (commentIds.length > 0) {
       await Vote.deleteMany({
-        commentId: { $in: commentIds }
+        commentId: { $in: commentIds },
       });
     }
 
@@ -536,11 +627,21 @@ export const deletePost = async (req, res) => {
     // Delete all comments under the post
     await Comment.deleteMany({ postId });
 
+    //delete related notis
+    await Notification.deleteMany({
+      $or: [
+        { "payload.postId": postId },
+        { "payload.commentId": { $in: commentIds } },
+      ],
+    });
+
+
     // Delete the post itself
     await Post.deleteOne({ _id: postId });
 
-    return res.json({ message: "Post and all related data deleted successfully" });
-
+    return res.json({
+      message: "Post and all related data deleted successfully",
+    });
   } catch (err) {
     console.error("deletePost error:", err);
     return res.status(500).json({ message: "Failed to delete post" });

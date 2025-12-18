@@ -1,46 +1,51 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import bannerImg from "../../../assets/moviebanner.jpg";
-import iconImg from "../../../assets/movieicon.webp";
 import "./CommunityHeader.css";
 
-function CommunityHeader({ community }) {
-  const [joined, setJoined] = useState(false);
+function CommunityHeader({ community, isMember, setIsMember }) {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   if (!community) return null;
 
+  const baseUrl = import.meta.env.VITE_API_URL;
+
+  const shownBanner = community?.bannerUrl
+    ? `${baseUrl}${community.bannerUrl}`
+    : ""; // or a default banner
+
+  const shownIcon = community?.iconUrl ? `${baseUrl}${community.iconUrl}` : ""; // or a default icon
+
   const handleCreatePost = () => {
     navigate(`/create-post?community=${encodeURIComponent(community.name)}`);
   };
 
-  const handleJoin = async () => {
+  const handleJoinToggle = async () => {
     try {
       setLoading(true);
 
-      const res = await fetch(
-        `http://localhost:5000/communities/${encodeURIComponent(
-          community.name
-        )}/join`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-        }
-      );
+      const url = isMember
+        ? `${baseUrl}/communities/${encodeURIComponent(community.name)}/leave`
+        : `${baseUrl}/communities/${encodeURIComponent(community.name)}/join`;
+
+      const method = isMember ? "DELETE" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        credentials: "include",
+      });
 
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.message || "Join failed");
+        alert(data.message || "Action failed");
         return;
       }
 
-      setJoined(true);
+      setIsMember(!isMember);
     } catch (err) {
       console.error(err);
-      alert("Join failed (network/server error)");
+      alert("Network error");
     } finally {
       setLoading(false);
     }
@@ -49,11 +54,19 @@ function CommunityHeader({ community }) {
   return (
     <div className="communityHeader">
       <div className="bannerContainer">
-        <img src={bannerImg} alt="banner" className="banner" />
+        {shownBanner ? (
+          <img src={shownBanner} alt="banner" className="banner" />
+        ) : (
+          <div className="banner bannerPlaceholder" />
+        )}
       </div>
 
       <div className="info">
-        <img src={iconImg} alt="icon" className="communityIcon" />
+        {shownIcon ? (
+          <img src={shownIcon} alt="icon" className="communityIcon" />
+        ) : (
+          <div className="communityIcon iconPlaceholder">r/</div>
+        )}
 
         <div className="textInfo">
           <h1 className="name">r/{community.name}</h1>
@@ -67,10 +80,16 @@ function CommunityHeader({ community }) {
 
           <button
             className="joinBtn"
-            onClick={handleJoin}
-            disabled={loading || joined}
+            onClick={handleJoinToggle}
+            disabled={loading}
           >
-            {joined ? "Joined" : loading ? "Joining..." : "Join"}
+            {loading
+              ? isMember
+                ? "Leaving..."
+                : "Joining..."
+              : isMember
+                ? "Joined"
+                : "Join"}
           </button>
         </div>
       </div>

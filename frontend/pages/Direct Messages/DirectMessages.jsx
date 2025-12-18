@@ -1,12 +1,17 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState, useRef } from "react";
-import "./DM.css";
+import { useSearchParams } from "react-router-dom";
 import axios from "axios";
-import { io } from "socket.io-client";
+import { FaPaperPlane } from "react-icons/fa";
+import { useSocket } from "../../context/SocketContext";
+import "./DirectMessages.css";
+import profileFallback from "../../assets/profile.png";
+import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
 
-const socket = io("http://localhost:5000");
-
-export default function DirectMessages({ darkMode}) {
-  const [currentUser,setCurrentUser] = useState(null);
+export default function DirectMessages() {
+  const socket = useSocket();
+  const [searchParams] = useSearchParams();
+  const [currentUser, setCurrentUser] = useState(null);
   const [conversations, setConversations] = useState([]);
   const [selected, setSelected] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -15,33 +20,72 @@ export default function DirectMessages({ darkMode}) {
   const [searchResults, setSearchResults] = useState([]);
   const scrollRef = useRef();
 
-useEffect(() => {
-  const fetchMe = async () => {
-    try {
-      const res = await axios.get(
-        "http://localhost:5000/users/me",
-        { withCredentials: true }
-      );
-      setCurrentUser(res.data);
-    } catch (err) {
-      console.log("Error fetching user:", err);
-    }
-  };
+  useEffect(() => {
+    const fetchMe = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/users/me`,
+          { withCredentials: true },
+        );
+        setCurrentUser(res.data);
+      } catch (err) {
+        console.log("Error fetching user:", err);
+        setCurrentUser(null);
+      }
+    };
 
-  fetchMe();
-}, []);
+    fetchMe();
+  }, []);
 
   const resolveAvatar = (url) => {
-    if (!url) return "/profile.png";
+    if (!url) return profileFallback;
     if (url.startsWith("http://") || url.startsWith("https://")) return url;
-    // backend serves uploads at http://localhost:5000/uploads/...
-    return `http://localhost:5000${url}`;
+    return `${import.meta.env.VITE_API_URL}${url}`;
   };
 
-  useEffect(() => {
-    if (currentUser && currentUser._id) {
-      socket.emit("register", currentUser._id);
+  const formatTime = (createdAt) => {
+    if (!createdAt) return "";
+    const date = new Date(createdAt);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const formatDetailedTime = (createdAt) => {
+    if (!createdAt) return "";
+    const date = new Date(createdAt);
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  async function fetchConversations() {
+    try {
+      const url = `${import.meta.env.VITE_API_URL}/dm/conversations`;
+      const res = await axios.get(url, { withCredentials: true });
+      setConversations(res.data || []);
+    } catch (err) {
+      console.error("Failed to load conversations:", err);
     }
+  }
+
+  useEffect(() => {
+    if (!socket || !currentUser || !currentUser._id) return;
+    
+    socket.emit("register", currentUser._id);
 
     socket.on("dm:new_message", (payload) => {
       const { conversationId, message } = payload;
@@ -54,33 +98,47 @@ useEffect(() => {
     });
 
     return () => {
-      if (currentUser && currentUser._id) socket.emit("unregister", currentUser._id);
+      if (currentUser && currentUser._id)
+        socket.emit("unregister", currentUser._id);
       socket.off("dm:new_message");
     };
-     
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selected]);
+  }, [selected, currentUser, socket]);
 
   // fetch conversations once currentUser is available (prevents 401 when landing on /messages)
   useEffect(() => {
-    if (currentUser === null) fetchConversations();
-    // if no currentUser, wait until App sets it
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ ]);
+    if (currentUser && currentUser._id) {
+      fetchConversations();
+    }
+  }, [currentUser]);
 
-  useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages]);
-
-  async function fetchConversations() {
+  async function openConversation(convo) {
+    setMessages([]);
+    setSelected(convo);
     try {
-      const url = `http://localhost:5000/dm/conversations${currentUser && currentUser._id ? `?asUserId=${encodeURIComponent(currentUser._id)}` : ""}`;
+      const url = `${import.meta.env.VITE_API_URL}/dm/messages/${convo._id}?limit=200`;
       const res = await axios.get(url, { withCredentials: true });
-      setConversations(res.data || []);
+      setMessages(res.data || []);
     } catch (err) {
-      console.error("Failed to load conversations:", err);
+      console.error("Failed to load messages:", err);
+      setMessages([]);
     }
   }
+  
+  // Open specific chat from URL parameter
+  useEffect(() => {
+    const chatId = searchParams.get("chat");
+    if (chatId && conversations.length > 0 && currentUser) {
+      const convo = conversations.find((c) => c._id === chatId);
+      if (convo) {
+        openConversation(convo);
+      }
+    }
+  }, [searchParams, conversations, currentUser]);
+
+  useEffect(() => {
+    if (scrollRef.current)
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [messages]);
 
   // debounce search
   useEffect(() => {
@@ -92,11 +150,16 @@ useEffect(() => {
 
     const id = setTimeout(async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/users/search?q=${encodeURIComponent(q)}&limit=30`, {
-          withCredentials: true,
-        });
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/users/search?q=${encodeURIComponent(q)}&limit=30`,
+          {
+            withCredentials: true,
+          },
+        );
         const users = res.data && res.data.results ? res.data.results : [];
-        setSearchResults(users.filter(((user)=>user.username!=currentUser.username)));
+        setSearchResults(
+          users.filter((user) => user.username != currentUser.username),
+        );
       } catch (err) {
         console.error("User search failed:", err);
         setSearchResults([]);
@@ -104,12 +167,12 @@ useEffect(() => {
     }, 300);
 
     return () => clearTimeout(id);
-  }, [searchQuery]);
+  }, [searchQuery, currentUser?.username]);
 
   async function createConversationWithUser(user) {
     if (!user || !user._id) return;
     try {
-      const url = `http://localhost:5000/dm/conversations/${user._id}?asUserId=${encodeURIComponent(currentUser?._id || "")}`;
+      const url = `${import.meta.env.VITE_API_URL}/dm/conversations/${user._id}`;
       const res = await axios.post(url, {}, { withCredentials: true });
       const convo = res.data;
       setSearchQuery("");
@@ -122,23 +185,15 @@ useEffect(() => {
     }
   }
 
-  async function openConversation(convo) {
-    setSelected(convo);
-    try {
-      const url = `http://localhost:5000/dm/messages/${convo._id}?limit=200${currentUser && currentUser._id ? `&asUserId=${encodeURIComponent(currentUser._id)}` : ""}`;
-      const res = await axios.get(url, { withCredentials: true });
-      setMessages(res.data || []);
-    } catch (err) {
-      console.error("Failed to load messages:", err);
-      setMessages([]);
-    }
-  }
-
   async function handleSend() {
     if (!input.trim()) return;
     try {
-      const body = { conversationId: selected?._id, content: input, asUserId: currentUser?._id };
-      const res = await axios.post("http://localhost:5000/dm/messages", body, { withCredentials: true });
+      const body = { conversationId: selected?._id, content: input };
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/dm/messages`,
+        body,
+        { withCredentials: true },
+      );
       setMessages((m) => [...m, res.data]);
       setInput("");
       fetchConversations();
@@ -156,8 +211,10 @@ useEffect(() => {
   }
 
   return (
-    <div className={`chat-layout ${darkMode ? "dark-mode" : ""}`}>
-      <div className="chat-sidebar">
+    <div style={{ display: "flex" }}>
+      <LeftSidebar/>
+      <div className={"chat-layout"}>
+        <div className="chat-sidebar">
         <div className="chat-sidebar-header">
           <div>Chats</div>
           <div className="chat-new-form">
@@ -171,10 +228,11 @@ useEffect(() => {
               type="button"
               className="chat-new-btn"
               onClick={() => {
-                if (searchResults.length) createConversationWithUser(searchResults[0]);
+                if (searchResults.length)
+                  createConversationWithUser(searchResults[0]);
               }}
             >
-              New
+              +
             </button>
             {searchResults.length > 0 && (
               <div className="chat-search-dropdown">
@@ -184,10 +242,16 @@ useEffect(() => {
                     className="chat-search-item"
                     onClick={() => createConversationWithUser(u)}
                   >
-                    <img src={resolveAvatar(u.avatarUrl)} className="chat-avatar" alt="av" />
+                    <img
+                      src={resolveAvatar(u.avatarUrl)}
+                      className="chat-avatar"
+                      alt="av"
+                    />
                     <div style={{ marginLeft: 8 }}>
                       <div style={{ fontWeight: 700 }}>{u.username}</div>
-                      <div style={{ fontSize: 12, color: "var(--dm-subtext)" }}>{u.karma ? `${u.karma} karma` : ""}</div>
+                      <div style={{ fontSize: 12, color: "var(--dm-subtext)" }}>
+                        {u.karma ? `${u.karma} karma` : ""}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -201,16 +265,55 @@ useEffect(() => {
         <div className="chat-list">
           {conversations.map((c) => {
             const other = otherParticipant(c);
+            const lastMessage = c.lastMessage;
+            const lastMessagePreview = lastMessage
+              ? lastMessage.content || lastMessage.text
+              : "No messages yet";
+            const lastMessageTime = lastMessage
+              ? formatTime(lastMessage.createdAt)
+              : "";
+
             return (
               <div
                 key={c._id}
                 className={`chat-list-item ${selected?._id === c._id ? "active" : ""}`}
                 onClick={() => openConversation(c)}
               >
-                <img src={resolveAvatar(other?.avatarUrl)} className="chat-avatar" alt="av" />
+                <img
+                  src={resolveAvatar(other?.avatarUrl)}
+                  className="chat-avatar"
+                  alt="av"
+                />
                 <div className="chat-list-text">
-                  <div className="chat-list-name">{other?.username || "Unknown"}</div>
-                  <div className="chat-list-last">{/* could show last message */}</div>
+                  <div className="chat-list-name">
+                    {other?.username || "Unknown"}
+                  </div>
+                  <div className="chat-list-last">
+                    <span
+                      style={{
+                        color: "var(--dm-subtext)",
+                        fontSize: "13px",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        flex: 1,
+                      }}
+                    >
+                      {lastMessagePreview}
+                    </span>
+                    {lastMessageTime && (
+                      <span
+                        style={{
+                          color: "var(--dm-subtext)",
+                          fontSize: "12px",
+                          marginLeft: "8px",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {lastMessageTime}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             );
@@ -223,21 +326,68 @@ useEffect(() => {
           <div className="chat-empty">Select a chat to start messaging</div>
         ) : (
           <>
-            <div className="chat-window-header">{otherParticipant(selected)?.username}</div>
+            <div className="chat-window-header" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <img
+                src={resolveAvatar(otherParticipant(selected)?.avatarUrl)}
+                className="chat-avatar"
+                alt="av"
+                style={{ width: "24px", height: "24px", borderRadius: "50%", flexShrink: 0 }}
+              />
+              {otherParticipant(selected)?.username}
+            </div>
 
             <div className="chat-messages" ref={scrollRef}>
               {messages.map((m, i) => (
                 <div
                   key={i}
-                  className={`chat-message ${m.senderId?._id === currentUser?._id ? "sent" : "received"}`}
+                  style={{
+                    display: "flex",
+                    flexDirection: m.senderId?._id === currentUser?._id ? "row-reverse" : "row",
+                    alignItems: "flex-end",
+                    gap: "8px",
+                    marginBottom: "12px",
+                  }}
                 >
-                  {m.content || m.text}
+                  <img
+                    src={resolveAvatar(m.senderId?.avatarUrl)}
+                    className="chat-avatar"
+                    alt="av"
+                    style={{ width: "28px", height: "28px", borderRadius: "50%", flexShrink: 0 }}
+                  />
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: m.senderId?._id === currentUser?._id ? "row-reverse" : "row",
+                      alignItems: "center",
+                      gap: "6px",
+                      minWidth: 0,
+                      marginTop: "4px",
+                    }}
+                  >
+                    <div
+                      className={`chat-message ${m.senderId?._id === currentUser?._id ? "sent" : "received"}`}
+                    >
+                      {m.content || m.text}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "11px",
+                        color: "var(--dm-subtext)",
+                        whiteSpace: "nowrap",
+                        marginBottom: "2px",
+                      }}
+                    >
+                      {formatDetailedTime(m.createdAt)}
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
 
             <div className="chat-input-bar">
               <input
+                id="chat-message-input"
+                name="message"
                 className="chat-input"
                 placeholder="Message"
                 value={input}
@@ -246,12 +396,13 @@ useEffect(() => {
                   if (e.key === "Enter") handleSend();
                 }}
               />
-              <button className="chat-send-btn" onClick={handleSend}>
-                Send
+              <button className="chat-send-btn" onClick={handleSend} disabled={!input.trim()}>
+                <FaPaperPlane />
               </button>
             </div>
           </>
         )}
+      </div>
       </div>
     </div>
   );

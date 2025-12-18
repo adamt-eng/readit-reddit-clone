@@ -7,7 +7,6 @@ const MAX_TITLE_LENGTH = 300;
 export default function CreatePostForm({ type = "post", selectedCommunity }) {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [url, setUrl] = useState("");
   const [image, setImage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -18,14 +17,9 @@ export default function CreatePostForm({ type = "post", selectedCommunity }) {
     selectedCommunity &&
     title.trim().length > 0 &&
     !isSubmitting &&
-    (
-      type === "post" ||
-      (type === "link" && url.trim()) ||
-      (type === "image" && image)
-    );
+    (type === "post" || (type === "image" && image));
 
-  /* ---------------- IMAGE HANDLERS ---------------- */
-
+  /* IMAGE HANDLERS */
   const handleFileDrop = (e) => {
     e.preventDefault();
     if (e.dataTransfer.files?.[0]) {
@@ -41,7 +35,7 @@ export default function CreatePostForm({ type = "post", selectedCommunity }) {
 
   const handleDragOver = (e) => e.preventDefault();
 
-  /* ---------------- SUBMIT ---------------- */
+  /* SUBMIT */
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -51,8 +45,9 @@ export default function CreatePostForm({ type = "post", selectedCommunity }) {
       setIsSubmitting(true);
       let res;
 
+      // TEXT POST
       if (type === "post") {
-        res = await fetch("http://localhost:5000/posts", {
+        res = await fetch(`${import.meta.env.VITE_API_URL}/posts`, {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
@@ -60,36 +55,53 @@ export default function CreatePostForm({ type = "post", selectedCommunity }) {
             title,
             content: body,
             type: "post",
-            communityId: selectedCommunity._id
-          })
+            communityId: selectedCommunity._id,
+          }),
         });
       }
 
-      if (type === "link") {
-        res = await fetch("http://localhost:5000/posts", {
+      // IMAGE POST (with body text)
+      if (type === "image") {
+        res = await fetch(`${import.meta.env.VITE_API_URL}/posts`, {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             title,
-            content: url,
-            type: "link",
-            communityId: selectedCommunity._id
-          })
+            content: body,
+            type: "image",
+            communityId: selectedCommunity._id,
+          }),
         });
-      }
 
-      if (type === "image") {
+        if (!res.ok) {
+          const err = await res.json();
+          alert(err.message || "Failed to create post");
+          return;
+        }
+
+        const newPost = await res.json();
+
         const formData = new FormData();
-        formData.append("file", image);
-        formData.append("title", title);
-        formData.append("communityId", selectedCommunity._id);
+        formData.append("postImage", image);
+        formData.append("postId", newPost._id);
 
-        res = await fetch("http://localhost:5000/upload/image-post", {
-          method: "POST",
-          credentials: "include",
-          body: formData
-        });
+        const imgRes = await fetch(
+          `${import.meta.env.VITE_API_URL}/upload/post-image`,
+          {
+            method: "POST",
+            credentials: "include",
+            body: formData,
+          },
+        );
+
+        if (!imgRes.ok) {
+          alert("Image upload failed");
+          return;
+        }
+
+        navigate(`/posts/${newPost._id}`);
+        return;
       }
 
       if (!res.ok) {
@@ -100,7 +112,6 @@ export default function CreatePostForm({ type = "post", selectedCommunity }) {
 
       const newPost = await res.json();
       navigate(`/posts/${newPost._id}`);
-
     } catch (err) {
       console.error("CREATE POST ERROR:", err);
       alert("Something went wrong");
@@ -109,11 +120,14 @@ export default function CreatePostForm({ type = "post", selectedCommunity }) {
     }
   };
 
-  /* ---------------- RENDER ---------------- */
+  /* RENDER */
 
   return (
-    <form className="create-post-form" onSubmit={handleSubmit} autoComplete="off">
-
+    <form
+      className="create-post-form"
+      onSubmit={handleSubmit}
+      autoComplete="off"
+    >
       {/* TITLE */}
       <div className="input-wrap">
         <input
@@ -131,35 +145,18 @@ export default function CreatePostForm({ type = "post", selectedCommunity }) {
         </span>
       </div>
 
-      {/* TEXT POST */}
-      {type === "post" && (
+      {/* BODY TEXT (POST + IMAGE) */}
+      {(type === "post" || type === "image") && (
         <div className="textarea-wrap">
           <textarea
             className="textarea"
             placeholder={
-              selectedCommunity
-                ? "Body text (optional)"
-                : "Select a community first"
+              selectedCommunity ? "Body text" : "Select a community first"
             }
             disabled={!selectedCommunity}
             value={body}
             onChange={(e) => setBody(e.target.value)}
           />
-        </div>
-      )}
-
-      {/* LINK POST */}
-      {type === "link" && (
-        <div className="input-wrap link-wrap">
-          <input
-            className="input"
-            type="url"
-            placeholder="Link URL"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            required
-          />
-          <span className="input-required">*</span>
         </div>
       )}
 
@@ -171,12 +168,10 @@ export default function CreatePostForm({ type = "post", selectedCommunity }) {
           onDrop={handleFileDrop}
           onDragOver={handleDragOver}
         >
-          <span className="dropzone-text">
-            Drag and Drop or upload media
-          </span>
-          {image && (
-            <div className="image-preview">{image.name}</div>
-          )}
+          <span className="dropzone-text">Drag and Drop or upload media</span>
+
+          {image && <div className="image-preview">{image.name}</div>}
+
           <input
             ref={fileInputRef}
             type="file"
@@ -189,9 +184,6 @@ export default function CreatePostForm({ type = "post", selectedCommunity }) {
 
       {/* ACTIONS */}
       <div className="btn-row">
-        <button className="btn" type="button" disabled>
-          Save Draft
-        </button>
         <button
           className={`btn primary ${!canSubmit ? "disabled" : ""}`}
           type="submit"

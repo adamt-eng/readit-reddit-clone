@@ -20,13 +20,14 @@ async function callHfSummarize(input, model = "facebook/bart-large-cnn") {
 
   return {
     summary: (item.summary_text || item.generated_text || "").trim(),
-    modelName: model
+    modelName: model,
   };
 }
 
 async function summarizePost(post, { hfModel }) {
   const title = post.title || "Untitled";
-  const content = (post.content || "").slice(0, 4000);
+  const content = (post.text || "").slice(0, 4000);
+
 
   const input = `${title}\n\n${content}`;
 
@@ -37,15 +38,16 @@ async function summarizePost(post, { hfModel }) {
     modelMeta: {
       modelName: hf.modelName,
       provider: "hf-inference",
-      tokensUsed: undefined
-    }
+      tokensUsed: undefined,
+    },
   };
 }
 
 export const getOrGenerateSummaryForPost = async (req, res) => {
   try {
     const { postId } = req.params;
-    const hfModel = req.query?.hfModel || req.body?.hfModel || "facebook/bart-large-cnn";
+    const hfModel =
+      req.query?.hfModel || req.body?.hfModel || "facebook/bart-large-cnn";
 
     if (!Types.ObjectId.isValid(postId))
       return res.status(400).json({ message: "Invalid or missing postId" });
@@ -56,7 +58,7 @@ export const getOrGenerateSummaryForPost = async (req, res) => {
 
     if (existing) return res.json(existing);
 
-    const post = await Post.findById(postId).select("title content authorId");
+    const post = await Post.findById(postId).select("title text authorId");
     if (!post) return res.status(404).json({ message: "Post not found" });
 
     const { summaryText, modelMeta } = await summarizePost(post, { hfModel });
@@ -66,13 +68,15 @@ export const getOrGenerateSummaryForPost = async (req, res) => {
       summaryText,
       generatedBy: post.authorId,
       modelMeta,
-      createdAt: new Date()
+      createdAt: new Date(),
     });
 
     return res.status(201).json(created);
   } catch (err) {
     console.error("AI SUMMARY ERROR:", err);
-    return res.status(500).json({ message: "Failed to get or generate AI summary" });
+    return res
+      .status(500)
+      .json({ message: "Failed to get or generate AI summary" });
   }
 };
 
@@ -89,13 +93,13 @@ export const generateSummaryForPost = async (req, res) => {
 
     const existing = await AiSummary.findOne({ postId });
 
-    const { summaryText, modelMeta } = await summarizePost(post, {hfModel});
+    const { summaryText, modelMeta } = await summarizePost(post, { hfModel });
 
     if (existing) {
-        existing.summaryText = summaryText;
-        existing.generatedBy = post.authorId;
-        existing.modelMeta = modelMeta;
-        existing.createdAt =  new Date()
+      existing.summaryText = summaryText;
+      existing.generatedBy = post.authorId;
+      existing.modelMeta = modelMeta;
+      existing.createdAt = new Date();
 
       await existing.save();
       return res.json(existing);
@@ -106,7 +110,7 @@ export const generateSummaryForPost = async (req, res) => {
       summaryText,
       generatedBy: post.authorId,
       modelMeta,
-      createdAt: new Date()
+      createdAt: new Date(),
     });
 
     return res.status(201).json(created);
@@ -118,5 +122,5 @@ export const generateSummaryForPost = async (req, res) => {
 
 export default {
   getOrGenerateSummaryForPost,
-  generateSummaryForPost
+  generateSummaryForPost,
 };

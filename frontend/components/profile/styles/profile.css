@@ -1,26 +1,18 @@
-/* src/components/profile/styles/profile.css */
-
-/* NEW REDDIT PROFILE - EXACT 2025 DESIGN */
 .profile-page-wrapper {
   display: flex;
   min-height: 100vh;
-  background: #ffffff;
+  background: var(--bg-page);
   margin: 0;
   padding: 0;
 }
-.dark-mode .profile-page-wrapper {
-  background:  #1a1a1b  !important;  /* match app/body dark */
-}
 
 .profile-page {
-
   flex: 1;
   min-width: 0;
   min-height: 100vh;
   margin: 0;
   padding: 0;
 }
-
 
 .profile-container {
   max-width: 1248px;
@@ -41,21 +33,22 @@
   top: 16px;
 }
 
+/* REMOVE hard-coded overrides — rely on component styles */
 .profile-header,
 .profile-tabs,
 .profile-content,
 .profile-sidebar,
 .profile-sidebar-info {
-  background: #ffffff !important;
+  background: var(--bg-surface);
 }
 
+/* RESPONSIVE */
 
-/* Responsive layout */
 @media (max-width: 960px) {
   .profile-container {
     grid-template-columns: 1fr;
   }
-  
+
   .profile-aside {
     display: none;
   }

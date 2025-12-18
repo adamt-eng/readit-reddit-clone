@@ -1,32 +1,29 @@
-/* CommunityPage.css */
-
 /* outer shell */
 .pageShell {
   display: flex;
   min-height: 100vh;
 }
 
-/* everything to the right of the fixed LeftSidebar */
 .mainWrapper {
   flex: 1;
   width: 100%;
   min-height: 100vh;
 }
 
-
 /* page background */
 .communityPage {
-  background: #f8f9fa;
+  background: var(--bg-page);
   min-height: 100vh;
-  padding: 24px 0;
+  padding: 0;           /* remove top spacing */
+  padding-bottom: 24px; /* keep bottom spacing if you want */
 }
+
 
 /* main content container */
 .communityContent {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px;
-
   display: flex;
   gap: 24px;
   align-items: flex-start;
@@ -40,12 +37,12 @@
 
 /* wrapper that makes the sidebar sticky */
 .right {
-  flex: 0 0 300px;     /* same size as your sidebar */
+  flex: 0 0 300px;
   width: 300px;
   align-self: flex-start;
-
   position: sticky;
-  top: 88px;           /* adjust if your header is taller */
+  top: 100px;
+  margin-top: 12px;
 }
 
 /* responsive */

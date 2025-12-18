@@ -1,33 +1,36 @@
-/* Recent Posts Section */
 .recent-posts-box {
-  background: #f7f8f8;
+  background: var(--bg-surface);
   border-radius: 8px;
   margin-bottom: 16px;
   overflow: hidden;
   transition: background-color 0.3s;
 }
 
+/* HEADER */
+
 .recent-posts-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  background: #f7f8f8;
-  border-bottom: 1px solid #edeff1;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-default);
 }
 
 .recent-posts-header h3 {
   margin: 0;
   font-size: 12px;
   font-weight: 600;
-  color: #7a7b7b;
+  color: var(--text-muted);
   text-transform: uppercase;
 }
+
+/* CLEAR BUTTON */
 
 .clear-recent-btn {
   background: none;
   border: none;
-  color: #0079d3;
+  color: var(--accent);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -37,9 +40,11 @@
 }
 
 .clear-recent-btn:hover {
-  background: #e8f0fe;
-  color: #0066b3;
+  background: var(--bg-page);
+  color: var(--accent-hover);
 }
+
+/* LIST */
 
 .recent-posts-list {
   padding: 8px 0;
@@ -52,7 +57,7 @@
   gap: 12px;
   transition: background-color 0.2s;
   cursor: pointer;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-default);
 }
 
 .recent-post-item:last-child {
@@ -60,8 +65,10 @@
 }
 
 .recent-post-item:hover {
-  background: #f6f7f8;
+  background: var(--bg-page);
 }
+
+/* THUMBNAIL */
 
 .recent-post-thumbnail {
   width: 60px;
@@ -78,14 +85,16 @@
 }
 
 .recent-post-thumbnail .default-thumbnail {
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
+  background: var(--bg-page);
+  border: 1px solid var(--border-default);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
-  color: #878a8c;
+  color: var(--text-muted);
 }
+
+/* META */
 
 .recent-post-header {
   display: flex;
@@ -104,7 +113,7 @@
 .recent-post-community {
   font-size: 11px;
   font-weight: 600;
-  color: #1c1c1c;
+  color: var(--text-primary);
   cursor: pointer;
 }
 
@@ -112,15 +121,13 @@
   text-decoration: underline;
 }
 
-.recent-post-time {
+.recent-post-time,
+.recent-post-divider {
   font-size: 10px;
-  color: #787c7e;
+  color: var(--text-muted);
 }
 
-.recent-post-divider {
-  margin: 0 4px;
-  color: #787c7e;
-}
+/* CONTENT */
 
 .recent-post-content {
   flex: 1;
@@ -130,21 +137,24 @@
 .recent-post-title {
   font-size: 12px;
   font-weight: 600;
-  color: #1c1c1c;
+  color: var(--text-primary);
   margin-bottom: 6px;
   line-height: 1.3;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* STATS */
 
 .recent-post-stats {
   display: flex;
   align-items: center;
   gap: 12px;
   font-size: 10px;
-  color: #787c7e;
+  color: var(--text-muted);
 }
 
 .recent-post-stat {
@@ -157,68 +167,12 @@
   font-size: 10px;
 }
 
+/* EMPTY STATE */
+
 .no-recent-posts {
   padding: 20px 16px;
   text-align: center;
-  color: #787c7e;
+  color: var(--text-muted);
   font-size: 12px;
   font-style: italic;
-}
-
-/* Dark mode styles for recent posts */
-.dark-mode .recent-posts-box {
-  background: #1a1a1b;
-  border-color: #343536;
-}
-
-.dark-mode .recent-posts-header {
-  background: #272729;
-  border-bottom-color: #343536;
-}
-
-.dark-mode .recent-posts-header h3 {
-  color: #d7dadc;
-}
-
-.dark-mode .clear-recent-btn {
-  color: #4dabf7;
-}
-
-.dark-mode .clear-recent-btn:hover {
-  background: #272729;
-  color: #74c0fc;
-}
-
-.dark-mode .recent-post-item {
-  border-bottom-color: #343536;
-}
-
-.dark-mode .recent-post-item:hover {
-  background: #272729;
-}
-
-.dark-mode .recent-post-community {
-  color: #d7dadc;
-}
-
-.dark-mode .recent-post-time {
-  color: #818384;
-}
-
-.dark-mode .recent-post-title {
-  color: #d7dadc;
-}
-
-.dark-mode .recent-post-stats {
-  color: #818384;
-}
-
-.dark-mode .recent-post-thumbnail .default-thumbnail {
-  background: #2d2d2d;
-  border-color: #404040;
-  color: #818384;
-}
-
-.dark-mode .no-recent-posts {
-  color: #818384;
 }

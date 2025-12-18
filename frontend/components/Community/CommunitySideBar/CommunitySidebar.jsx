@@ -1,62 +1,82 @@
+import { useState } from "react";
 import "./CommunitySidebar.css";
+import EditCommunityModal from "../EditCommunityModal/EditCommunityModal";
 
-function CommunitySidebar({ community }) {
+function CommunitySidebar({
+  community,
+  isMember,
+  setIsMember,
+  isModerator,
+  onCommunityUpdated,
+}) {
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
   if (!community) return null;
+
+  const handleLeave = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/communities/${community.name}/leave`,
+        { method: "DELETE", credentials: "include" },
+      );
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        alert(data.message || "Leave failed");
+        return;
+      }
+
+      alert("Left community successfully");
+      setIsMember(false);
+    } catch (err) {
+      console.error("Leave error:", err);
+      alert("Network or server error");
+    }
+  };
 
   return (
     <div className="communitySidebar">
-      {/* About Community */}
       <div className="aboutSection">
-        <h2>MovieDetails</h2>
-        <p className="description">Movie Details, Movie Details</p>
+        <h2>r/{community.name}</h2>
+        <p className="description">{community.description}</p>
+
         <div className="stats">
           <div className="stat">
-            <strong>561K</strong>
+            <strong>{community.memberCount}</strong>
             <span>Members</span>
           </div>
-          <div className="stat">
-            <strong>87</strong>
-            <span>Weekly contributors</span>
-          </div>
         </div>
-        <p className="created">Created Jun 30, 2017</p>
-        <div className="publicInfo">
-          <span className="icon">⧉</span>
-          <span>Public</span>
-        </div>
-        <button className="joinBtn">Join</button>
+
+        {isMember && (
+          <button className="leaveBtn" onClick={handleLeave}>
+            Leave
+          </button>
+        )}
+
+        {isModerator && (
+          <button
+            className="editCommunityBtn"
+            onClick={() => setIsEditOpen(true)}
+          >
+            Edit Community
+          </button>
+        )}
       </div>
 
-      {/* Community Bookmarks */}
-      <div className="bookmarksSection">
-        <h3>COMMUNITY BOOKMARKS</h3>
-        <div className="bookmark">
-          <span>The Details Network</span>
-          <span className="chevron">▸</span>
-        </div>
-        <div className="bookmark">
-          <span>The Details Network2</span>
-          <span className="chevron">▸</span>
-        </div>
-        <div className="bookmark">
-          <span>Chat rooms</span>
-          <span className="chevron">▸</span>
-        </div>
-        <div className="bookmark">
-          <span>Twitter</span>
-          <span className="chevron">▸</span>
-        </div>
-      </div>
-
-      {/* Rules */}
-      <div className="rulesSection">
-        <h3>r/MovieDetails Rules</h3>
-        <div className="ruleList">
-          <div className="rule">1. No spoilers</div>
-          <div className="rule">2. Be respectful</div>
-          {/* Add more as needed */}
-        </div>
-      </div>
+      {isEditOpen && (
+        <EditCommunityModal
+          key={community?._id || community?.name}
+          community={community}
+          onClose={() => setIsEditOpen(false)}
+          onSaved={(updatedCommunity) => {
+            //update community in parent immediately
+            onCommunityUpdated?.(updatedCommunity);
+            //close modal
+            setIsEditOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }

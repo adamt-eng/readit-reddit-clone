@@ -7,16 +7,19 @@ export default function createDMRouter({ io, onlineUsers }) {
   const DMController = createDMController({ io, onlineUsers });
 
   // create or get conversation with other user
-  router.post("/conversations/:otherUserId", auth, DMController.getOrCreateConversation);
+  router.post(
+    "/conversations/:otherUserId",
+    DMController.getOrCreateConversation,
+  );
 
   // list conversations for current user
-  router.get("/conversations", auth, DMController.listConversations);
+  router.get("/conversations",  DMController.listConversations);
 
   // get messages for a conversation
-  router.get("/messages/:conversationId", auth, DMController.getMessages);
+  router.get("/messages/:conversationId",  DMController.getMessages);
 
   // send message (body: { conversationId?, recipientId?, content })
-  router.post("/messages", auth, DMController.sendMessage);
+  router.post("/messages",  DMController.sendMessage);
 
   return router;
 }

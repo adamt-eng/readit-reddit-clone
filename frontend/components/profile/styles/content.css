@@ -1,8 +1,8 @@
 /* Main content area below tabs */
 .profile-content {
-  background: white;
+  background: var(--bg-surface);
   min-height: 400px;
-  border: 1px solid #edeff1; 
+  border: 1px solid var(--border-default);
   border-top: none;
   border-radius: 0 0 8px 8px;
   padding: 20px;
@@ -10,10 +10,11 @@
   align-items: center;
 }
 
+/* Empty state */
 .empty-state {
   text-align: center;
   padding: 60px 20px;
-  color: #787c7e;
+  color: var(--text-muted);
 }
 
 .empty-state img {
@@ -22,6 +23,7 @@
   margin-bottom: 20px;
 }
 
+/* Items list */
 .profile-items-container {
   display: flex;
   flex-direction: column;
@@ -30,29 +32,20 @@
 }
 
 .profile-item-frame {
-  background-color: #fff; 
-  border: 1px solid #edeff1; 
-  border-radius: 8px; 
-  padding: 8px; 
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  padding: 8px;
   transition: border-color 0.2s;
 }
 
 .profile-item-frame:hover {
-  border-color: #878a8c; 
+  border-color: var(--text-muted);
 }
 
-/* Dark mode support */
-.appdark-mode .profile-item-frame {
-  background-color: #1a1a1b;
-  border-color: #343536;
-}
-
-.appdark-mode .profile-item-frame:hover {
-  border-color: #d7dadc;
-}
-
+/* Empty tab message */
 .empty-tab-message {
   padding: 40px;
   text-align: center;
-  color: #777;
+  color: var(--text-muted);
 }

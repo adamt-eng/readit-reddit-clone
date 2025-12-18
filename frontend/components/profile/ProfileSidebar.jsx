@@ -6,10 +6,9 @@ import "./styles/sidebar.css";
 export default function ProfileSidebar({ user, isMyProfile }) {
   const [stats, setStats] = useState(null);
 
-  // safe avatar src (fallback if missing)
   const avatarSrc =
     user?.avatarUrl && user.avatarUrl.trim() !== ""
-      ? `http://localhost:5000${user.avatarUrl}`
+      ? `${import.meta.env.VITE_API_URL}${user.avatarUrl}`
       : "../../assets/default-avatar.png";
 
   useEffect(() => {
@@ -17,14 +16,14 @@ export default function ProfileSidebar({ user, isMyProfile }) {
 
     const fetchStats = async () => {
       try {
-        console.log("fetching stats");
-        
+        console.log("Fetching stats");
+
         const res = await axios.get(
-          `http://localhost:5000/users/stats/${user._id}`,
-          { withCredentials: true }
+          `${import.meta.env.VITE_API_URL}/users/stats/${user._id}`,
+          { withCredentials: true },
         );
-        console.log("Stats ",res.data);
-        
+        console.log("Stats ", res.data);
+
         setStats(res.data);
       } catch (err) {
         console.error("Failed to fetch user stats:", err);
@@ -38,21 +37,21 @@ export default function ProfileSidebar({ user, isMyProfile }) {
     <div className="profile-sidebar">
       <div className="profile-sidebar-top" />
 
-      <img
-        src={avatarSrc}
-        alt="avatar"
-        className="profile-sidebar-avatar"
-      />
+      <img src={avatarSrc} alt="avatar" className="profile-sidebar-avatar" />
 
       <div className="profile-sidebar-info">
-        <h2 className="profile-sidebar-name">{user?.username || "Loading..."}</h2>
+        <h2 className="profile-sidebar-name">
+          {user?.username || "Loading..."}
+        </h2>
 
-        <p className="profile-sidebar-handle">u/{user?.username || "Loading..."}</p>
+        <p className="profile-sidebar-handle">
+          u/{user?.username || "Loading..."}
+        </p>
 
         <button
           onClick={() => {
             navigator.clipboard.writeText(
-              `http://localhost:5173/user/${user.username}`
+              `https://readit-reddit-clone.vercel.app/user/${user.username}`,
             );
             alert("Profile link copied to clipboard");
           }}
@@ -63,39 +62,37 @@ export default function ProfileSidebar({ user, isMyProfile }) {
         {/* Only show Edit Profile on YOUR OWN profile */}
         {isMyProfile && (
           <Link to="/edit-profile">
-            <button className="edit-profile-sidebar-btn">
-              Edit Profile
-            </button>
+            <button className="edit-profile-sidebar-btn">Edit Profile</button>
           </Link>
         )}
 
         <div className="profile-stats-grid">
           <div className="stat-item">
-            <div className="stat-value">
-              {stats?.karma ?? user?.karma ?? 0}
+            <div className="stat-value">{stats?.karma ?? user?.karma ?? 0}</div>
+            <div className="stat-label">
+              <strong>Karma</strong>
             </div>
-            <div className="stat-label"><strong>Karma</strong></div>
           </div>
 
           <div className="stat-item">
-            <div className="stat-value">
-              {stats?.postsCount ?? 0}
+            <div className="stat-value">{stats?.postsCount ?? 0}</div>
+            <div className="stat-label">
+              <strong>Contributions</strong>
             </div>
-            <div className="stat-label"><strong>Contributions</strong></div>
           </div>
 
           <div className="stat-item">
-            <div className="stat-value">
-              {stats?.communitiesCount ?? 0}
+            <div className="stat-value">{stats?.communitiesCount ?? 0}</div>
+            <div className="stat-label">
+              <strong>Active in</strong>
             </div>
-            <div className="stat-label"><strong>Active in</strong></div>
           </div>
 
           <div className="stat-item">
-            <div className="stat-value">
-              {stats?.age ?? "0d"}
+            <div className="stat-value">{stats?.age ?? "0d"}</div>
+            <div className="stat-label">
+              <strong>Reddit age</strong>
             </div>
-            <div className="stat-label"><strong>Reddit age</strong></div>
           </div>
         </div>
 
@@ -114,7 +111,9 @@ export default function ProfileSidebar({ user, isMyProfile }) {
 
           <div className="achievement-footer">
             <span className="unlocked-count">3 unlocked</span>
-            <a href="#" className="view-all-link">View All</a>
+            <a href="#" className="view-all-link">
+              View All
+            </a>
           </div>
         </div>
       </div>

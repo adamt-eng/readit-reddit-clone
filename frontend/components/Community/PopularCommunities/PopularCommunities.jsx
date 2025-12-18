@@ -1,9 +1,9 @@
 import { useState } from "react";
 import "./PopularCommunities.css";
 
-const PopularCommunities = ({ communities, darkMode }) => {
+const PopularCommunities = ({ communities }) => {
   const [showAll, setShowAll] = useState(false);
-  
+
   // Show only first 3 communities by default, show all when "See More" is clicked
   const displayedCommunities = showAll ? communities : communities.slice(0, 3);
 
@@ -12,7 +12,7 @@ const PopularCommunities = ({ communities, darkMode }) => {
   };
 
   return (
-    <div className={`popular-communities ${darkMode ? 'dark-mode' : ''}`}>
+    <div className={"popular-communities"}>
       <div className="communities-header">
         <h3>Popular Communities</h3>
       </div>
@@ -20,28 +20,27 @@ const PopularCommunities = ({ communities, darkMode }) => {
         {displayedCommunities.map((community, index) => (
           <div key={index} className="community-item">
             <div className="community-avatar">
-              <img 
-                src={community.avatar} 
+              <img
+                src={community.avatar}
                 alt={community.name}
                 className="community-avatar-img"
               />
             </div>
             <div className="community-info">
               <span className="community-name">r/{community.name}</span>
-              <span className="community-members">{community.members} members</span>
+              <span className="community-members">
+                {community.members} members
+              </span>
             </div>
           </div>
         ))}
       </div>
-      
+
       {/* See More Button */}
       {communities.length > 3 && (
         <div className="communities-footer">
-          <button 
-            className="see-more-btn"
-            onClick={toggleShowAll}
-          >
-            {showAll ? 'See Less' : 'See More'}
+          <button className="see-more-btn" onClick={toggleShowAll}>
+            {showAll ? "See Less" : "See More"}
           </button>
         </div>
       )}

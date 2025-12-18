@@ -1,4 +1,4 @@
-export default function EmptyState({title,message}) {
+export default function EmptyState({ title, message }) {
   return (
     <div className="empty-state">
       <img
@@ -7,9 +7,7 @@ export default function EmptyState({title,message}) {
         className="empty-snoo"
       />
       <h2 className="empty-title">{title}</h2>
-      <p className="empty-text">
-        {message}
-      </p>
+      <p className="empty-text">{message}</p>
     </div>
   );
 }

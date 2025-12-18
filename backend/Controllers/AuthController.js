@@ -9,10 +9,11 @@ const createToken = (payload) => {
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
-// ------------------ SIGNUP ------------------
+// SIGNUP
 export const signup = async (req, res) => {
   try {
     const { username, email, password } = req.body;
+    console.log(username,email,password)
 
     // Check email
     const existingUserName = await User.findOne({ username });
@@ -30,6 +31,7 @@ export const signup = async (req, res) => {
       return res.status(400).json({ message: "Username already taken" });
 
     const hashed = await bcrypt.hash(password, process.env.HASHING);
+    console.log(hashed)
 
     const user = await User.create({
       username,
@@ -42,16 +44,19 @@ export const signup = async (req, res) => {
       karma: 0
     });
 
+    const isProduction = process.env.NODE_ENV === "production";
+
     const token = createToken({ id: user._id });
     console.log(token)
     res.cookie("auth", token, {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 100
     });
 
     user.password = undefined;
+    console.log(user)
 
     res.status(200).json({ message: "User created", user });
   } catch (err) {
@@ -60,7 +65,7 @@ export const signup = async (req, res) => {
   }
 };
 
-// ------------------ LOGIN (Auto-hash un-hashed passwords) ------------------
+// LOGIN
 export const login = async (req, res) => {
   console.log(req.body);
   
@@ -73,7 +78,7 @@ export const login = async (req, res) => {
     if (!user)
       return res.status(404).json({ message: "User not found" });
 
-    // ------------------ CHECK IF PASSWORD IS HASHED ------------------
+    // CHECK IF PASSWORD IS HASHED
     let isHashed = false;
 
     if (typeof user.password === "string") {
@@ -84,7 +89,6 @@ export const login = async (req, res) => {
     }
     console.log(user.password);
     
-    // If password in DB is NOT hashed → hash it and save it
     if (!isHashed) {
       console.log("⚠️ Plaintext password detected. Auto-hashing now...");
 
@@ -94,12 +98,10 @@ export const login = async (req, res) => {
         });
       }
 
-      // Hash old plaintext password
-      const hashed = await bcrypt.hash(user.password, process.env.HASHING);
+      const hashed = bcrypt.hash(user.password, process.env.HASHING);
       user.password = hashed;
       await user.save();
     }
-    // ---------------------------------------------------------------
 
     const match = await bcrypt.compare(password, user.password);
     if (!match)
@@ -107,10 +109,12 @@ export const login = async (req, res) => {
 
     const token = createToken({ id: user._id });
  
+    const isProduction = process.env.NODE_ENV === "production";
+
     res.cookie("auth", token, {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 100
     });
 
@@ -123,7 +127,7 @@ export const login = async (req, res) => {
   }
 };
 
-// ------------------ LOGOUT ------------------
+// LOGOUT
 export const logout = (req, res) => {
   res.clearCookie("auth");
   res.json({ message: "Logged out" });

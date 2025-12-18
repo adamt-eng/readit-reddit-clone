@@ -1,35 +1,31 @@
 import { useEffect, useState } from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import { Link } from "react-router-dom";
-
 import axios from "axios";
-
-import "../SearchResults/SearchResults.css";
-
 import SearchItem from "../../components/SearchItem/SearchItem";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
+import TopCommunities from "../../components/TopCommunities/TopCommunities";
+import "./ExplorePage.css";
 
-const API_URL = "http://localhost:5000";
+const API_URL = `${import.meta.env.VITE_API_URL}`;
 
 export default function Explore() {
+  const [query,setQuery] = useState("")
   const [communities, setCommunities] = useState([]);
   const [total, setTotal] = useState(0);
-  const [topCommunities, setTopCommunities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // pagination
   const [page, setPage] = useState(1);
-  const limit = 20;
+  const limit = 50;
 
-//fetch all comms  
-useEffect(() => {
+
+  useEffect(() => {
     async function fetchCommunities() {
       try {
         setIsLoading(true);
 
         const res = await axios.get(`${API_URL}/communities`, {
           withCredentials: true,
-          params: { page, limit }
+          params: { page, limit,query },
         });
 
         setCommunities(res.data.results || []);
@@ -42,43 +38,34 @@ useEffect(() => {
     }
 
     fetchCommunities();
-  }, [page]);
-
-  //fetch top comms
-  useEffect(() => {
-    async function fetchTopComms() {
-      try {
-        const res = await axios.get(
-          `${API_URL}/search/top-communities`,
-          { withCredentials: true }
-        );
-        setTopCommunities(Array.isArray(res.data) ? res.data : []);
-      } catch (err) {
-        console.error("Top communities load error:", err);
-      }
-    }
-
-    fetchTopComms();
-  }, []);
+  }, [page,query]);
 
   return (
     <div className="sr-layout">
       <div className="sr-sidebar">
-        <LeftSidebar showStartCommunity={true} />
+        <LeftSidebar />
       </div>
 
       <div className="sr-wrapper">
         <div className="sr-tabs">
-          <h2 style={{ margin: 0 }}>Explore Communities</h2>
+          <h2>Explore Communities</h2>
           <div className="sr-flex-spacer" />
-          <span style={{ color: "#7c7c7c" }}>
-            {total.toLocaleString()} communities
-          </span>
+          <span>{total.toLocaleString()} communities</span>
         </div>
 
         <div className="sr-content-container">
+          {/* ===== LEFT / MAIN COLUMN ===== */}
           <div className="sr-left-column">
-            <div className="sr-results-scroll">
+            <div className="sr-local-search">
+              <input
+                type="text"
+                placeholder="Search communities by name or description"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </div>
+
+            <div className="sr-results-scroll test">
               {isLoading ? (
                 <div className="sr-loading">
                   <div className="sr-spinner"></div>
@@ -91,15 +78,13 @@ useEffect(() => {
                       type="community"
                       data={comm}
                       member={comm.isMember}
-                      isNotSearch = {true}
-                      isMyProfile = {true}
+                      isNotSearch={true}
+                      isMyProfile={true}
                     />
                   </div>
                 ))
               ) : (
-                <div className="sr-empty">
-                  No communities found.
-                </div>
+                <div className="sr-empty">No communities found.</div>
               )}
             </div>
 
@@ -109,57 +94,27 @@ useEffect(() => {
                   className={`sr-page-arrow ${page === 1 ? "disabled" : ""}`}
                   onClick={() => page > 1 && setPage(page - 1)}
                 />
-
                 <span className="sr-page-number">{page}</span>
-
                 <FiChevronRight
                   className={`sr-page-arrow ${
                     page * limit >= total ? "disabled" : ""
                   }`}
-                  onClick={() =>
-                    page * limit < total && setPage(page + 1)
-                  }
+                  onClick={() => page * limit < total && setPage(page + 1)}
                 />
               </div>
             )}
           </div>
 
+          {/* ===== RIGHT COLUMN (UNCHANGED) ===== */}
           <div className="sr-right-column">
-            <div className="sr-card">
-              <h3>Top Communities</h3>
+            <TopCommunities />
 
-              {topCommunities.map((c) => (
-                <Link to = {`/community/${c.name}`} >
-                <div
-                  key={c._id}
-                  className="sr-side-item no-router-click"
-                >
-                  <img
-                    className="sr-side-icon"
-                    src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(c.name)}`}
-                    alt={`${c.name} avatar`}
-                  />
-                  <div>
-                    <div className="sr-side-title">
-                      {c.name.startsWith("r/") ? c.name : "r/" + c.name}
-                    </div>
-                    <div className="sr-side-count">
-                      {Number(c.memberCount || 0).toLocaleString()} members
-                    </div>
-                  </div>
-                </div>
-                </Link>
-              ))}
-            </div>
-
-            <div className="sr-card" style = {{padding:"20px 10px"}}>
+            <div className="sr-card ttt">
               <h3>Explore Reddit</h3>
-              <p style={{ color: "#7c7c7c", fontSize: "16px", lineHeight: "1.5",margin:"10px 0px" }}>
-                We have a whole world for you to explore, get ready.
-              </p>
-
-              <p style={{ color: "#7c7c7c", fontSize: "16px", lineHeight: "1.5" }}>
-                Remember, always surround yourself with those who share the same interests and idiologies!
+              <p>We have a whole world for you to explore, get ready.</p>
+              <p>
+                Remember, always surround yourself with those who share the same
+                interests and idiologies!
               </p>
             </div>
           </div>

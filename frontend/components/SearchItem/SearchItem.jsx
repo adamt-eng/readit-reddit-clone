@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
-import { useState, useEffect } from 'react';
+import { useState } from "react";
 import { FaTrash } from "react-icons/fa";
 
 import axios from "axios";
+
 import "./SearchItem.css";
 
 function formatTimeAgo(dateString) {
@@ -26,34 +27,51 @@ function formatTimeAgo(dateString) {
   return `${years}y ago`;
 }
 
-export default function SearchItem({ type, data, member = false,onLeave = null, onDelete = null ,isNotSearch = false, isMyProfile = false}) {
-  const[isMember,setIsMember] = useState(member);
+export default function SearchItem({
+  type,
+  data,
+  member = false,
+  onLeave = null,
+  onDelete = null,
+  isNotSearch = false,
+  isMyProfile = false,
+}) {
+  const [isMember, setIsMember] = useState(member);
 
   // COMMUNITY RESULT
   if (type === "community") {
     const handleMembership = async (e) => {
-      e.preventDefault(); 
+      e.preventDefault();
       e.stopPropagation();
-      try{
-      if (isMember) {
-        await axios.post(`http://localhost:5000/communities/${data.name}/leave`,{},{withCredentials:true}); 
-        setIsMember(false);
-        if(onLeave)
-          onLeave(data.name);
-      } else {
-        await axios.post(`http://localhost:5000/communities/${data.name}/join`,{},{withCredentials:true}); 
-            setIsMember(true);
+      try {
+        if (isMember) {
+          await axios.delete(
+            `${import.meta.env.VITE_API_URL}/communities/${encodeURIComponent(data.name)}/leave`,
+            { withCredentials: true },
+          );
+          setIsMember(false);
+          if (onLeave) onLeave(data.name);
+        } else {
+          await axios.post(
+            `${import.meta.env.VITE_API_URL}/communities/${data.name}/join`,
+            {},
+            { withCredentials: true },
+          );
+          setIsMember(true);
+        }
+      } catch (err) {
+        console.log("Failed to join/leave community ", err);
       }
-    }
-    catch(err){
-      console.log("Failed to join/leave community ",err);
-    }
     };
 
     return (
       <Link to={`/community/${data.name}`} className="sc-container">
         <img
-          src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(data.name)}`}
+          src={
+            data.iconUrl
+              ? `${import.meta.env.VITE_API_URL}${data.iconUrl}`
+              : `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(data.name)}`
+          }
           alt="community icon"
           className="sc-icon"
         />
@@ -68,79 +86,81 @@ export default function SearchItem({ type, data, member = false,onLeave = null, 
         </div>
 
         {/* JOIN / LEAVE BUTTON */}
-        {(isNotSearch&&isMyProfile)&&(<button
-          className={`sc-join-btn ${isMember ? "leave" : "join"}`}
-          onClick={handleMembership}
-        >
-          {isMember ? "Leave" : "Join"}
-        </button>)}
+        {isNotSearch && isMyProfile && (
+          <button
+            className={`sc-join-btn ${isMember ? "leave" : "join"}`}
+            onClick={handleMembership}
+          >
+            {isMember ? "Leave" : "Join"}
+          </button>
+        )}
       </Link>
     );
   }
 
-// post
-if (type === "post") {
-  const timeAgo = formatTimeAgo(data.createdAt);
+  // post
+  if (type === "post") {
+    const timeAgo = formatTimeAgo(data.createdAt);
 
-  const handleDelete = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+    const handleDelete = async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-    try {
-      await axios.delete(
-        `http://localhost:5000/posts/${data._id}`,
-        { withCredentials: true }
-      );
+      try {
+        await axios.delete(
+          `${import.meta.env.VITE_API_URL}/posts/${data._id}`,
+          { withCredentials: true },
+        );
 
-      if (onDelete) {
-        onDelete(data._id);
+        if (onDelete) {
+          onDelete(data._id);
+        }
+      } catch (err) {
+        console.error("Failed to delete post:", err);
       }
-    } catch (err) {
-      console.error("Failed to delete post:", err);
-    }
-  };
+    };
 
-  return (
-    <Link to={`/posts/${data._id}`} className="sp-container">
-      <div className="sp-left">
-        <div className="sp-meta">
-          <img
-            src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(data.communityName)}`}
-            alt="community icon"
-            className="sp-icon"
-          />
-          <span className="sp-community">
-            {data.communityName.startsWith("r/")
-              ? data.communityName
-              : "r/" + data.communityName}
-          </span>
-          <span className="sp-time">• {timeAgo}</span>
+    return (
+      <Link to={`/posts/${data._id}`} className="sp-container">
+        <div className="sp-left">
+          <div className="sp-meta">
+            <img
+              src={
+                data?.iconUrl
+                  ? `${import.meta.env.VITE_API_URL}${data.iconUrl}`
+                  : `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(data.communityName)}`
+              }
+              alt="community icon"
+              className="sp-icon"
+            />
+            <span className="sp-community">
+              {data.communityName.startsWith("r/")
+                ? data.communityName
+                : "r/" + data.communityName}
+            </span>
+            <span className="sp-time">• {timeAgo}</span>
+          </div>
+
+          <div className="sp-title">{data.title}</div>
+
+          <div className="sp-sub">
+            {(data.upvoteCount ?? 0).toLocaleString()} votes •{" "}
+            {(data.commentCount ?? 0).toLocaleString()} comments
+          </div>
         </div>
 
-        <div className="sp-title">{data.title}</div>
+        {onDelete && isMyProfile && (
+          <FaTrash className="sp-delete-btn" onClick={handleDelete}>
+            Delete
+          </FaTrash>
+        )}
 
-        <div className="sp-sub">
-          {(data.upvoteCount ?? 0).toLocaleString()} votes •{" "}
-          {(data.commentCount ?? 0).toLocaleString()} comments
-        </div>
-      </div>
-
-      {(onDelete && isMyProfile )&&(
-        <FaTrash
-          className="sp-delete-btn"
-          onClick={handleDelete}
-        >
-          Delete
-        </FaTrash>
-      )}
-
-      {data.media?.url && (
-        <img className="sp-thumb" src={data.media.url} alt="" />
-      )}
-    </Link>
-  );
-}
-
+        {data.media?.url && (
+          <img className="sp-thumb" src={data.media.url} alt="" />
+        )}
+      </Link>
+    );
+  }
 
   // user
   if (type === "user") {
@@ -149,8 +169,9 @@ if (type === "post") {
         <img
           className="su-avatar"
           src={
-            data.avatarUrl ||
-            `https://api.dicebear.com/7.x/thumbs/svg?seed=${data.username}`
+            data?.avatarUrl
+              ? `${import.meta.env.VITE_API_URL}${data.avatarUrl}`
+              : `https://api.dicebear.com/7.x/thumbs/svg?seed=${data.username}`
           }
           alt="avatar"
         />
@@ -164,59 +185,57 @@ if (type === "post") {
   }
 
   // comment
-if (type === "comment") {
-  const timeAgo = formatTimeAgo(data.createdAt);
+  if (type === "comment") {
+    const timeAgo = formatTimeAgo(data.createdAt);
 
-  const handleDelete = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+    const handleDelete = async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-    try {
-      await axios.delete(
-        `http://localhost:5000/comments/${data._id}`,
-        { withCredentials: true }
-      );
+      try {
+        await axios.delete(
+          `${import.meta.env.VITE_API_URL}/comments/${data._id}`,
+          { withCredentials: true },
+        );
 
-      if (onDelete) {
-        onDelete(data._id);
+        if (onDelete) {
+          onDelete(data._id);
+        }
+      } catch (err) {
+        console.error("Failed to delete comment:", err);
       }
-    } catch (err) {
-      console.error("Failed to delete comment:", err);
-    }
-  };
+    };
 
-  return (
-    <Link to={`/posts/${data.postId}`} className="sp-container">
-      <div className="sp-left">
-        <div className="sp-meta">
-          <img
-            src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(data.communityName)}`}
-            alt="community icon"
-            className="sp-icon"
-          />
-          <span className="sp-community">
-            {data.communityName.startsWith("r/")
-              ? data.communityName
-              : "r/" + data.communityName}
-          </span>
-          <span className="sp-time">• {timeAgo}</span>
+    return (
+      <Link to={`/posts/${data.postId}`} className="sp-container">
+        <div className="sp-left">
+          <div className="sp-meta">
+            <img
+              src={
+                data?.iconUrl
+                  ? `${import.meta.env.VITE_API_URL}${data.iconUrl}`
+                  : `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(data.communityName)}`
+              }
+              alt="community icon"
+              className="sp-icon"
+            />
+            <span className="sp-community">
+              {data.communityName.startsWith("r/")
+                ? data.communityName
+                : "r/" + data.communityName}
+            </span>
+            <span className="sp-time">• {timeAgo}</span>
+          </div>
+
+          <div className="sp-title">{data.content}</div>
         </div>
 
-        <div className="sp-title">
-          {data.content}
-        </div>
-      </div>
-
-      {(onDelete && isMyProfile)&&(
-        <FaTrash
-          className="sp-delete-btn"
-          onClick={handleDelete}
-        />
-      )}
-    </Link>
-  );
-}
-
+        {onDelete && isMyProfile && (
+          <FaTrash className="sp-delete-btn" onClick={handleDelete} />
+        )}
+      </Link>
+    );
+  }
 
   return null;
 }

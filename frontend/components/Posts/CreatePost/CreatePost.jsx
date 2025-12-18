@@ -6,7 +6,7 @@ import { useSearchParams } from "react-router-dom";
 
 import "./CreatePost.css";
 
-export default function CreatePost({ isDark }) {
+export default function CreatePost() {
   const [activeTab, setActiveTab] = useState("post");
 
   const [communities, setCommunities] = useState([]);
@@ -19,51 +19,48 @@ export default function CreatePost({ isDark }) {
   const [searchParams] = useSearchParams();
   const communityFromUrl = searchParams.get("community");
 
-  // --------------------------------------------------
   // Fetch communities user can post in (AUTH-BASED)
-  // --------------------------------------------------
-  const fetchCommunities = async () => {
-    try {
-      const res = await fetch(
-        "http://localhost:5000/posts/communities",
-        { credentials: "include" }
-      );
-
-      if (!res.ok) {
-        console.error("Failed to load communities");
-        setCommunities([]);
-        return;
-      }
-
-      const data = await res.json();
-
-      if (!Array.isArray(data)) {
-        console.error("Invalid communities response:", data);
-        setCommunities([]);
-        return;
-      }
-
-      setCommunities(data);
-
-      // Auto-select community if coming from community page
-      if (communityFromUrl) {
-        const match = data.find(
-          (c) => c.name?.toLowerCase() === communityFromUrl.toLowerCase()
-        );
-        if (match) setSelectedCommunity(match);
-      }
-    } catch (err) {
-      console.error("Failed to fetch communities", err);
-      setCommunities([]);
-    }
-  };
-
-  // Initial load + URL change
   useEffect(() => {
-    fetchCommunities();
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/posts/communities`,
+          { credentials: "include" },
+        );
+
+        if (!res.ok) {
+          if (!cancelled) setCommunities([]);
+          return;
+        }
+
+        const data = await res.json();
+
+        if (!Array.isArray(data)) {
+          if (!cancelled) setCommunities([]);
+          return;
+        }
+
+        if (!cancelled) setCommunities(data);
+
+        // auto-select community if coming from URL
+        if (communityFromUrl) {
+          const match = data.find(
+            (c) => c.name?.toLowerCase() === communityFromUrl.toLowerCase(),
+          );
+          if (!cancelled) setSelectedCommunity(match || null);
+        }
+      } catch (err) {
+        console.error("Failed to fetch communities", err);
+        if (!cancelled) setCommunities([]);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [communityFromUrl]);
-
-
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -74,15 +71,12 @@ export default function CreatePost({ isDark }) {
     };
 
     document.addEventListener("mousedown", handleOutsideClick);
-    return () =>
-      document.removeEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
 
-  // --------------------------------------------------
   // Render
-  // --------------------------------------------------
   return (
-    <div className={`createpost-page-wrapper ${isDark ? "dark" : ""}`}>
+    <div className={"createpost-page-wrapper"}>
       <LeftSidebar />
 
       <div className="createpost-page">
@@ -91,7 +85,6 @@ export default function CreatePost({ isDark }) {
             {/* Header */}
             <div className="create-post-header">
               <div className="create-post-title">Create post</div>
-              <div className="drafts-link">Drafts</div>
             </div>
 
             {/* Community Selector */}
@@ -101,7 +94,16 @@ export default function CreatePost({ isDark }) {
                 type="button"
                 onClick={() => setShowDropdown((prev) => !prev)}
               >
-                <span className="community-avatar" />
+                <img
+                  className="community-avatar"
+                  src={
+                    selectedCommunity?.iconUrl
+                      ? `${import.meta.env.VITE_API_URL}${selectedCommunity.iconUrl}`
+                      : "/assets/reddit-logo.png"
+                  }
+                  alt={selectedCommunity?.name || "community"}
+                />
+
                 <span className="community-selector-text">
                   {selectedCommunity
                     ? selectedCommunity.name
@@ -136,7 +138,16 @@ export default function CreatePost({ isDark }) {
                           setShowDropdown(false);
                         }}
                       >
-                        <span className="community-avatar small" />
+                        <img
+                          className="community-avatar small"
+                          src={
+                            c.iconUrl
+                              ? `${import.meta.env.VITE_API_URL}${c.iconUrl}`
+                              : "/assets/default-community.png"
+                          }
+                          alt={c.name}
+                        />
+
                         <div className="community-text">
                           <div className="community-name">{c.name}</div>
                           {c.title && (
@@ -151,17 +162,13 @@ export default function CreatePost({ isDark }) {
             </div>
 
             {/* Tabs */}
-            <PostTabs
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-            />
+            <PostTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
             {/* Tab content */}
             <CreatePostForm
-            type={activeTab} // "post" | "image" | "link"
-  selectedCommunity={selectedCommunity}
-/>
-
+              type={activeTab}
+              selectedCommunity={selectedCommunity}
+            />
           </div>
         </div>
 

@@ -1,10 +1,8 @@
-/* eslint-disable no-unused-vars */
-
+import { useState } from "react";
+import { createPortal } from "react-dom";
 import {
   HiHome,
   HiFire,
-  HiSearch,
-  HiClock,
   HiUserGroup,
   HiInformationCircle,
   HiSpeakerphone,
@@ -13,36 +11,29 @@ import {
   HiNewspaper,
   HiBriefcase,
   HiBookOpen,
-  HiPlus
+  HiPlus,
 } from "react-icons/hi";
 import { NavLink } from "react-router-dom";
+import CreateCommunityModal from "../Community/CreateCommunityModal/CreateCommunityModal";
 import "./LeftSidebar.css";
 
 export default function LeftSidebar({
-  showStartCommunity = false,
-  onStartCommunity,
+  showStartCommunity = true,
 }) {
-  const promptLogin = () => alert("Login to continue");
+  const [showCreateCommunity, setShowCreateCommunity] = useState(false);
 
   const handleStartCommunityClick = () => {
-    if (onStartCommunity) {
-      onStartCommunity();
-    }
+    setShowCreateCommunity(true);
   };
 
   return (
     <div className="left-sidebar">
       <nav className="sidebar-nav">
-
-        {/* ================= HOME / POPULAR ================= */}
         <div className="nav-section">
-
           <NavLink
             to="/"
             end
-            className={({ isActive }) =>
-              `nav-item ${isActive ? "active" : ""}`
-            }
+            className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
           >
             <HiHome className="nav-icon" />
             <span>Home</span>
@@ -50,27 +41,20 @@ export default function LeftSidebar({
 
           <NavLink
             to="/popular"
-            className={({ isActive }) =>
-              `nav-item ${isActive ? "active" : ""}`
-            }
+            className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
           >
             <HiFire className="nav-icon" />
             <span>Popular</span>
           </NavLink>
           <NavLink
             to="/explore"
-            className={({ isActive }) =>
-              `nav-item ${isActive ? "active" : ""}`
-            }
+            className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
           >
             <HiUserGroup className="nav-icon" />
             <span>Explore Communities</span>
-
           </NavLink>
         </div>
-        
 
-        {/* ================= CREATE ================= */}
         {showStartCommunity && (
           <div className="nav-section">
             <h4>CREATE</h4>
@@ -84,55 +68,85 @@ export default function LeftSidebar({
           </div>
         )}
 
-
-          
-
-        {/* ================= RESOURCES ================= */}
         <div className="nav-section">
           <h4>RESOURCES</h4>
 
-          <div className="nav-item">
+          <a
+            className="nav-item"
+            href="https://github.com/adamt-eng/readit-reddit-clone"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <HiInformationCircle className="nav-icon" />
-            <span>About Reddit</span>
-          </div>
+            <span>About Readit</span>
+          </a>
 
-          <div className="nav-item">
+          <a
+            className="nav-item"
+            href="https://www.reddit.com/advertising/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <HiSpeakerphone className="nav-icon" />
-
             <span>Advertise</span>
-          </div>
+          </a>
 
-          <div className="nav-item">
+          <a
+            className="nav-item"
+            href="https://www.reddit.com/dev/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <HiCode className="nav-icon" />
             <span>Developer Platform</span>
-          </div>
+          </a>
 
-          <div className="nav-item">
-            <span>Reddit Pro BETA</span>
-          </div>
-
-          <div className="nav-item">
+          <a
+            className="nav-item"
+            href="https://www.reddithelp.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <HiQuestionMarkCircle className="nav-icon" />
             <span>Help</span>
-          </div>
+          </a>
 
-          <div className="nav-item">
+          <a
+            className="nav-item"
+            href="https://redditinc.com/blog/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <HiNewspaper className="nav-icon" />
             <span>Blog</span>
-          </div>
+          </a>
 
-          <div className="nav-item">
+          <a
+            className="nav-item"
+            href="https://redditinc.com/careers/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <HiBriefcase className="nav-icon" />
             <span>Careers</span>
-          </div>
+          </a>
 
-          <div className="nav-item">
+          <a
+            className="nav-item"
+            href="https://redditinc.com/press/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <HiBookOpen className="nav-icon" />
             <span>Press</span>
-          </div>
-
+          </a>
         </div>
       </nav>
+      {showCreateCommunity &&
+        createPortal(
+          <CreateCommunityModal onClose={() => setShowCreateCommunity(false)} />,
+          document.body
+        )}
     </div>
   );
 }

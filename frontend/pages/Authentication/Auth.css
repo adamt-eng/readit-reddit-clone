@@ -1,54 +1,26 @@
-/* ================= THEME TOKENS ================= */
-
-:root {
-  --reddit-main: #ff4500;
-  --reddit-main-hover: #d03a00;
-
-  --auth-bg: #ffffff;
-  --auth-surface: #f6f7f8;
-  --auth-text: #1a1a1b;
-  --auth-subtext: #555;
-  --auth-border: #d3d3d3;
-}
-
-/* Dark mode overrides */
-.appdark-mode {
-  --auth-bg: #1a1a1b;
-  --auth-surface: #2c2d2e;
-  --auth-text: #d7dadc;
-  --auth-subtext: #9a9a9a;
-  --auth-border: #3b3c3d;
-}
-
-/* ================= PAGE / MODAL ================= */
-
 .auth-page {
   display: flex;
   width: 100%;
   height: 100vh;
-  background: var(--auth-bg);
+  background: var(--bg-page);
   font-family: sans-serif;
 }
 
-/* Modal version */
 .auth-modal-content {
   flex-direction: column;
   height: auto;
   background: transparent;
 }
 
-/* ================= LAYOUT ================= */
-
 .auth-left {
   width: 50%;
-  background: var(--auth-surface);
+  background: var(--bg-surface);
   padding: 80px;
   text-align: right;
 }
 
 .auth-right {
   width: 50%;
-  background: var(--auth-bg);
   padding: 80px;
   display: flex;
   align-items: center;
@@ -65,7 +37,7 @@
   text-align: center;
 }
 
-/* ================= FORM ================= */
+/* FORM */
 
 .auth-form {
   width: 100%;
@@ -75,29 +47,36 @@
   gap: 18px;
 }
 
-/* ================= INPUTS ================= */
-
 .auth-input {
   padding: 14px 16px;
   font-size: 15px;
   border-radius: 8px;
-  background: var(--auth-surface);
-  border: 1px solid var(--auth-border);
-  color: var(--auth-text);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
 }
 
 .auth-input::placeholder {
-  color: var(--auth-subtext);
+  color: var(--text-muted);
 }
 
 .auth-input:focus {
   outline: none;
-  border-color: var(--reddit-main);
-  background: var(--auth-surface);
+  border-color: var(--accent);
+  background: var(--bg-elevated);
 }
 
-/* ================= BUTTON ================= */
-/* SAME IN LIGHT AND DARK — NO OVERRIDES */
+/* LOGO */
+
+.auth-logo.side-logo {
+  width: 800px;
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* BUTTON */
 
 .auth-btn {
   padding: 14px;
@@ -106,38 +85,36 @@
   border-radius: 30px;
   border: none;
   cursor: pointer;
-
-  background: #ff4500;
+  background: var(--accent);
   color: #ffffff;
-
-  transition: background 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .auth-btn:hover {
-  background: #d03a00;
+  background: var(--accent-hover);
 }
 
-/* ================= TEXT ================= */
+/* TEXT */
 
 .auth-left h1,
 .auth-form h1 {
   font-size: 32px;
   font-weight: 700;
-  color: var(--auth-text);
+  color: var(--text-primary);
 }
 
 .auth-left p,
 .auth-form p,
 .auth-small {
   font-size: 14px;
-  color: var(--auth-subtext);
+  color: var(--text-secondary);
 }
 
 .auth-small {
   text-align: center;
 }
 
-/* ================= LINKS ================= */
+/* LINKS */
 
 .auth-link-switch,
 .auth-small a {
@@ -145,7 +122,7 @@
   border: none;
   padding: 0;
   font-weight: 600;
-  color: var(--reddit-main);
+  color: var(--accent);
   cursor: pointer;
   text-decoration: none;
 }
@@ -155,7 +132,7 @@
   text-decoration: underline;
 }
 
-/* ================= ALERTS ================= */
+/* ALERTS */
 
 .auth-alert {
   padding: 12px 14px;
@@ -164,16 +141,16 @@
 }
 
 .auth-error {
-  background: rgba(255, 69, 0, 0.15);
-  color: #ff4500;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
 }
 
 .auth-success {
-  background: rgba(46, 204, 113, 0.15);
+  background: color-mix(in srgb, #2ecc71 15%, transparent);
   color: #2ecc71;
 }
 
-/* ================= MOBILE ================= */
+/* RESPONSIVE */
 
 @media (max-width: 900px) {
   .auth-left {

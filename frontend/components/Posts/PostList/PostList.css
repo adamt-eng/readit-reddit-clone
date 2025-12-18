@@ -1,15 +1,13 @@
-/* PostList.css – controls only the list layout */
 .postList {
   display: flex;
   flex-direction: column;
-  gap: 12px;                 /* exact Reddit spacing between posts */
+  gap: 12px;
   margin-top: 8px;
 }
 
-/* Optional: adds a little breathing room at the bottom */
 .postList:empty::before {
   content: "No posts yet.";
-  color: #787c7e;
+  color: var(--text-muted);
   font-size: 16px;
   text-align: center;
   padding: 40px 20px;

@@ -1,151 +1,145 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaSearch, FaPlus, FaBell, FaUser, FaCog, FaSignOutAlt, FaMoon, FaSun, FaComment } from "react-icons/fa";
-import axios from "axios"
-import { io } from "socket.io-client";
+import {
+  FaSearch,
+  FaPlus,
+  FaBell,
+  FaUser,
+  FaSignOutAlt,
+  FaMoon,
+  FaSun,
+  FaComment,
+} from "react-icons/fa";
+import axios from "axios";
+import { useSocket } from "../../context/SocketContext";
 import { useLocation } from "react-router-dom";
-
-
-
-
 import "./Navbar.css";
 import profileFallback from "../../assets/profile.png";
+import Readit from "../../assets/Readit.png";
+import logo from "../../assets/logo.png";
+import { useTheme } from "../../context/ThemeProvider.jsx";
 
-
-export default function Navbar({ setUser,user, isLoggedIn, darkMode, onToggleDarkMode, onLoginClick, onSignupClick }) {
-  const navigate = useNavigate()
+export default function Navbar({
+  setUser,
+  user,
+  onLoginClick,
+  onSignupClick,
+  onOpenFloatingDM,
+}) {
+  const socket = useSocket();
+  const navigate = useNavigate();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const [notisCount,setNotisCount]=useState(0);
+  const [notisCount, setNotisCount] = useState(0);
+  const [avatarBust, setAvatarBust] = useState(Date.now());
+  const { theme, toggleTheme } = useTheme();
 
-    const location = useLocation();
-    console.log(location);
-    
+  useEffect(() => {
+    if (user?.avatarUrl) setAvatarBust(Date.now());
+  }, [user?.avatarUrl]);
+
+  const location = useLocation();
+
   const profileMenuRef = useRef(null);
 
-  const promptLogin = () => alert("Login to continue");
-
   const toggleProfileMenu = () => {
-    setShowProfileMenu(prev => !prev);
+    setShowProfileMenu((prev) => !prev);
   };
 
-  const handleCreatePost = (e) => {
-    if (!isLoggedIn) {
-        e.preventDefault();
-        return promptLogin();
+  const handleCreatePost = () => {
+    if (!user) {
+      return;
     }
   };
 
-  const handleOpenMessages = () => {
-    if (!isLoggedIn) return promptLogin();
+  function promptLogin() {
+    alert("Please login to continue");
+  }
+
+  const handleSearch = () => {
+    const q = searchText.trim();
+    if (!q) navigate("/");
+
+    navigate(`/search?q=${encodeURIComponent(q)}`);
   };
 
+  const handleLogout = async () => {
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}/authentication/logout`,
+        {},
+        { withCredentials: true },
+      );
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      setUser(null);
+      setNotisCount(0);
+      navigate("/");
+    }
+  };
 
-const handleSearch = () => {
-  const q = searchText.trim();
-  if (!q) navigate("/");
+  const handleOpenNotifications = async () => {
+    try {
+      await axios.patch(
+        `${import.meta.env.VITE_API_URL}/notifications/read-all`,
+        {},
+        { withCredentials: true },
+      );
+      setNotisCount(0);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-  navigate(`/search?q=${encodeURIComponent(q)}`);
-};
+  const fetchCount = useCallback(async () => {
+    if (!user) return;
 
-const handleLogout = async () => {
-  try {
-    await axios.post(
-      "http://localhost:5000/authentication/logout",
-      {},
-      { withCredentials: true }
-    );
-  } catch (err) {
-    console.error("Logout error:", err);
-  } finally {
-    setUser(null);
-    setNotisCount(0);
-    navigate("/");
-  }
-};
-
-const handleOpenNotifications = async () => {
-  try {
-    await axios.patch(
-      "http://localhost:5000/notifications/read-all",
-      {},
-      { withCredentials: true }
-    );
-    setNotisCount(0);
-  } catch (err) {
-    console.error(err);
-  }
-};
-
-
-const fetchCount = async () => {
-  if (!user) return;
-
-  try {
-    const res = await axios.get(
-      `http://localhost:5000/notifications/count/${user._id}`,
-      { withCredentials: true }
-    );
-    console.log("Initial unread:", res.data.unreadCount);
-    setNotisCount(res.data.unreadCount);
-  } catch (err) {
-    console.log("Error fetching count:", err);
-  }
-};
-
-const socketRef = useRef(null);
-
-//create socket
-useEffect(() => {
-  if (!socketRef.current) {
-    socketRef.current = io("http://localhost:5000");
-  }
-}, []);
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/notifications/count/${user._id}`,
+        { withCredentials: true },
+      );
+      console.log("Initial unread:", res.data.unreadCount);
+      setNotisCount(res.data.unreadCount);
+    } catch (err) {
+      console.log("Error fetching count:", err);
+    }
+  }, [user]);
 
 
-
-// FETCH INITIAL COUNT
-useEffect(() => {
-  if (!user?._id) return;
-  fetchCount();
-}, [user]);
-
-
-
-// REAL-TIME SOCKET UPDATES
-useEffect(() => {
-  if (!user?._id) return;
-
-  socketRef.current.emit("register", user._id);
-
-  const handleNotification = () => {
-    console.log("ana hena oxembellahh")
+  // Fetch initial count
+  useEffect(() => {
+    if (!user?._id) return;
     fetchCount();
-  };
+  }, [location,user?._id, fetchCount]);
 
-  socketRef.current.on("notification", handleNotification);
+  // Real-time socket updates
+  useEffect(() => {
+    if (!user?._id || !socket) return;
 
-  return () => {
-    socketRef.current.off("notification", handleNotification);
-  };
-}, [location]);
+    socket.emit("register", user._id);
 
+    const handleNotification = () => {
+      fetchCount();
+    };
 
+    socket.on("notification", handleNotification);
+
+    return () => {
+      socket.off("notification", handleNotification);
+    };
+  }, [location, user?._id, fetchCount, socket]);
 
   const handleDropdownItemClick = (action) => {
     setShowProfileMenu(false);
     setTimeout(() => {
       switch (action) {
-        case 'profile':
-          // Route handled by <Link>
+        // case "profile": Route handled by <Link> break;
+        case "darkMode":
+          toggleTheme();
           break;
-        case 'settings':
-          console.log("Opening settings");
-          break;
-        case 'darkMode':
-          onToggleDarkMode();
-          break;
-        case 'logout':
+        case "logout":
           handleLogout();
           break;
         default:
@@ -154,17 +148,15 @@ useEffect(() => {
     }, 100);
   };
 
-  
-
-  if (isLoggedIn) {
+  if (user) {
     return (
       <div className="navbar">
         <div className="nav-left">
           <div className="logo-section">
             <Link to="/">
-              <img 
-                src={"../../assets/reddit-text.png"} 
-                alt="reddit logo text"
+              <img
+                src={Readit}
+                alt="Belal's Readit Logo"
                 className="nav-logo-text"
               />
             </Link>
@@ -173,8 +165,8 @@ useEffect(() => {
 
         <div className="nav-center">
           <div className="search-container">
-            <input 
-              placeholder="Search Reddit"
+            <input
+              placeholder="Search Readit"
               className="nav-search"
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
@@ -183,34 +175,39 @@ useEffect(() => {
               }}
             />
             <div className="search-icon">
-              <FaSearch onClick={handleSearch}/>
+              <FaSearch onClick={handleSearch} />
             </div>
           </div>
         </div>
 
         <div className="nav-right logged-in">
-
-          <Link 
+          <Link
             to="/create-post"
             className="nav-icon-btn create-post-btn"
-            onClick={handleCreatePost} 
+            onClick={handleCreatePost}
             title="Create Post"
           >
-            <FaPlus  />
+            <FaPlus />
             <span className="create-text">Create</span>
           </Link>
 
-          <Link 
-            to="/messages"
+          <button
             className="nav-icon-btn"
-            onClick={handleOpenMessages}
+            onClick={onOpenFloatingDM}
             title="Direct Messages"
           >
             <FaComment />
-          </Link>
+          </button>
 
-          <Link onClick = {()=>{handleOpenNotifications()}} to="/notifications" className="nav-icon-btn" title="Notifications">
-            <FaBell  />
+          <Link
+            onClick={() => {
+              handleOpenNotifications();
+            }}
+            to="/notifications"
+            className="nav-icon-btn"
+            title="Notifications"
+          >
+            <FaBell />
             {location.pathname != "/notifications" && notisCount > 0 && (
               <span className="notification-badge">{notisCount}</span>
             )}
@@ -219,58 +216,56 @@ useEffect(() => {
           <div className="profile-menu-container" ref={profileMenuRef}>
             <button className="profile-btn" onClick={toggleProfileMenu}>
               <img
-              src={user?.avatarUrl ? `http://localhost:5000${user.avatarUrl}` : profileFallback}
-              alt="Profile"
-              className="profile-avatar"
-              onError={(e) => {
-                e.currentTarget.src = profileFallback;
-              }}
-            />
+                src={
+                  user?.avatarUrl
+                    ? `${import.meta.env.VITE_API_URL}${user.avatarUrl}?v=${avatarBust}`
+                    : profileFallback
+                }
+                alt="Profile"
+                className="profile-avatar"
+                onError={(e) => {
+                  e.currentTarget.src = profileFallback;
+                }}
+              />
 
               <span className="profile-name">{user?.username}</span>
-              <svg className={`dropdown-icon ${showProfileMenu ? 'open' : ''}`} fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+              <svg
+                className={`dropdown-icon ${showProfileMenu ? "open" : ""}`}
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
               </svg>
             </button>
-            
+
             {showProfileMenu && (
               <div className="profile-dropdown">
-
-                <Link
-                  to="/user/me"
-                  className="dropdown-item"
-                  onClick={() => handleDropdownItemClick("profile")}
-                >
+                <Link to="/user/me" className="dropdown-item">
                   <FaUser className="dropdown-icon" />
                   <span>Profile</span>
                 </Link>
 
-                <div 
+                <div
                   className="dropdown-item"
-                  onClick={() => handleDropdownItemClick('settings')}
+                  onClick={() => handleDropdownItemClick("darkMode")}
                 >
-                  <FaCog className="dropdown-icon" />
-                  <span>Settings</span>
-                </div>
-
-                <div 
-                  className="dropdown-item"
-                  onClick={() => handleDropdownItemClick('darkMode')}
-                >
-                  {darkMode ? <FaSun className="dropdown-icon" /> : <FaMoon className="dropdown-icon" />}
-                  <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
+                  {theme === "dark" ? <FaSun /> : <FaMoon />}
+                  <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
                 </div>
 
                 <div className="dropdown-divider"></div>
 
-                <div 
-                  className="dropdown-item logout-btn" 
-                  onClick={() => handleDropdownItemClick('logout')}
+                <div
+                  className="dropdown-item logout-btn"
+                  onClick={() => handleDropdownItemClick("logout")}
                 >
                   <FaSignOutAlt className="dropdown-icon" />
                   <span>Log Out</span>
                 </div>
-
               </div>
             )}
           </div>
@@ -284,9 +279,9 @@ useEffect(() => {
       <div className="nav-left">
         <div className="logo-section">
           <Link to="/guest">
-            <img 
-              src="../../assets/reddit-text.png" 
-              alt="reddit logo text"
+            <img
+              src={Readit}
+              alt="Belal's Readit Logo"
               className="nav-logo-text"
             />
           </Link>
@@ -295,24 +290,24 @@ useEffect(() => {
 
       <div className="nav-center">
         <div className="search-container">
-          <input 
-            placeholder='Please log in to to dive into the world of reddit!'
+          <input
+            placeholder="Please log in to to dive into the world of Readit!"
             className="nav-search"
             onClick={promptLogin}
           />
           <div className="search-icon">
-            <img 
-              src="../../assets/logo.png" 
-              alt="reddit logo"
-              className="nav-logo"
-            />
+            <img src={logo} alt="reddit logo" className="nav-logo" />
           </div>
         </div>
       </div>
 
       <div className="nav-right">
-        <button className="login-btn" onClick={onLoginClick}>Log In</button >
-        <button className="signup-btn" onClick={onSignupClick}>Sign Up</button >
+        <button className="login-btn" onClick={onLoginClick}>
+          Log In
+        </button>
+        <button className="signup-btn" onClick={onSignupClick}>
+          Sign Up
+        </button>
       </div>
     </div>
   );

@@ -1,15 +1,13 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-
 import axios from "axios";
-
 import "./SearchResults.css";
-
 import SearchItem from "../../components/SearchItem/SearchItem";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar";
+import TopCommunities from "../../components/TopCommunities/TopCommunities";
 
-const API_URL = "http://localhost:5000";
+const API_URL = `${import.meta.env.VITE_API_URL}`;
 
 export default function SearchResults() {
   const [activeTab, setActiveTab] = useState("Posts");
@@ -19,17 +17,16 @@ export default function SearchResults() {
   const [searchResults, setSearchResults] = useState({
     posts: [],
     users: [],
-    communities: []
+    communities: [],
   });
 
   // store total for each type
   const [totalCount, setTotalCount] = useState({
     posts: 0,
     users: 0,
-    communities: 0
+    communities: 0,
   });
 
-  const [topCommunities, setTopCommunities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // pagination
@@ -49,59 +46,43 @@ export default function SearchResults() {
   const typeMap = { Posts: "post", Communities: "community", People: "user" };
   const list = searchResults[tabKey(activeTab)];
 
-
-  // ---------- FETCH TOP COMMUNITIES ----------
-  useEffect(() => {
-    async function fetchTopComms() {
-      try {
-        const res = await axios.get(`${API_URL}/search/top-communities`,{withCredentials:true});
-        setTopCommunities(Array.isArray(res.data) ? res.data : []);
-      } catch (err) {
-        console.error("Top communities load error:", err);
-      }
-    }
-    fetchTopComms();
-  }, []);
-
-
-  // ---------- FETCH SEARCH RESULTS ----------
+  // FETCH SEARCH RESULTS ----------
   useEffect(() => {
     if (!q) return;
 
     async function runSearch() {
       try {
         setIsLoading(true);
-const [postsRes, usersRes, communitiesRes] = await Promise.all([
-  axios.get(`${API_URL}/search/posts`, {
-    withCredentials: true,
-    params: { q, page, limit, sort: sortBy, time: timeFilter }
-  }),
+        const [postsRes, usersRes, communitiesRes] = await Promise.all([
+          axios.get(`${API_URL}/search/posts`, {
+            withCredentials: true,
+            params: { q, page, limit, sort: sortBy, time: timeFilter },
+          }),
 
-  axios.get(`${API_URL}/search/users`, {
-    withCredentials: true,
-    params: { q, page, limit }
-  }),
+          axios.get(`${API_URL}/search/users`, {
+            withCredentials: true,
+            params: { q, page, limit },
+          }),
 
-  axios.get(`${API_URL}/search/communities`, {
-    withCredentials: true,
-    params: { q, page, limit }
-  })
-]);
+          axios.get(`${API_URL}/search/communities`, {
+            withCredentials: true,
+            params: { q, page, limit },
+          }),
+        ]);
 
         // update results
         setSearchResults({
           posts: postsRes.data.results || [],
           users: usersRes.data.results || [],
-          communities: communitiesRes.data.results || []
+          communities: communitiesRes.data.results || [],
         });
 
         // update total counts
         setTotalCount({
           posts: postsRes.data.total || 0,
           users: usersRes.data.total || 0,
-          communities: communitiesRes.data.total || 0
+          communities: communitiesRes.data.total || 0,
         });
-
       } catch (err) {
         console.error("Search error:", err);
       } finally {
@@ -112,17 +93,14 @@ const [postsRes, usersRes, communitiesRes] = await Promise.all([
     runSearch();
   }, [q, page, sortBy, timeFilter]);
 
-
   return (
     <div className="sr-layout">
-
       <div className="sr-sidebar">
-        <LeftSidebar showStartCommunity={false} />
+        <LeftSidebar/>
       </div>
 
       <div className="sr-wrapper">
-
-        {/* ---------- TABS + FILTER CONTROLS ---------- */}
+        {/* TABS + FILTER CONTROLS */}
         <div className="sr-tabs">
           {["Posts", "Communities", "People"].map((tab) => (
             <button
@@ -134,9 +112,7 @@ const [postsRes, usersRes, communitiesRes] = await Promise.all([
               }}
             >
               {tab}
-              <span className="sr-tab-count">
-                {totalCount[tabKey(tab)]}
-              </span>
+              <span className="sr-tab-count">{totalCount[tabKey(tab)]}</span>
             </button>
           ))}
 
@@ -174,64 +150,61 @@ const [postsRes, usersRes, communitiesRes] = await Promise.all([
           </select>
         </div>
 
-        {/* ---------- RESULTS + SIDEBAR ---------- */}
+        {/* RESULTS + SIDEBAR */}
         <div className="sr-content-container">
-
           <div className="sr-left-column">
-
-          {/* SCROLL AREA */}
-          <div className="sr-results-scroll">
-            {isLoading ? (
-              <div className="sr-loading">
-                <div className="sr-spinner"></div>
-                <span>Searching...</span>
-              </div>
-            ) : list?.length ? (
-              list.map((item) => (
-                <div className="sr-result-card" key={item._id || item.id}>
-                  <SearchItem type={typeMap[activeTab]} data={item} />
+            {/* SCROLL AREA */}
+            <div className="sr-results-scroll">
+              {isLoading ? (
+                <div className="sr-loading">
+                  <div className="sr-spinner"></div>
+                  <span>Searching...</span>
                 </div>
-              ))
-            ) : (
-              <div className="sr-empty">No results found.</div>
+              ) : list?.length ? (
+                list.map((item) => (
+                  <div className="sr-result-card" key={item._id || item.id}>
+                    <SearchItem type={typeMap[activeTab]} data={item} />
+                  </div>
+                ))
+              ) : (
+                <div className="sr-empty">No results found.</div>
+              )}
+            </div>
+
+            {/* FIXED PAGINATION BAR */}
+            {!isLoading && (
+              <div className="sr-pagination-fixed">
+                <FiChevronLeft
+                  className={`sr-page-arrow ${page === 1 ? "disabled" : ""}`}
+                  onClick={() => page > 1 && setPage(page - 1)}
+                />
+
+                <span className="sr-page-number">{page}</span>
+
+                <FiChevronRight
+                  className={`sr-page-arrow ${
+                    page * limit >= totalCount[tabKey(activeTab)]
+                      ? "disabled"
+                      : ""
+                  }`}
+                  onClick={() =>
+                    page * limit < totalCount[tabKey(activeTab)] &&
+                    setPage(page + 1)
+                  }
+                />
+              </div>
             )}
           </div>
 
-          {/* FIXED PAGINATION BAR */}
-          {!isLoading && (
-            <div className="sr-pagination-fixed">
-              <FiChevronLeft
-                className={`sr-page-arrow ${page === 1 ? "disabled" : ""}`}
-                onClick={() => page > 1 && setPage(page - 1)}
-              />
-
-              <span className="sr-page-number">{page}</span>
-
-              <FiChevronRight
-                className={`sr-page-arrow ${
-                  page * limit >= totalCount[tabKey(activeTab)] ? "disabled" : ""
-                }`}
-                onClick={() =>
-                  page * limit < totalCount[tabKey(activeTab)] && setPage(page + 1)
-                }
-              />
-            </div>
-          )}
-
-          </div>
-
-
-
-          {/* ---------- RIGHT SIDEBAR ---------- */}
+          {/* RIGHT SIDEBAR */}
           <div className="sr-right-column">
-            <div className="sr-card">
-              <h3>Top Communities</h3>
+            <TopCommunities></TopCommunities>
 
               {topCommunities.map((c) => (
                 <div
                   key={c._id}
                   className="sr-side-item no-router-click"
-                  onClick={() => console.log("clicked community:", c.name)}
+                  onClick={() => console.log("Clicked community:", c.name)}
                 >
                   <img
                     className="sr-side-icon"
@@ -258,11 +231,9 @@ const [postsRes, usersRes, communitiesRes] = await Promise.all([
                 <li>Use filters to narrow results by time</li>
               </ul>
             </div>
-
           </div>
         </div>
       </div>
-
     </div>
   );
 }

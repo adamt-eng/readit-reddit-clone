@@ -23,7 +23,9 @@ async function buildNotificationData(type, payload) {
   if (postId) {
     const post = await Post.findById(postId).select("communityId");
     if (post?.communityId) {
-      const community = await Community.findById(post.communityId).select("name");
+      const community = await Community.findById(post.communityId).select(
+        "name",
+      );
       communityName = community?.name || "";
     }
   }
@@ -39,19 +41,19 @@ async function buildNotificationData(type, payload) {
       break;
     case "post_downvote":
       message = `${actorUsername} upvoted your post in r/${communityName}`;
-    break;
+      break;
     case "comment_downvote":
       message = `${actorUsername} upvoted your post in r/${communityName}`;
-    break;
+      break;
     case "comment_upvote":
       message = `${actorUsername} upvoted your comment in r/${communityName}`;
-    break;
+      break;
     case "comment":
       message = `${actorUsername} commented on your post in r/${communityName}`;
-    break;
+      break;
     case "private_message":
       message = `${actorUsername} sent you a message`;
-    break;
+      break;
     case "comment_reply":
       message = `${actorUsername} replied to your comment in r/${communityName}`;
       break;
@@ -66,10 +68,25 @@ async function buildNotificationData(type, payload) {
 }
 
 export async function createNotification({ userId, type, payload }) {
-  console.log("called")
   if (!userId || userId.toString() === payload.actorId?.toString()) return;
 
   const finalPayload = await buildNotificationData(type, payload);
+  const downTime = new Date(Date.now() - 10 * 1000);
+
+  const query = {
+    userId,
+    type,
+    createdAt: { $gte: downTime },
+  };
+
+  // only match fields that exist
+  if (payload.actorId) query["payload.actorId"] = payload.actorId;
+  if (payload.postId) query["payload.postId"] = payload.postId;
+  if (payload.commentId) query["payload.commentId"] = payload.commentId;
+  if (payload.communityId) query["payload.communityId"] = payload.communityId;
+
+  const existing = await Notification.findOne(query);
+  if (existing) return existing;
 
   const notification = await Notification.create({
     userId,
@@ -85,9 +102,10 @@ export async function createNotification({ userId, type, payload }) {
       _io.to(socketId).emit("notification", notification);
     }
   }
-  console.log("new")
+
   return notification;
 }
+
 
 export const createNotisController = ({ io, onlineUsers }) => {
   // bind socket
@@ -132,7 +150,7 @@ export const createNotisController = ({ io, onlineUsers }) => {
     try {
       await Notification.findOneAndUpdate(
         { _id: req.params.id, userId: req.user.id },
-        { isRead: true }
+        { isRead: true },
       );
       res.status(200).json({ success: true });
     } catch (err) {
@@ -144,7 +162,7 @@ export const createNotisController = ({ io, onlineUsers }) => {
     try {
       await Notification.updateMany(
         { userId: req.user.id, isRead: false },
-        { isRead: true }
+        { isRead: true },
       );
       res.status(200).json({ success: true });
     } catch (err) {
