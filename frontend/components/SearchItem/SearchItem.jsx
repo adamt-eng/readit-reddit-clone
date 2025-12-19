@@ -105,19 +105,10 @@ export default function SearchItem({
     const handleDelete = async (e) => {
       e.preventDefault();
       e.stopPropagation();
-
-      try {
-        await axios.delete(
-          `${import.meta.env.VITE_API_URL}/posts/${data._id}`,
-          { withCredentials: true },
-        );
-
-        if (onDelete) {
+      if (onDelete) {
           onDelete(data._id);
         }
-      } catch (err) {
-        console.error("Failed to delete post:", err);
-      }
+
     };
 
     return (

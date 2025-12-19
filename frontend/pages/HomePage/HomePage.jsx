@@ -191,7 +191,6 @@ const HomePage = () => {
         );
 
         setJoinedCommunities(res.data);
-        console.log("joined: ", joinedCommunities);
       } catch (error) {
         console.error("Error loading joined communities from server:", error);
         setJoinedCommunities({});

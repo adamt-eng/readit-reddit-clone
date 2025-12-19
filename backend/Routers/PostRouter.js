@@ -57,6 +57,6 @@ router.get("/:postId", auth, getPostById);
 
 //save
 router.patch("/save/:id",auth,savePost);
-router.patch("unsave/:id",unsavePost)
+router.patch("/unsave/:id",auth,unsavePost);
 
 export default router;

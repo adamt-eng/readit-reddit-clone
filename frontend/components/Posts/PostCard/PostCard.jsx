@@ -128,8 +128,12 @@ const handleSavePost = async () => {
     if (isGuest) {
       onPromptLogin?.();
     } else {
-      console.log('Save post:', post.id);
+      try{
       await axios.patch(`${import.meta.env.VITE_API_URL}/posts/save/${post.id}`,{},{withCredentials:true})
+      alert("saved");}
+      catch(err){
+        console.log("error while saving ",err)
+      }
     }
 };
   

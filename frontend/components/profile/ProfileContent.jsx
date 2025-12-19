@@ -25,15 +25,23 @@ export default function ProfileContent({
     setCommunities((prev) => prev.filter((c) => c.name !== name));
   };
 
-  const onDeletePost = (id) => {
-    setPosts((prev) => prev.filter((p) => p._id !== id));
+  const onDeletePost = async (id) => {
+        try {
+            await axios.delete(
+          `${import.meta.env.VITE_API_URL}/posts/${id}`,
+          { withCredentials: true },
+        );
+       setPosts((prev) => prev.filter((p) => p._id !== id));
+      } catch (err) {
+        console.error("Failed to delete post:", err);
+      }
+
   };
 
   const onUnsavePost = async (id) => {
-          try{await axios.patch(`${API_URL}/posts/usave/${id}`, {
-            withCredentials: true,
-          })
-          setPosts((prev) => prev.filter((p) => p._id !== id));
+          try{await axios.patch(`${API_URL}/posts/unsave/${id}`,{}, {
+            withCredentials: true})
+          setSaved((prev) => prev.filter((p) => p._id !== id));
         }
           catch(err){
             console.log("Error while unsaving: ",err)
