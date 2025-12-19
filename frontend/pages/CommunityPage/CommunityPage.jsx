@@ -88,18 +88,33 @@ function CommunityPage() {
 
       const updatedPost = res.data.post;
 
+      // Fetch the updated vote state from backend to get accurate userVote
+      const voteRes = await fetch(
+        `${import.meta.env.VITE_API_URL}/votes/me`,
+        { credentials: "include" }
+      );
+
+      if (!voteRes.ok) {
+        console.error("Failed to fetch vote state");
+        return;
+      }
+
+      const voteData = await voteRes.json();
+
+      // Update posts with new vote counts and user's current vote
       setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post.id === postId
-            ? {
-                ...post,
-                upvotes: updatedPost.upvoteCount,
-                downvotes: updatedPost.downvoteCount,
-                voteCount: updatedPost.upvoteCount - updatedPost.downvoteCount,
-                userVote: post.userVote === voteType ? 0 : voteType,
-              }
-            : post
-        )
+        prevPosts.map((post) => {
+          if (post.id === postId) {
+            return {
+              ...post,
+              upvotes: updatedPost.upvoteCount,
+              downvotes: updatedPost.downvoteCount,
+              voteCount: updatedPost.upvoteCount - updatedPost.downvoteCount,
+              userVote: voteData.posts?.[postId] ?? 0,
+            };
+          }
+          return post;
+        })
       );
     } catch (err) {
       console.error("Error voting:", err);
@@ -159,19 +174,25 @@ function CommunityPage() {
             : [];
 
          
+          // Fetch votes in parallel with posts
+          let voteMap = {};
           try {
-            const { data: voteMap } = await axios.get(
+            const { data: votesData } = await axios.get(
               `${import.meta.env.VITE_API_URL}/votes/me`,
               { withCredentials: true }
             );
-            normalized.forEach((post) => {
-              post.userVote = voteMap[post.id] ?? 0;
-            });
+            voteMap = votesData.posts || {};
           } catch {
             /* ignore */
           }
 
-          setPosts(normalized);
+          // Update posts with vote data BEFORE setting state
+          const postsWithVotes = normalized.map((post) => ({
+            ...post,
+            userVote: voteMap[post.id] ?? 0,
+          }));
+
+          setPosts(postsWithVotes);
         }
 
         // membership + role

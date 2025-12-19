@@ -11,45 +11,15 @@ export default function Vote({
   itemId,
   itemType = "post",
 }) {
-  const [currentVote, setCurrentVote] = useState(0);
+  const [currentVote, setCurrentVote] = useState(userVote ?? 0);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch vote state from backend on mount to persist across page refreshes
+  // Sync with userVote prop
   useEffect(() => {
-    const fetchVoteState = async () => {
-      if (!itemId) return;
+    setCurrentVote(userVote ?? 0);
+  }, [userVote, itemId]);
 
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/votes/me`,
-          {
-            credentials: "include",
-          }
-        );
 
-        if (response.ok) {
-          const voteData = await response.json();
-          
-          if (itemType === "post" && voteData.posts && voteData.posts[itemId] !== undefined) {
-            setCurrentVote(voteData.posts[itemId]);
-          } else if (itemType === "comment" && voteData.comments && voteData.comments[itemId] !== undefined) {
-            setCurrentVote(voteData.comments[itemId]);
-          } else {
-            setCurrentVote(0);
-          }
-        }
-      } catch (error) {
-        console.error("Failed to fetch vote state:", error);
-      }
-    };
-
-    fetchVoteState();
-  }, [itemId, itemType]);
-
-  // Sync with userVote prop when it changes (after parent saves vote to DB)
-  useEffect(() => {
-    setCurrentVote(userVote || 0);
-  }, [userVote]);
 
   const handleUpvote = async () => {
     if (isLoading) return;

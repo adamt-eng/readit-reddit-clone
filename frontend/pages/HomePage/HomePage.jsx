@@ -128,21 +128,25 @@ const HomePage = () => {
         }));
 
         // load votes
+        let voteMap = {};
         try {
-          const { data: voteMap } = await axios.get(
+          const { data: votesData } = await axios.get(
             `${import.meta.env.VITE_API_URL}/votes/me`,
             { withCredentials: true },
           );
-
-          fetchedPosts.forEach((post) => {
-            post.userVote = voteMap.posts?.[post.id] ?? 0;
-          });
+          voteMap = votesData.posts || {};
         } catch {
           /* empty */
         }
 
+        // Update posts with votes BEFORE setting state
+        const postsWithVotes = fetchedPosts.map((post) => ({
+          ...post,
+          userVote: voteMap[post.id] ?? 0,
+        }));
+
         setPosts((prev) =>
-          page === 1 ? fetchedPosts : [...prev, ...fetchedPosts],
+          page === 1 ? postsWithVotes : [...prev, ...postsWithVotes],
         );
 
         setHasMore(res.data.hasMore);
