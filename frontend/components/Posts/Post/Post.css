@@ -141,3 +141,27 @@
   object-fit: cover;
   margin-right: 6px;
 }
+
+.page-layout {
+  display: flex;
+  width: 100%;
+}
+
+.page-sidebar {
+  width: 250px;
+  flex-shrink: 0;
+}
+
+.page-main {
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
+  padding-right: 150px;
+}
+
+
+.sr-main > * {
+  width: 100%;
+  max-width: 740px;
+}
+
