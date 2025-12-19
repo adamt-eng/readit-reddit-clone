@@ -11,7 +11,7 @@ const UserSchema = new Schema(
     createdAt: { type: Date, default: Date.now },
     lastLogin: { type: Date, default: Date.now },
     karma: { type: Number, default: 0 },
-    contributions:{type: Number,default:0}
+    savedPosts: [{ type: Schema.Types.ObjectId, ref: "Post", default: [] }],
   },
   { collection: "users" }
 );

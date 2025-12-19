@@ -122,7 +122,18 @@ export default function PostCard({
     setShowMenu(!showMenu);
   };
 
-  const handleMenuAction = (e, action) => {
+
+const handleSavePost = async () => {
+    if (isGuest) {
+      onPromptLogin?.();
+    } else {
+      console.log('Save post:', post.id);
+      await axios.patch(`${import.meta.env.VITE_API_URL}/posts/save/${post.id}`,{},{withCredentials:true})
+    }
+};
+  
+
+  const handleMenuAction = async (e, action) => {
     e.preventDefault();
     e.stopPropagation();
     setShowMenu(false);
@@ -133,8 +144,7 @@ export default function PostCard({
       console.log('Report post:', post.id);
       // Add report logic here
     } else if (action === 'save') {
-      console.log('Save post:', post.id);
-      // Add save logic here
+      handleSavePost();
     } else if (action === 'follow') {
       console.log('Follow post:', post.id);
       // Add follow logic here
