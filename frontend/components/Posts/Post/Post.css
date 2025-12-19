@@ -41,7 +41,7 @@
 .post-body {
   font-size: 0.95rem;
   line-height: 1.55;
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
 
 .post-image {
