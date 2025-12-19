@@ -55,6 +55,7 @@ export const getPostsByCommunity = async (req, res) => {
       user: p.authorId?.username || "",
       userAvatar: p.authorId?.avatarUrl || "",
       upvotes: p.upvoteCount || 0,
+      downvotes: p.downvoteCount || 0,
       comments: p.commentCount || 0,
       createdAt: p.createdAt,
       type: p.media?.url ? "image" : "text",

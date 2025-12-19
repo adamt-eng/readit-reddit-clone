@@ -232,7 +232,6 @@ export const getUserVotes = async (req, res) => {
 
     res.json(voteMap);
   } catch (err) {
-    console.error("getUserPostVotes error:", err);
     res.status(500).json({ message: "Failed to fetch user votes" });
   }
 };
