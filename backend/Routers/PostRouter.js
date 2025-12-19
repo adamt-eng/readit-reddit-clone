@@ -11,6 +11,8 @@ import {
   deletePost,
   getPostsByCommunity,
   getGuestFeed,
+  savePost,
+  unsavePost,
 } from "../Controllers/PostController.js";
 
 import {
@@ -50,5 +52,9 @@ router.delete("/:id", auth, deletePost);
 
 // Must stay last
 router.get("/:postId", auth, getPostById);
+
+//save
+router.patch("/save/:id",auth,savePost);
+router.patch("unsave/:id",unsavePost)
 
 export default router;
