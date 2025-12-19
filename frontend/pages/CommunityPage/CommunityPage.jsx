@@ -5,7 +5,6 @@ import CommunityHeader from "../../components/Community/CommunityHeader/Communit
 import PostList from "../../components/Posts/PostList/PostList.jsx";
 import CommunitySidebar from "../../components/Community/CommunitySideBar/CommunitySidebar.jsx";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar.jsx";
-import CreateCommunityModal from "../../components/Community/CreateCommunityModal/CreateCommunityModal.jsx";
 
 function CommunityPage() {
   const { communityName } = useParams();
@@ -51,29 +50,66 @@ function CommunityPage() {
           commentsList: [newComment, ...(p.commentsList || [])],
           comments: (p.comments || 0) + 1,
         };
-      }),
+      })
     );
 
     setCommentInputs((prev) => ({ ...prev, [postId]: "" }));
   };
 
+  // ✅ VOTING
+  const handleVote = async (postId, value) => {
+    // optimistic UI update
+    setPosts((prev) =>
+      prev.map((p) => {
+        const pid = p._id || p.id;
+        if (pid !== postId) return p;
+
+        const oldVote = p.userVote || 0; // -1 / 0 / 1
+        const newVote = oldVote === value ? 0 : value;
+        const delta = newVote - oldVote;
+
+        return {
+          ...p,
+          userVote: newVote,
+          voteCount: (p.voteCount || 0) + delta,
+        };
+      })
+    );
+
+    // send to backend (adjust endpoint ONLY if yours is different)
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/posts/${postId}/vote`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ value }), // 1 or -1
+        }
+      );
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        console.error("Vote API failed:", data);
+      }
+    } catch (err) {
+      console.error("Vote request error:", err);
+    }
+  };
+
   useEffect(() => {
     const fetchCommunityData = async () => {
       try {
-        //community info
+        // community info
         const commRes = await fetch(
           `${import.meta.env.VITE_API_URL}/communities/${communityName}`,
-          { credentials: "include" },
+          { credentials: "include" }
         );
         const commData = await commRes.json().catch(() => ({}));
 
         if (!commRes.ok) {
           console.error("Community fetch failed:", commData);
-          setCommunity({
-            name: communityName,
-            description: "",
-            memberCount: 0,
-          });
+          setCommunity({ name: communityName, description: "", memberCount: 0 });
         } else {
           setCommunity(commData);
         }
@@ -81,7 +117,7 @@ function CommunityPage() {
         // posts
         const postsRes = await fetch(
           `${import.meta.env.VITE_API_URL}/posts/community/${communityName}`,
-          { credentials: "include" },
+          { credentials: "include" }
         );
         const postsData = await postsRes.json().catch(() => []);
 
@@ -89,21 +125,13 @@ function CommunityPage() {
           console.error("Posts fetch failed:", postsData);
           setPosts([]);
         } else {
-          setPosts(
-          Array.isArray(postsData)
-            ? postsData.map((p) => ({
-                ...p,
-                id: p._id,
-              }))
-            : []
-);
-
+          setPosts(Array.isArray(postsData) ? postsData : []);
         }
 
-        //membership + role
+        // membership + role
         const memRes = await fetch(
           `${import.meta.env.VITE_API_URL}/communities/${communityName}/membership`,
-          { credentials: "include" },
+          { credentials: "include" }
         );
         const memData = await memRes.json().catch(() => ({}));
 
@@ -130,7 +158,7 @@ function CommunityPage() {
 
   return (
     <div className="pageShell">
-      <LeftSidebar/>
+      <LeftSidebar />
       <div className="mainWrapper">
         <div className="communityPage">
           <CommunityHeader
@@ -144,8 +172,8 @@ function CommunityPage() {
               <PostList
                 posts={posts}
                 viewMode="card"
+                onVote={handleVote} // ✅ THIS is what makes voting work
                 expandedPostId={expandedPostId}
-                showJoined = {false}
                 onToggleComments={handleToggleComments}
                 commentInputs={commentInputs}
                 onCommentInputChange={handleCommentInputChange}
