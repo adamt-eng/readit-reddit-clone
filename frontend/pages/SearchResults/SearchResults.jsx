@@ -152,7 +152,7 @@ export default function SearchResults() {
 
         {/* RESULTS + SIDEBAR */}
         <div className="sr-content-container">
-          <div className="sr-left-column">
+          <div className="srr-left-column">
             {/* SCROLL AREA */}
             <div className="sr-results-scroll">
               {isLoading ? (
@@ -199,31 +199,7 @@ export default function SearchResults() {
           {/* RIGHT SIDEBAR */}
           <div className="sr-right-column">
             <TopCommunities></TopCommunities>
-
-              {topCommunities.map((c) => (
-                <div
-                  key={c._id}
-                  className="sr-side-item no-router-click"
-                  onClick={() => console.log("Clicked community:", c.name)}
-                >
-                  <img
-                    className="sr-side-icon"
-                    src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(c.name)}`}
-                    alt={`${c.name} avatar`}
-                  />
-                  <div>
-                    <div className="sr-side-title">
-                      {c.name.startsWith("r/") ? c.name : "r/" + c.name}
-                    </div>
-                    <div className="sr-side-count">
-                      {Number(c.memberCount || 0).toLocaleString()} members
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="sr-card">
+            <div className="sr-info">
               <h3>Search tips</h3>
               <ul className="sr-help-list">
                 <li>Try shorter or broader terms</li>

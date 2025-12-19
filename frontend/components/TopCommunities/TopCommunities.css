@@ -129,7 +129,7 @@
 .sr-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
-  padding: 16px;
+  padding: 20px;
   border-radius: 10px;
   margin-bottom: 18px;
 }

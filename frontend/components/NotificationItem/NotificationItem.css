@@ -13,10 +13,13 @@
   width: 100%;
   box-sizing: border-box;
   text-align: left;
+  border: 1.5px solid var(--border-default);
+  box-shadow: var(--shadow-sm);
 }
 
 .notif-card:hover {
   background: var(--bg-page);
+  border: 3px solid var(--border-default);
 }
 
 /* UNREAD */

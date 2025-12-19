@@ -86,8 +86,9 @@
 }
 
 /* LEFT COLUMN */
-.sr-left-column {
+.srr-left-column {
   flex: 1;
+  margin-top: 45px;
 }
 
 .sr-results-scroll {
@@ -131,7 +132,7 @@
   background: var(--bg-surface);
   position:sticky;
   border: 1px solid var(--border-default);
-  padding: 16px;
+  padding: 20px;
   border-radius: 10px;
   margin-bottom: 18px;
   box-shadow: var(--shadow-sm);
@@ -179,6 +180,16 @@
   padding-left: 18px;
   margin-top: 8px;
   color: var(--text-muted);
+}
+
+.sr-info{
+  background: var(--bg-surface);
+  position:sticky;
+  border: 1px solid var(--border-default);
+  margin-top:20px;
+  padding: 30px 15px;
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
 }
 
 /* LOADING */
