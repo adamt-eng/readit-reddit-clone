@@ -5,6 +5,28 @@ import CommunityHeader from "../../components/Community/CommunityHeader/Communit
 import PostList from "../../components/Posts/PostList/PostList.jsx";
 import CommunitySidebar from "../../components/Community/CommunitySideBar/CommunitySidebar.jsx";
 import LeftSidebar from "../../components/LeftSidebar/LeftSidebar.jsx";
+import axios from "axios";
+
+// Helper function to format time ago (same style as HomePage)
+const formatTimeAgo = (dateString) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now - date;
+
+  const minutes = Math.floor(diffMs / (1000 * 60));
+  const hours = Math.floor(diffMs / (1000 * 60 * 60));
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const months = Math.floor(days / 30);
+  const years = Math.floor(days / 365);
+
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days < 30) return `${days}d ago`;
+  if (months < 12) return `${months}mo ago`;
+  return `${years}y ago`;
+};
 
 function CommunityPage() {
   const { communityName } = useParams();
@@ -56,49 +78,37 @@ function CommunityPage() {
     setCommentInputs((prev) => ({ ...prev, [postId]: "" }));
   };
 
-  // ✅ VOTING
-  const handleVote = async (postId, value) => {
-    // optimistic UI update
-    setPosts((prev) =>
-      prev.map((p) => {
-        const pid = p._id || p.id;
-        if (pid !== postId) return p;
-
-        const oldVote = p.userVote || 0; // -1 / 0 / 1
-        const newVote = oldVote === value ? 0 : value;
-        const delta = newVote - oldVote;
-
-        return {
-          ...p,
-          userVote: newVote,
-          voteCount: (p.voteCount || 0) + delta,
-        };
-      })
-    );
-
-    // send to backend (adjust endpoint ONLY if yours is different)
+  // ✅ Voting exactly like HomePage
+  const handleVote = async (postId, voteType) => {
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/posts/${postId}/vote`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ value }), // 1 or -1
-        }
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/votes/posts/${postId}`,
+        { voteScore: voteType }, // MUST be voteScore (1 or -1)
+        { withCredentials: true }
       );
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        console.error("Vote API failed:", data);
-      }
+      const updatedPost = res.data.post;
+
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                upvotes: updatedPost.upvoteCount,
+                downvotes: updatedPost.downvoteCount,
+                voteCount: updatedPost.upvoteCount - updatedPost.downvoteCount,
+                userVote: post.userVote === voteType ? 0 : voteType,
+              }
+            : post
+        )
+      );
     } catch (err) {
-      console.error("Vote request error:", err);
+      console.error("Error voting:", err);
     }
   };
 
   useEffect(() => {
-    const fetchCommunityData = async () => {
+    async function fetchCommunityData() {
       try {
         // community info
         const commRes = await fetch(
@@ -125,7 +135,44 @@ function CommunityPage() {
           console.error("Posts fetch failed:", postsData);
           setPosts([]);
         } else {
-          setPosts(Array.isArray(postsData) ? postsData : []);
+          // ✅ normalize like HomePage (id + _id + voteCount + time)
+          const normalized = Array.isArray(postsData)
+            ? postsData.map((p) => ({
+                id: p._id,
+                _id: p._id,
+                community: p.community || communityName || "",
+                communityIcon: p.communityIcon || null,
+                user: p.user || "",
+                userAvatar: `${p.userAvatar}` || "/profile.png",
+                title: p.title || "",
+                content: p.content || "",
+                upvotes: p.upvotes || 0,
+                downvotes: p.downvotes || 0,
+                voteCount: (p.upvotes || 0) - (p.downvotes || 0),
+                comments: p.comments || 0,
+                time: formatTimeAgo(p.createdAt),
+                userVote: 0, // filled from /votes/me below
+                image: p.media?.url || p.mediaUrl || p.image || null,
+                isExpanded: false,
+                commentsList: p.commentsList || [],
+                type: p.type || "text",
+              }))
+            : [];
+
+          // ✅ load votes like HomePage
+          try {
+            const { data: voteMap } = await axios.get(
+              `${import.meta.env.VITE_API_URL}/votes/me`,
+              { withCredentials: true }
+            );
+            normalized.forEach((post) => {
+              post.userVote = voteMap[post.id] ?? 0;
+            });
+          } catch {
+            /* ignore */
+          }
+
+          setPosts(normalized);
         }
 
         // membership + role
@@ -149,7 +196,7 @@ function CommunityPage() {
         setIsMember(false);
         setRole(null);
       }
-    };
+    }
 
     fetchCommunityData();
   }, [communityName]);
@@ -172,7 +219,7 @@ function CommunityPage() {
               <PostList
                 posts={posts}
                 viewMode="card"
-                onVote={handleVote} // ✅ THIS is what makes voting work
+                onVote={handleVote} // ✅ HomePage-style vote
                 expandedPostId={expandedPostId}
                 onToggleComments={handleToggleComments}
                 commentInputs={commentInputs}
