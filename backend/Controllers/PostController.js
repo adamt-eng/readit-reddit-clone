@@ -5,7 +5,7 @@ import Post from "../Models/Post.js";
 import Vote from "../Models/Votes.js";
 import Comment from "../Models/Comment.js";
 import User from "../Models/User.js";
-
+import Notification from "../Models/Notification.js";
 // Get communities where the user is a member and can post
 export const getPostableCommunities = async (req, res) => {
   try {
