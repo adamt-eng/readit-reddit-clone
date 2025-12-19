@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Post from "../../components/Posts/Post/Post.jsx";
+import LeftSidebar from "../../components/LeftSidebar/LeftSidebar.jsx";
 import axios from "axios";
 
 export default function PostPage() {
@@ -63,8 +64,6 @@ const handleGenerateSummary = async () => {
     setIsSummarizing(false);
   }
 };
-
-
 const handleShowOriginal = () => {
   setPost((prev) => ({
     ...prev,
@@ -274,21 +273,26 @@ const handleShowOriginal = () => {
   if (loading || !post) return <div>Loading...</div>;
 
   return (
- <Post
-  post={post}
-  comments={comments}
-  onUpvote={() => handlePostVote(1)}
-  onDownvote={() => handlePostVote(-1)}
-  onComment={handleComment}
-  onVote={handleCommentVote}
-  onReply={handleReply}
-  isSummarizing={isSummarizing}
-  isSummaryMode={isSummaryMode}
-  onGenerateSummary={handleGenerateSummary}
-  onShowOriginal={handleShowOriginal}
-  typingText={typingText}
-/>
-
-
+    <div className="page-layout">
+      <div className="page-sidebar">
+        <LeftSidebar />
+      </div>
+      <div className="page-main">
+        <Post
+          post={post}
+          comments={comments}
+          onUpvote={() => handlePostVote(1)}
+          onDownvote={() => handlePostVote(-1)}
+          onComment={handleComment}
+          onVote={handleCommentVote}
+          onReply={handleReply}
+          isSummarizing={isSummarizing}
+          isSummaryMode={isSummaryMode}
+          onGenerateSummary={handleGenerateSummary}
+          onShowOriginal={handleShowOriginal}
+          typingText={typingText}
+        />
+      </div>
+    </div>
   );
 }
