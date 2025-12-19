@@ -33,6 +33,14 @@ export default function Post({
   alert("Post link copied to clipboard");
 };
 
+const handleUpvote = () => {
+  onUpvote?.();
+};
+
+const handleDownvote = () => {
+  onDownvote?.();
+};
+
 
   return (
     <div className="post-card">
@@ -76,10 +84,10 @@ export default function Post({
       {/* ACTIONS */}
       <div className="post-actions">
         <Vote
-          voteCount={post.votes}
-          userVote={post.userVote}
-          onUpvote={onUpvote}
-          onDownvote={onDownvote}
+          voteCount={post.votes || 0}
+          userVote={post.userVote ?? 0}
+          onUpvote={handleUpvote}
+          onDownvote={handleDownvote}
           orientation="horizontal"
           itemId={post.id}
         />

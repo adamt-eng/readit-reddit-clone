@@ -84,6 +84,22 @@ const handleShowOriginal = () => {
 
         const data = res.data;
         console.log(res.data);
+        
+        // Fetch user's vote separately to ensure we have it
+        let userVote = data.userVote ?? 0;
+        try {
+          const voteRes = await fetch(
+            `${import.meta.env.VITE_API_URL}/votes/me`,
+            { credentials: "include" }
+          );
+          if (voteRes.ok) {
+            const voteData = await voteRes.json();
+            userVote = voteData.posts?.[data._id] ?? 0;
+          }
+        } catch (e) {
+          console.error("Failed to fetch vote state:", e);
+        }
+        
         setPost({
           id: data._id,
           community: data.communityId?.name,
@@ -97,7 +113,7 @@ const handleShowOriginal = () => {
             : null,
           votes: data.upvoteCount - data.downvoteCount,
           commentsCount: data.commentCount,
-          userVote: data.userVote,
+          userVote: userVote,
         });
       } catch (err) {
         console.log("Error while fetching post ", err);
@@ -113,6 +129,16 @@ const handleShowOriginal = () => {
 
       const data = await res.json();
 
+      // Fetch user's comment votes
+      const voteRes = await fetch(`${import.meta.env.VITE_API_URL}/votes/me`, {
+        credentials: "include",
+      });
+      let commentVotes = {};
+      if (voteRes.ok) {
+        const voteData = await voteRes.json();
+        commentVotes = voteData.comments || {};
+      }
+
       const normalize = (arr) =>
         arr.map((c) => ({
           id: c._id,
@@ -120,7 +146,7 @@ const handleShowOriginal = () => {
           content: c.content,
           timeAgo: new Date(c.createdAt).toLocaleDateString(),
           votes: (c.upvoteCount || 0) - (c.downvoteCount || 0),
-          userVote: 0,
+          userVote: commentVotes[c._id] ?? 0,
           replies: normalize(c.replies || []),
         }));
 
