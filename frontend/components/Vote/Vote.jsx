@@ -8,8 +8,7 @@ export default function Vote({
   onUpvote,
   onDownvote,
   orientation = "horizontal",
-  itemId,
-  itemType = "post",
+  itemId
 }) {
   const [currentVote, setCurrentVote] = useState(userVote ?? 0);
   const [isLoading, setIsLoading] = useState(false);

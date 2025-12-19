@@ -82,7 +82,6 @@ export default function Post({
           onDownvote={onDownvote}
           orientation="horizontal"
           itemId={post.id}
-          itemType="post"
         />
 
         <button className="action-btn" onClick={handleSharePost}>

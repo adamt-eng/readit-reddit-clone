@@ -367,7 +367,6 @@ const handleSavePost = async () => {
             onDownvote={handleDownvote}
             orientation="horizontal"
             itemId={post.id}
-            itemType="post"
           />
 
           {/* Comment Button - wrapped in Link */}

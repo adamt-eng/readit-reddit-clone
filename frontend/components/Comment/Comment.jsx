@@ -47,7 +47,6 @@ const Comment = ({ comment, depth = 0, onVote, onReply, postId }) => {
         onDownvote={() => handleVote(-1)}
         orientation="vertical"
         itemId={comment.id}
-        itemType="comment"
       />
       </div>
 
