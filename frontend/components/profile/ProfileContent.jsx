@@ -15,6 +15,7 @@ export default function ProfileContent({
   const [communities, setCommunities] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [comments, setComments] = useState([]);
+  const [saved,setSaved] = useState([])
 
   const onDeleteComment = (id) => {
     setComments((prev) => prev.filter((c) => c._id !== id));
@@ -28,12 +29,23 @@ export default function ProfileContent({
     setPosts((prev) => prev.filter((p) => p._id !== id));
   };
 
+  const onUnsavePost = async (id) => {
+          try{await axios.patch(`${API_URL}/posts/usave/${id}`, {
+            withCredentials: true,
+          })
+          setPosts((prev) => prev.filter((p) => p._id !== id));
+        }
+          catch(err){
+            console.log("Error while unsaving: ",err)
+          }
+  };
+
   // FETCH DATA
   useEffect(() => {
     async function fetchProfileData() {
       try {
         setIsLoading(true);
-        const [postsRes, communitiesRes, commentsRes] = await Promise.all([
+        const [postsRes, communitiesRes, commentsRes,savedRes] = await Promise.all([
           axios.get(`${API_URL}/posts/users/${user._id}`, {
             withCredentials: true,
           }),
@@ -43,11 +55,15 @@ export default function ProfileContent({
           axios.get(`${API_URL}/comments/users/${user._id}`, {
             withCredentials: true,
           }),
+          axios.get(`${API_URL}/posts/saved`, {
+            withCredentials: true,
+          })
         ]);
 
         setPosts(postsRes.data || []);
         setCommunities(communitiesRes.data || []);
         setComments(commentsRes.data || []);
+        setSaved(savedRes.data||[]);
       } catch (err) {
         console.error("Error fetching profile data:", err);
       } finally {
@@ -147,9 +163,34 @@ export default function ProfileContent({
               )}
             </>
           )}
+          {/* SAVED TAB */}
+          {activeTab === "Saved" && (
+            <>
+              {saved.length > 0 ? (
+                saved.map((post) => (
+                  <div key={post._id} className="profile-item-frame">
+                    <SearchItem
+                      type="post"
+                      data={post}
+                      onDelete={onUnsavePost}
+                      isNotSearch={true}
+                      isMyProfile={isMyProfile}
+                    />
+                  </div>
+                ))
+              ) : (
+                <EmptyState
+                  title={"You have no saves yet"}
+                  message={
+                    "Maybe your feed is too good you can't decide what to save?"
+                  }
+                ></EmptyState>
+              )}
+            </>
+          )}
 
           {/* OTHER TABS */}
-          {["Saved", "Hidden", "Upvoted", "Downvoted"].includes(activeTab) && (
+          {["Hidden", "Upvoted", "Downvoted"].includes(activeTab) && (
             <div className="empty-tab-message">Nothing here yet.</div>
           )}
         </div>

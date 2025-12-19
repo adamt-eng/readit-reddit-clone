@@ -13,6 +13,7 @@ import "./PostCard.css";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Vote from "../../Vote/Vote.jsx";
+import axios from "axios";
 
 export default function PostCard({
   // Post data

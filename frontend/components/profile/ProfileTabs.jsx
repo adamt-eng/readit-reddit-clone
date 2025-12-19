@@ -1,4 +1,4 @@
-const tabs = ["Posts", "Communities", "Comments"];
+const tabs = ["Posts", "Communities", "Comments","Saved"];
 
 export default function ProfileTabs({ activeTab, setActiveTab }) {
   return (

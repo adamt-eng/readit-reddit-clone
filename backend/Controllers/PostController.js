@@ -726,3 +726,49 @@ export const unsavePost = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
+//get user saved for profile
+export async function getSavedPosts(req, res) {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const user = await User.findById(userId).select("savedPosts");
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const posts = await Post.find({
+      _id: { $in: user.savedPosts },
+      isRemoved: false,
+    })
+      .populate("communityId", "name iconUrl")
+      .populate("authorId", "username avatarUrl")
+      .sort({ createdAt: -1 });
+
+    const results = posts.map((p) => ({
+      _id: p._id,
+      title: p.title,
+      content: p.content,
+
+      communityName: p.communityId?.name || "",
+      iconUrl: p.communityId?.iconUrl || null,
+
+      author: p.authorId?.username || "",
+      avatarUrl: p.authorId?.avatarUrl || "",
+
+      upvoteCount: p.upvoteCount,
+      commentCount: p.commentCount,
+      createdAt: p.createdAt,
+    }));
+
+    res.json(results);
+  } catch (err) {
+    console.error("getSavedPosts error:", err);
+    res.status(500).json({ error: "Server error fetching saved posts" });
+  }
+}

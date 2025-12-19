@@ -13,6 +13,7 @@ import {
   getGuestFeed,
   savePost,
   unsavePost,
+  getSavedPosts,
 } from "../Controllers/PostController.js";
 
 import {
@@ -46,6 +47,7 @@ router.get("/search", auth, searchPosts);
 
 // Get user posts
 router.get("/users/:id", auth, getUserPosts);
+router.get("/saved",auth,getSavedPosts);
 
 //delete post
 router.delete("/:id", auth, deletePost);
