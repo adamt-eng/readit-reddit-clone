@@ -8,19 +8,19 @@ const RecentPosts = ({
   onCommunityClick,
   formatRelativeTime,
   formatNumber,
-  getRecentPostThumbnail,
 }) => {
-  // Function to get thumbnail for recent posts
-  const getThumbnail = (post) => {
-    if (post.image) {
-      return post.image;
-    }
-    return "../../../assets/compact-image.png";
-  };
-
+  // Return null when there are no recent posts
   if (!recentPosts || recentPosts.length === 0) {
     return null;
   }
+
+  // Handle community click
+  const handleCommunityClick = (e, communityName) => {
+    e.stopPropagation(); // Prevent post click
+    if (onCommunityClick) {
+      onCommunityClick(communityName);
+    }
+  };
 
   return (
     <div className="recent-posts-box">
@@ -42,27 +42,23 @@ const RecentPosts = ({
             className="recent-post-item"
             onClick={() => onPostClick && onPostClick(post.id)}
           >
-
             <div className="recent-post-content">
               <div className="recent-post-header">
                 <img
                   src={
-                  post.communityIcon
-                    ? `${import.meta.env.VITE_API_URL}${post.communityIcon}`
-                    : `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(post.community)}`
+                    post.communityIcon
+                      ? `${import.meta.env.VITE_API_URL}${post.communityIcon}`
+                      : `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(post.community)}`
                   }                  
                   className="recent-post-user-avatar"
+                  alt={post.community ? `r/${post.community}` : `u/${post.user}`}
+                  onClick={(e) => handleCommunityClick(e, post.community)}
+                  style={{ cursor: 'pointer' }}
                 />
                 <span
                   className="recent-post-community"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (post.community && onCommunityClick) {
-                      onCommunityClick(post.community);
-                    } else {
-                      console.log(`Opening user profile for ${post.user}`);
-                    }
-                  }}
+                  onClick={(e) => handleCommunityClick(e, post.community)}
+                  style={{ cursor: 'pointer' }}
                 >
                   {post.community ? `r/${post.community}` : `u/${post.user}`}
                 </span>

@@ -40,7 +40,6 @@ const HomePage = () => {
   const location = useLocation();
   const isPopular = location.pathname === "/popular";
 
-
   // Initialize viewMode from localStorage
   const [viewMode, setViewMode] = useState(() => {
     try {
@@ -77,6 +76,92 @@ const HomePage = () => {
     }
     return [];
   });
+
+  // Initialize recentPosts from localStorage with proper error handling
+  const [recentPosts, setRecentPosts] = useState(() => {
+    try {
+      const savedRecentPosts = localStorage.getItem("recentPosts");
+      if (savedRecentPosts) {
+        const parsedPosts = JSON.parse(savedRecentPosts);
+        return Array.isArray(parsedPosts) ? parsedPosts : [];
+      }
+    } catch (error) {
+      console.error("Error loading recent posts from localStorage:", error);
+    }
+    return [];
+  });
+
+  // Initialize expandedPostId from localStorage
+  const [expandedPostId] = useState(() => {
+    try {
+      const savedExpandedPostId = localStorage.getItem("expandedPostId");
+      if (savedExpandedPostId) {
+        const parsedId = JSON.parse(savedExpandedPostId);
+        return typeof parsedId === "number" ? parsedId : null;
+      }
+    } catch (error) {
+      console.error("Error loading expanded post from localStorage:", error);
+    }
+    return null;
+  });
+
+  // Initialize joinedCommunities from localStorage
+  const [joinedCommunities, setJoinedCommunities] = useState([]);
+  useEffect(() => {
+    const fetchJoinedCommunities = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/memberships/me`,
+          { withCredentials: true },
+        );
+
+        setJoinedCommunities(res.data);
+      } catch (error) {
+        console.error("Error loading joined communities from server:", error);
+        setJoinedCommunities([]);
+      }
+    };
+
+    fetchJoinedCommunities();
+  }, []);
+
+  // Initialize hiddenPosts from localStorage
+  const [hiddenPosts, setHiddenPosts] = useState(() => {
+    try {
+      const savedHiddenPosts = localStorage.getItem("hiddenPosts");
+      if (savedHiddenPosts) {
+        const parsedHiddenPosts = JSON.parse(savedHiddenPosts);
+        return Array.isArray(parsedHiddenPosts) ? parsedHiddenPosts : [];
+      }
+    } catch (error) {
+      console.error("Error loading hidden posts from localStorage:", error);
+    }
+    return [];
+  });
+
+  // Listen for storage events to sync recent posts
+  useEffect(() => {
+    const syncRecentPosts = () => {
+      try {
+        const savedRecentPosts = localStorage.getItem('recentPosts');
+        if (savedRecentPosts) {
+          const parsedPosts = JSON.parse(savedRecentPosts);
+          if (Array.isArray(parsedPosts)) {
+            setRecentPosts(parsedPosts);
+          }
+        }
+      } catch (error) {
+        console.error('Error syncing recent posts:', error);
+      }
+    };
+
+    window.addEventListener('storage', syncRecentPosts);
+    syncRecentPosts();
+    
+    return () => {
+      window.removeEventListener('storage', syncRecentPosts);
+    };
+  }, []);
 
   // Fetch personalized feed from API
   useEffect(() => {
@@ -127,7 +212,7 @@ const HomePage = () => {
           type: p.type || "text",
         }));
 
-        // load votes
+        // load votes - IMPROVED VOTING LOGIC FROM FIRST CODE
         let voteMap = {};
         try {
           const { data: votesData } = await axios.get(
@@ -160,77 +245,13 @@ const HomePage = () => {
     fetchFeed();
   }, [sortBy, expandedPosts, isPopular, page]);
 
-  //reset paging
+  // Reset paging
   useEffect(() => {
     setPage(1);
     setHasMore(true);
   }, [sortBy, isPopular]);
 
-  // Initialize expandedPostId from localStorage
-  const [expandedPostId] = useState(() => {
-    try {
-      const savedExpandedPostId = localStorage.getItem("expandedPostId");
-      if (savedExpandedPostId) {
-        const parsedId = JSON.parse(savedExpandedPostId);
-        return typeof parsedId === "number" ? parsedId : null;
-      }
-    } catch (error) {
-      console.error("Error loading expanded post from localStorage:", error);
-    }
-    return null;
-  });
-
-  // Initialize joinedCommunities from localStorage
-  const [joinedCommunities, setJoinedCommunities] = useState([]);
-  useEffect(() => {
-    const fetchJoinedCommunities = async () => {
-      try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/memberships/me`,
-          { withCredentials: true },
-        );
-
-        setJoinedCommunities(res.data);
-      } catch (error) {
-        console.error("Error loading joined communities from server:", error);
-        setJoinedCommunities({});
-      }
-    };
-
-    fetchJoinedCommunities();
-  });
-
-  // Initialize hiddenPosts from localStorage
-  const [hiddenPosts, setHiddenPosts] = useState(() => {
-    try {
-      const savedHiddenPosts = localStorage.getItem("hiddenPosts");
-      if (savedHiddenPosts) {
-        const parsedHiddenPosts = JSON.parse(savedHiddenPosts);
-        return Array.isArray(parsedHiddenPosts) ? parsedHiddenPosts : [];
-      }
-    } catch (error) {
-      console.error("Error loading hidden posts from localStorage:", error);
-    }
-    return [];
-  });
-
-  // Initialize recentPosts from localStorage with proper error handling
-  const [recentPosts, setRecentPosts] = useState(() => {
-    try {
-      const savedRecentPosts = localStorage.getItem("recentPosts");
-      if (savedRecentPosts) {
-        const parsedPosts = JSON.parse(savedRecentPosts);
-        return Array.isArray(parsedPosts) ? parsedPosts : [];
-      }
-    } catch (error) {
-      console.error("Error loading recent posts from localStorage:", error);
-    }
-    return [];
-  });
-
-  const sortOptions = ["Best", "New", "Top"];
-
-  // Save viewMode to localStorage whenever it changes
+  // Save states to localStorage
   useEffect(() => {
     try {
       localStorage.setItem("viewMode", viewMode);
@@ -239,7 +260,6 @@ const HomePage = () => {
     }
   }, [viewMode]);
 
-  // Save sortBy to localStorage whenever it changes
   useEffect(() => {
     try {
       localStorage.setItem("sortBy", sortBy);
@@ -248,20 +268,6 @@ const HomePage = () => {
     }
   }, [sortBy]);
 
-  // Save expandedPostId to localStorage whenever it changes
-  useEffect(() => {
-    try {
-      if (expandedPostId) {
-        localStorage.setItem("expandedPostId", JSON.stringify(expandedPostId));
-      } else {
-        localStorage.removeItem("expandedPostId");
-      }
-    } catch (error) {
-      console.error("Error saving expanded post to localStorage:", error);
-    }
-  }, [expandedPostId]);
-
-  // Save expandedPosts to localStorage whenever they change
   useEffect(() => {
     try {
       localStorage.setItem("expandedPosts", JSON.stringify(expandedPosts));
@@ -270,7 +276,6 @@ const HomePage = () => {
     }
   }, [expandedPosts]);
 
-  // Save recent posts to localStorage whenever they change
   useEffect(() => {
     try {
       localStorage.setItem("recentPosts", JSON.stringify(recentPosts));
@@ -279,7 +284,6 @@ const HomePage = () => {
     }
   }, [recentPosts]);
 
-  // Save hiddenPosts to localStorage whenever they change
   useEffect(() => {
     try {
       localStorage.setItem("hiddenPosts", JSON.stringify(hiddenPosts));
@@ -288,13 +292,9 @@ const HomePage = () => {
     }
   }, [hiddenPosts]);
 
-  // Save joinedCommunities to localStorage whenever they change
   useEffect(() => {
     try {
-      localStorage.setItem(
-        "joinedCommunities",
-        JSON.stringify(joinedCommunities),
-      );
+      localStorage.setItem("joinedCommunities", JSON.stringify(joinedCommunities));
     } catch (error) {
       console.error("Error saving joined communities to localStorage:", error);
     }
@@ -311,7 +311,7 @@ const HomePage = () => {
       community: post.community,
       user: post.user,
       userAvatar: `${post.userAvatar}` || "/profile.png",
-      communityIcon : `${post.communityIcon}`,
+      communityIcon: `${post.communityIcon}`,
       timestamp: Date.now(),
       time: post.time,
     };
@@ -402,7 +402,6 @@ const HomePage = () => {
         return;
       }
 
-      // Update UI only AFTER backend succeeds
       setJoinedCommunities((prev) =>
         prev.includes(communityName) ? prev : [...prev, communityName],
       );
@@ -436,12 +435,12 @@ const HomePage = () => {
     });
   };
 
-  // Handle post voting
+  // Handle post voting - IMPROVED VOTING LOGIC FROM FIRST CODE
   const handleVote = async (postId, voteType) => {
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/votes/posts/${postId}`,
-        { voteScore: voteType }, // MUST be voteScore (1 or -1)
+        { voteScore: voteType },
         { withCredentials: true },
       );
 
@@ -481,13 +480,12 @@ const HomePage = () => {
   };
 
   // Function to get thumbnail image for compact view
- const getThumbnailImage = (post) => {
-  if (post.image) {
-    // Use same logic as expanded image will use
-    return `${import.meta.env.VITE_API_URL}${post.image}`;
-  }
-  return "../../../assets/compact-image.png"; 
-};
+  const getThumbnailImage = (post) => {
+    if (post.image) {
+      return `${import.meta.env.VITE_API_URL}${post.image}`;
+    }
+    return "../../../assets/compact-image.png"; 
+  };
 
   const toggleViewMode = () => {
     setViewMode((prev) => {
@@ -505,7 +503,7 @@ const HomePage = () => {
   };
 
   const handleCommunityClick = (communityName) => {
-    console.log(`Opening community page for r/${communityName}`);
+    navigate(`/community/${communityName}`);
   };
 
   const formatNumber = (num) => {
@@ -515,98 +513,102 @@ const HomePage = () => {
     return num.toString();
   };
 
-const EmptyFeedState = () => {
+  const sortOptions = ["Best", "New", "Top"];
+
+  const EmptyFeedState = () => {
+    return (
+      <div className="feed-empty">
+        <div className="feed-empty-inner">
+          <img
+            src="https://www.redditstatic.com/avatars/avatar_default_02_46D160.png"
+            alt="Snoo"
+            className="empty-snoo"
+          />
+
+          <h2>Nothing here yet</h2>
+
+          <p>
+            Your home feed shows posts from communities you join.
+            <br />
+            Start by exploring and joining a few communities you like.
+          </p>
+
+          <button
+            className="feed-empty-cta"
+            onClick={() => navigate("/explore")}
+          >
+            Explore communities
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="page-container">
-      {/* Use LeftSidebar component with start community button */}
-      <LeftSidebar
-        showStartCommunity={true}
-        onStartCommunity={onStartCommunity}
-      />
+      <LeftSidebar/>
 
-      <h2>Nothing here yet</h2>
-
-      <p>
-        Your home feed shows posts from communities you join.
-        <br />
-        Start by exploring and joining a few communities you like.
-      </p>
-
-      <button
-        className="feed-empty-cta"
-        onClick={() => navigate("/explore")}
-      >
-        Explore communities
-      </button>
-    </div>
-</div>
-
-  );
-};
-
-
-return (
-  <div className="page-container">
-    <LeftSidebar/>
-
-    <div className="feed-wrapper">
-      <div className="main-feed">
-        {!( !isPopular && joinedCommunities.length === 0 ) && (
-          <div className="feed-controls">
-            {!isPopular && (
-              <div className="sort-options">
-                <div className="sort-dropdown-container">
-                  <button
-                    className="sort-btn active"
-                    onClick={toggleSortDropdown}
-                  >
-                    <span>{sortBy}</span>
-                    <svg
-                      className={`dropdown-icon ${showSortDropdown ? "open" : ""}`}
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
+      <div className="feed-wrapper">
+        <div className="main-feed">
+          {!( !isPopular && joinedCommunities.length === 0 ) && (
+            <div className="feed-controls">
+              {!isPopular && (
+                <div className="sort-options">
+                  <div className="sort-dropdown-container">
+                    <button
+                      className="sort-btn active"
+                      onClick={toggleSortDropdown}
                     >
-                      <path
-                        fillRule="evenodd"
-                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
+                      <span>{sortBy}</span>
+                      <svg
+                        className={`dropdown-icon ${showSortDropdown ? "open" : ""}`}
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
 
-                  {showSortDropdown && (
-                    <div className="sort-dropdown">
-                      <div className="dropdown-list">
-                        {sortOptions.map((option, index) => (
-                          <button
-                            key={index}
-                            className={`dropdown-item ${sortBy === option ? "active" : ""}`}
-                            onClick={() => handleSortSelect(option)}
-                          >
-                            {option}
-                          </button>
-                        ))}
+                    {showSortDropdown && (
+                      <div className="sort-dropdown">
+                        <div className="dropdown-list">
+                          {sortOptions.map((option, index) => (
+                            <button
+                              key={index}
+                              className={`dropdown-item ${sortBy === option ? "active" : ""}`}
+                              onClick={() => handleSortSelect(option)}
+                            >
+                              {option}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
+
+                  <button className="view-toggle-btn" onClick={toggleViewMode}>
+                    {viewMode === "card" ? "☐" : "≡"}
+                  </button>
                 </div>
+              )}
 
-                <button className="view-toggle-btn" onClick={toggleViewMode}>
-                  {viewMode === "card" ? "☐" : "≡"}
-                </button>
-              </div>
-            )}
+              {isPopular && (
+                <p style={{ textAlign: "center" }}>
+                  <strong>Popular</strong>
+                </p>
+              )}
+            </div>
+          )}
 
-            {isPopular && (
-              <p style={{ textAlign: "center" }}>
-                <strong>Popular</strong>
-              </p>
-            )}
-          </div>
-        )}
-
-          {/* Posts */}
-          {isLoadingPosts && page === 1 ? (
+          {!isLoadingPosts &&
+          joinedCommunities.length === 0 &&
+          !isPopular ? (
+            <EmptyFeedState></EmptyFeedState>
+          ) : isLoadingPosts && page === 1 ? (
             <div className="sr-loading">
               <div className="sr-spinner"></div>
               <span>Loading posts...</span>
@@ -632,51 +634,48 @@ return (
             />
           )}
 
-        {hasMore && !isLoadingPosts && (
-          <div className="feed-pagination">
-            <button
-              className="show-more-btn"
-              onClick={() => setPage((prev) => prev + 1)}
-            >
-              Show more
-            </button>
-          </div>
-        )}
+          {hasMore && !isLoadingPosts && (
+            <div className="feed-pagination">
+              <button
+                className="show-more-btn"
+                onClick={() => setPage((prev) => prev + 1)}
+              >
+                Show more
+              </button>
+            </div>
+          )}
 
-        {!hasMore && !isLoadingPosts && (
-          <div className="feed-end">
-            <div className="feed-end-line"></div>
-            <p>You’re all caught up</p>
-          </div>
-        )}
+          {!hasMore && !isLoadingPosts && (
+            <div className="feed-end">
+              <div className="feed-end-line"></div>
+              <p>You're all caught up</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="sidebar">
+        <RecentPosts
+          recentPosts={recentPosts}
+          onClearRecentPosts={clearRecentPosts}
+          onPostClick={handlePostClick}
+          onCommunityClick={handleCommunityClick}
+          formatRelativeTime={formatRelativeTime}
+          formatNumber={formatNumber}
+          getRecentPostThumbnail={getRecentPostThumbnail}
+        />
+      </div>
+
+      <div className="footer-text">
+        <p className="footer-line">
+          Readit Rules Privacy Policy User Agreement
+        </p>
+        <p className="footer-copyright">
+          Readit, Inc. © 2025. All rights reserved.
+        </p>
       </div>
     </div>
-
-    <div className="sidebar">
-      <RecentPosts
-        recentPosts={recentPosts}
-        darkMode={darkMode}
-        onClearRecentPosts={clearRecentPosts}
-        onPostClick={handlePostClick}
-        onCommunityClick={handleCommunityClick}
-        formatRelativeTime={formatRelativeTime}
-        formatNumber={formatNumber}
-        getRecentPostThumbnail={getRecentPostThumbnail}
-      />
-    </div>
-
-    <div className="footer-text">
-      <p className="footer-line">
-        Readit Rules Privacy Policy User Agreement
-      </p>
-      <p className="footer-copyright">
-        Readit, Inc. © 2025. All rights reserved.
-      </p>
-    </div>
-  </div>
-);
-
-
+  );
 };
 
 export default HomePage;

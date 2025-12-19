@@ -15,63 +15,112 @@ export default function PostPage() {
   const [originalText, setOriginalText] = useState("");
   const [typingText, setTypingText] = useState("");
 
+  const formatTimeAgo = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const minutes = Math.floor(diffMs / (1000 * 60));
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (minutes < 1) return "just now";
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days < 30) return `${days}d ago`;
+    return new Date(dateString).toLocaleDateString();
+  };
 
-const handleGenerateSummary = async () => {
-  try {
-    setIsSummarizing(true);
-    setTypingText("");
+  const handleGenerateSummary = async () => {
+    try {
+      setIsSummarizing(true);
+      setTypingText("");
 
-    if (!originalText) {
-      setOriginalText(post.text);
+      if (!originalText) {
+        setOriginalText(post.text);
+      }
+
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/ai-summary/${post.id}`,
+        { withCredentials: true }
+      );
+
+      const summary = res.data.summaryText;
+
+      setIsSummaryMode(true);
+      setPost((prev) => ({
+        ...prev,
+        text: "",
+      }));
+
+      // WORD-BY-WORD TYPING EFFECT
+      const words = summary.split(" ");
+      let index = 0;
+
+      const interval = setInterval(() => {
+        index++;
+
+        setTypingText(words.slice(0, index).join(" "));
+
+        if (index >= words.length) {
+          clearInterval(interval);
+          setIsSummarizing(false);
+
+          // Finalize text
+          setPost((prev) => ({
+            ...prev,
+            text: summary,
+          }));
+        }
+      }, 35); // typing speed (ms per word)
+
+    } catch (err) {
+      console.error("Error generating summary:", err);
+      setIsSummarizing(false);
     }
+  };
 
-    const res = await axios.get(
-      `${import.meta.env.VITE_API_URL}/ai-summary/${post.id}`,
-      { withCredentials: true }
-    );
-
-    const summary = res.data.summaryText;
-
-    setIsSummaryMode(true);
+  const handleShowOriginal = () => {
     setPost((prev) => ({
       ...prev,
-      text: "",
+      text: originalText,
     }));
+    setIsSummaryMode(false);
+  };
 
-    // WORD-BY-WORD TYPING EFFECT
-    const words = summary.split(" ");
-    let index = 0;
-
-    const interval = setInterval(() => {
-      index++;
-
-      setTypingText(words.slice(0, index).join(" "));
-
-      if (index >= words.length) {
-        clearInterval(interval);
-        setIsSummarizing(false);
-
-        // Finalize text
-        setPost((prev) => ({
-          ...prev,
-          text: summary,
-        }));
+  const updateRecentPosts = (post) => {
+    try {
+      const savedRecentPosts = localStorage.getItem('recentPosts');
+      let recentPosts = [];
+      
+      if (savedRecentPosts) {
+        try {
+          recentPosts = JSON.parse(savedRecentPosts);
+          if (!Array.isArray(recentPosts)) {
+            recentPosts = [];
+          }
+        } catch {
+          recentPosts = [];
+        }
       }
-    }, 35); // typing speed (ms per word)
-
-  } catch (err) {
-    console.error("Error generating summary:", err);
-    setIsSummarizing(false);
-  }
-};
-const handleShowOriginal = () => {
-  setPost((prev) => ({
-    ...prev,
-    text: originalText,
-  }));
-  setIsSummaryMode(false);
-};
-
+      
+      // Remove if post already exists
+      const filtered = recentPosts.filter(p => p.id !== post.id);
+      
+      // Add new post at the beginning
+      const updated = [post, ...filtered].slice(0, 5); // Keep only 5 most recent
+      
+      // Save back to localStorage
+      localStorage.setItem('recentPosts', JSON.stringify(updated));
+      
+      // Dispatch storage event to notify HomePage
+      window.dispatchEvent(new Event('storage'));
+      
+      return updated;
+    } catch (error) {
+      console.error('Error updating recent posts:', error);
+      return [];
+    }
+  };
 
   /* LOAD POST + COMMENTS */
   useEffect(() => {
@@ -83,7 +132,6 @@ const handleShowOriginal = () => {
         );
 
         const data = res.data;
-        console.log(res.data);
         
         // Fetch user's vote separately to ensure we have it
         let userVote = data.userVote ?? 0;
@@ -100,6 +148,28 @@ const handleShowOriginal = () => {
           console.error("Failed to fetch vote state:", e);
         }
         
+        // Create recent post object for localStorage
+        const recentPost = {
+          id: data._id,
+          title: data.title,
+          image: data.media?.url 
+            ? `${import.meta.env.VITE_API_URL}${data.media.url}` 
+            : null,
+          upvotes: data.upvoteCount || 0,
+          downvotes: data.downvoteCount || 0,
+          comments: data.commentCount || 0,
+          community: data.communityId?.name || "",
+          user: data.authorId?.username || "Unknown",
+          userAvatar: data.authorId?.avatarUrl || "/profile.png",
+          communityIcon: data.communityId?.iconUrl || null,
+          timestamp: Date.now(),
+          time: formatTimeAgo(data.createdAt)
+        };
+
+        // Update recent posts in localStorage
+        updateRecentPosts(recentPost);
+        
+        // Set post state for display
         setPost({
           id: data._id,
           community: data.communityId?.name,
@@ -179,11 +249,37 @@ const handleShowOriginal = () => {
 
     const voteData = await voteRes.json();
 
+    // Update post state
     setPost((prev) => ({
       ...prev,
       votes: updatedPost.upvoteCount - updatedPost.downvoteCount,
       userVote: voteData.posts?.[postId] ?? 0,
     }));
+
+    // Update recent posts with new vote count
+    const savedRecentPosts = localStorage.getItem('recentPosts');
+    if (savedRecentPosts) {
+      try {
+        let recentPosts = JSON.parse(savedRecentPosts);
+        
+        recentPosts = recentPosts.map(post => {
+          if (post.id === postId) {
+            return {
+              ...post,
+              upvotes: updatedPost.upvoteCount || 0,
+              downvotes: updatedPost.downvoteCount || 0,
+              timestamp: Date.now()
+            };
+          }
+          return post;
+        });
+        
+        localStorage.setItem('recentPosts', JSON.stringify(recentPosts));
+        window.dispatchEvent(new Event('storage'));
+      } catch (error) {
+        console.error('Error updating vote count in recent posts:', error);
+      }
+    }
   };
 
   /* COMMENT VOTING */
@@ -258,6 +354,34 @@ const handleShowOriginal = () => {
       ...prev,
       commentsCount: prev.commentsCount + 1,
     }));
+
+    // UPDATE RECENT POSTS WITH NEW COMMENT COUNT
+    const savedRecentPosts = localStorage.getItem('recentPosts');
+    if (savedRecentPosts) {
+      try {
+        let recentPosts = JSON.parse(savedRecentPosts);
+        
+        // Find and update the post in recent posts
+        recentPosts = recentPosts.map(post => {
+          if (post.id === postId) {
+            return {
+              ...post,
+              comments: (post.comments || 0) + 1,
+              timestamp: Date.now() // Update timestamp
+            };
+          }
+          return post;
+        });
+        
+        // Save back to localStorage
+        localStorage.setItem('recentPosts', JSON.stringify(recentPosts));
+        
+        // Trigger update event
+        window.dispatchEvent(new Event('storage'));
+      } catch (error) {
+        console.error('Error updating comment count in recent posts:', error);
+      }
+    }
   };
 
   /* COMMENT REPLY */
