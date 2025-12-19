@@ -78,7 +78,6 @@ function CommunityPage() {
     setCommentInputs((prev) => ({ ...prev, [postId]: "" }));
   };
 
-  // ✅ Voting exactly like HomePage
   const handleVote = async (postId, voteType) => {
     try {
       const res = await axios.post(
@@ -135,7 +134,7 @@ function CommunityPage() {
           console.error("Posts fetch failed:", postsData);
           setPosts([]);
         } else {
-          // ✅ normalize like HomePage (id + _id + voteCount + time)
+          
           const normalized = Array.isArray(postsData)
             ? postsData.map((p) => ({
                 id: p._id,
@@ -159,7 +158,7 @@ function CommunityPage() {
               }))
             : [];
 
-          // ✅ load votes like HomePage
+         
           try {
             const { data: voteMap } = await axios.get(
               `${import.meta.env.VITE_API_URL}/votes/me`,
@@ -219,7 +218,7 @@ function CommunityPage() {
               <PostList
                 posts={posts}
                 viewMode="card"
-                onVote={handleVote} // ✅ HomePage-style vote
+                onVote={handleVote} 
                 expandedPostId={expandedPostId}
                 onToggleComments={handleToggleComments}
                 commentInputs={commentInputs}
