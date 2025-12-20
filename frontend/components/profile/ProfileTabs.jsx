@@ -1,6 +1,7 @@
 const tabs = ["Posts", "Communities", "Comments","Saved"];
 
-export default function ProfileTabs({ activeTab, setActiveTab }) {
+export default function ProfileTabs({isMyProfile, activeTab, setActiveTab }) {
+  const tabs = isMyProfile?["Posts", "Communities", "Comments","Saved"]:["Posts", "Communities", "Comments"];
   return (
     <div className="profile-tabs card">
       {tabs.map((tab) => (

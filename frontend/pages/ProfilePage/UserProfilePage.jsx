@@ -74,6 +74,7 @@ export default function UserProfilePage() {
               <ProfileTabs
                 className="sticky"
                 activeTab={activeTab}
+                isMyProfile={isMyProfile}
                 setActiveTab={setActiveTab}
               />
 

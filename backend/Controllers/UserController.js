@@ -20,7 +20,7 @@ export const getUserById = async (req, res) => {
     }
 
     const user = await User.findById(userId).select(
-      "-password -passwordHash -__v",
+      "-password -passwordHash -__v -savedPosts",
     );
 
     if (!user) {
