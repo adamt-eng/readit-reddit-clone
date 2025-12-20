@@ -67,13 +67,14 @@ const Comment = ({ comment, depth = 0, onVote, onReply, postId }) => {
         <div className="comment-content">{comment.content || comment.body}</div>
         <div className="comment-actions">
           <button
-            className="action-btn"
+            className="action-btn reply-btn"
             onClick={() => setIsReplying(!isReplying)}
           >
-            ↩ Reply
+            <span className="reply-icon">↩</span>
+            <span>Reply</span>
           </button>
+
           <button className="action-btn" onClick={handleShareComment}> Share</button>
-          <button className="action-btn">Report</button>
 
           {/* Show/Hide Replies Button for comments with replies */}
           {comment.replies && comment.replies.length > 0 && (
