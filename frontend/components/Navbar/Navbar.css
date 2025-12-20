@@ -412,20 +412,41 @@
 }
 
 /* Notification dropdown */
+/* ============================= */
+/* Notification Dropdown        */
+/* ============================= */
+
 .noti-dropdown {
   position: absolute;
   top: calc(100% + 10px);
   right: 0;
 
-  width: 320px;
+  width: 340px;
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
-  border-radius: 10px;
-  box-shadow: var(--shadow-lg);
+  border-radius: 12px;
 
+  box-shadow: var(--shadow-lg);
   z-index: 1000;
   overflow: hidden;
 }
+
+/* Small arrow pointing to bell */
+.noti-dropdown::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  right: 18px;
+
+  width: 10px;
+  height: 10px;
+  background: var(--bg-surface);
+  transform: rotate(45deg);
+
+  border-left: 1px solid var(--border-default);
+  border-top: 1px solid var(--border-default);
+}
+
 
 .noti-dropdown-header {
   display: flex;
@@ -437,6 +458,7 @@
 
   font-size: 14px;
   font-weight: 600;
+  color: var(--text-primary);
 }
 
 .noti-show-more {
@@ -444,28 +466,83 @@
   border: none;
   color: var(--accent);
   font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
+  padding: 0;
 }
 
+.noti-show-more:hover {
+  text-decoration: underline;
+}
+
+
+
 .noti-dropdown-list {
-  max-height: 300px;
+  max-height: 300px; /* ≈ 5 notifications */
   overflow-y: auto;
 }
 
+
+
 .noti-dropdown-item {
   padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
   font-size: 13px;
   color: var(--text-primary);
   cursor: pointer;
+
+  transition: background-color 0.15s ease;
+}
+
+.noti-dropdown-item:not(:last-child) {
+  border-bottom: 1px solid var(--border-default);
 }
 
 .noti-dropdown-item:hover {
   background: var(--bg-page);
 }
 
+/* Message text */
+.noti-item-message {
+  line-height: 1.4;
+}
+
+/* Time (secondary info) */
+.noti-item-time {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+
+.noti-dropdown-item.unread {
+  background: rgba(255, 69, 0, 0.08);
+}
+
+.noti-dropdown-item.unread:hover {
+  background: rgba(255, 69, 0, 0.12);
+}
+
 .noti-empty {
-  padding: 16px;
+  padding: 18px;
   text-align: center;
   font-size: 13px;
   color: var(--text-muted);
+}
+
+.noti-dropdown {
+  animation: dropdownFade 150ms ease-out;
+}
+
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
