@@ -687,3 +687,126 @@ export const editPost = async (req, res) => {
     return res.status(500).json({ message: "Failed to edit post" });
   }
 };
+
+//save post
+export const savePost = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    const { postId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    const postExists = await Post.exists({ _id: postId });
+    if (!postExists) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.savedPosts.includes(postId)) {
+      return res.status(200).json({ message: "Post already saved" });
+    }
+
+    user.savedPosts.push(postId);
+    await user.save();
+
+    res.status(200).json({ message: "Post saved successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+//remove save
+export const unsavePost = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    const { postId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(postId)) {
+      return res.status(400).json({ message: "Invalid post ID" });
+    }
+
+    const postExists = await Post.exists({ _id: postId });
+    if (!postExists) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const wasSaved = user.savedPosts.some(
+      (id) => id.toString() === postId
+    );
+
+    if (!wasSaved) {
+      return res.status(200).json({ message: "Post not in saved list" });
+    }
+
+    user.savedPosts = user.savedPosts.filter(
+      (id) => id.toString() !== postId
+    );
+
+    await user.save();
+
+    res.status(200).json({ message: "Post removed from saved" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+//get user saved for profile
+export async function getSavedPosts(req, res) {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const user = await User.findById(userId).select("savedPosts");
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const posts = await Post.find({
+      _id: { $in: user.savedPosts },
+      isRemoved: false,
+    })
+      .populate("communityId", "name iconUrl")
+      .populate("authorId", "username avatarUrl")
+      .sort({ createdAt: -1 });
+
+    const results = posts.map((p) => ({
+      _id: p._id,
+      title: p.title,
+      content: p.content,
+
+      communityName: p.communityId?.name || "",
+      iconUrl: p.communityId?.iconUrl || null,
+
+      author: p.authorId?.username || "",
+      avatarUrl: p.authorId?.avatarUrl || "",
+
+      upvoteCount: p.upvoteCount,
+      commentCount: p.commentCount,
+      createdAt: p.createdAt,
+    }));
+
+    res.json(results);
+  } catch (err) {
+    console.error("getSavedPosts error:", err);
+    res.status(500).json({ error: "Server error fetching saved posts" });
+  }
+}
