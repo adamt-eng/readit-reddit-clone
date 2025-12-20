@@ -110,14 +110,14 @@ useEffect(() => {
         />
 
         <button className="action-btn" onClick={handleSharePost}>
-          🔗 Share
+          ➤ Share
         </button>
         {post.canEdit && (
           <button
             className="action-btn"
             onClick={() => setIsEditOpen(true)}
           >
-            ✏️ Edit
+            ✎ Edit
           </button>
         )}
 
@@ -131,7 +131,7 @@ useEffect(() => {
             onClick={onGenerateSummary}
             disabled={isSummarizing}
           >
-            {isSummarizing ? "⏳ Summarizing..." : "✨ Summary"}
+            {isSummarizing ? "↺ Summarizing..." : "✦ Summary"}
           </button>
         )}
         
