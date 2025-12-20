@@ -32,7 +32,7 @@ async function callHfSummarize(input, model = DEFAULT_HF_MODEL) {
 
 async function summarizePost(post, { hfModel }) {
   const title = post.title || "Untitled";
-  const content = (post.text || "").slice(0, 4000);
+  const content = (post.content || "").slice(0, 4000);
   const input = `${title}\n\n${content}`;
 
   const hf = await callHfSummarize(input, hfModel);
@@ -63,7 +63,7 @@ export const getOrGenerateSummaryForPost = async (req, res) => {
 
     if (existing) return res.json(existing);
 
-    const post = await Post.findById(postId).select("title text authorId");
+    const post = await Post.findById(postId).select("title content authorId");
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
@@ -96,7 +96,7 @@ export const generateSummaryForPost = async (req, res) => {
       return res.status(400).json({ message: "Invalid or missing postId" });
     }
 
-    const post = await Post.findById(postId).select("title text authorId");
+    const post = await Post.findById(postId).select("title content authorId");
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
