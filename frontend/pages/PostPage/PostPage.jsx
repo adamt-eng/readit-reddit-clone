@@ -14,6 +14,7 @@ export default function PostPage() {
   const [isSummaryMode, setIsSummaryMode] = useState(false);
   const [originalText, setOriginalText] = useState("");
   const [typingText, setTypingText] = useState("");
+  const [summaryText, setSummaryText] = useState("");
 
 
 
@@ -32,61 +33,57 @@ export default function PostPage() {
     return new Date(dateString).toLocaleDateString();
   };
 
-  const handleGenerateSummary = async () => {
-    try {
-      setIsSummarizing(true);
-      setTypingText("");
+const handleGenerateSummary = async (forceRegenerate = false) => {
+  try {
+    setIsSummarizing(true);
+    setTypingText("");
 
-      if (!originalText) {
-        setOriginalText(post.text);
-      }
-
-      const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/ai-summary/${post.id}`,
-        { withCredentials: true }
-      );
-
-      const summary = res.data.summaryText;
-
-      setIsSummaryMode(true);
-      setPost((prev) => ({
-        ...prev,
-        text: "",
-      }));
-
-      const words = summary.split(" ");
-      let index = 0;
-
-      const interval = setInterval(() => {
-        index++;
-
-        setTypingText(words.slice(0, index).join(" "));
-
-        if (index >= words.length) {
-          clearInterval(interval);
-          setIsSummarizing(false);
-
-          // Finalize text
-          setPost((prev) => ({
-            ...prev,
-            text: summary,
-          }));
-        }
-      }, 35); // typing speed (ms per word)
-
-    } catch (err) {
-      console.error("Error generating summary:", err);
-      setIsSummarizing(false);
+    // capture original text ONCE
+    if (!originalText) {
+      setOriginalText(post.text);
     }
-  };
 
-  const handleShowOriginal = () => {
-    setPost((prev) => ({
-      ...prev,
-      text: originalText,
-    }));
-    setIsSummaryMode(false);
-  };
+    const endpoint = forceRegenerate
+      ? `/ai-summary/${post.id}/generate`
+      : `/ai-summary/${post.id}`;
+
+    const res = await axios.get(
+      `${import.meta.env.VITE_API_URL}${endpoint}`,
+      { withCredentials: true }
+    );
+
+    const summary = res.data.summaryText;
+
+    setIsSummaryMode(true);
+    setSummaryText(""); // reset before animation
+
+    const words = summary.split(" ");
+    let index = 0;
+
+    const interval = setInterval(() => {
+      index++;
+      setTypingText(words.slice(0, index).join(" "));
+
+      if (index >= words.length) {
+        clearInterval(interval);
+        setIsSummarizing(false);
+        setTypingText("");
+        setSummaryText(summary);
+      }
+    }, 35);
+
+  } catch (err) {
+    console.error("Error generating summary:", err);
+    setIsSummarizing(false);
+  }
+};
+
+
+const handleShowOriginal = () => {
+  setIsSummaryMode(false);
+  setTypingText("");
+};
+
 
   /* POST EDIT */
 const handleEditPost = async ({ title, text, removeImage }) => {
@@ -109,11 +106,16 @@ const handleEditPost = async ({ title, text, removeImage }) => {
       text: updated.content,
       image: removeImage ? null : prev.image,
     }));
+    // Reset summary state on edit
+    setIsSummaryMode(false);
+    setSummaryText("");
+    setTypingText("");
+    setOriginalText(updated.content);
+
   } catch (err) {
     console.error("Failed to edit post:", err);
   }
 };
-
 
   const updateRecentPosts = (post) => {
     try {
@@ -414,6 +416,7 @@ const handleEditPost = async ({ title, text, removeImage }) => {
           onEdit={handleEditPost}
           isSummarizing={isSummarizing}
           isSummaryMode={isSummaryMode}
+          summaryText={summaryText}
           onGenerateSummary={handleGenerateSummary}
           onShowOriginal={handleShowOriginal}
           typingText={typingText}
