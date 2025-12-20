@@ -40,6 +40,8 @@ export default function Navbar({
   const [isNotiMuted, setIsNotiMuted] = useState(false);
   const [showNotiDropdown, setShowNotiDropdown] = useState(false);
   const [latestNotis, setLatestNotis] = useState([]);
+  const showNotiDropdownRef = useRef(showNotiDropdown);
+
 
 
   const popupTimeoutRef = useRef(null);
@@ -141,7 +143,12 @@ export default function Navbar({
 
   useEffect(()=>{
       setShowNotiDropdown(false);
-  },[location.pathname])
+  },[location.pathname]);
+
+  useEffect(() => {
+  showNotiDropdownRef.current = showNotiDropdown;
+}, [showNotiDropdown]);
+
 
 
   // Fetch initial count
@@ -156,10 +163,17 @@ export default function Navbar({
 
     socket.emit("register", user._id);
 
-    const handleNotification = (notification) => {
-      fetchCount();
+    const handleNotification = async (notification) => {
+      await fetchCount();
+      await setLatestNotis((prev)=>[notification,...prev])
 
-      if (isNotiMuted) return;
+      if (
+        isNotiMuted ||
+        location.pathname === "/notifications" ||
+        showNotiDropdownRef.current
+      ) {
+        return;
+      }
 
       if (popupTimeoutRef.current) {
       clearTimeout(popupTimeoutRef.current);
@@ -176,7 +190,7 @@ export default function Navbar({
           setSocketPopup(null);
           setIsFadingOut(false);
         }, 400);
-      }, 3600);
+      }, 2600);
 
     };
 
@@ -302,14 +316,14 @@ export default function Navbar({
                     <div className="noti-empty">No notifications yet</div>
                   ) : (
                     latestNotis.map((n) => (
-                      <div key={n._id} className="noti-dropdown-item">
+                      <Link to={'/notifications'} key={n._id} className="noti-dropdown-item">
                         <div className="noti-item-message">
                           {n.payload?.message || "New notification"}
                         </div>
                         <div className="noti-item-time">
                           {n.timeAgoFormatted || ""}
                         </div>
-                      </div>
+                      </Link>
                     ))
                   )}
                 </div>
@@ -318,7 +332,7 @@ export default function Navbar({
 
             {/* socket popup stays unchanged */}
             {socketPopup && !showNotiDropdown &&location.pathname !== "/notifications"&&(
-              <div className={`noti-toast ${isFadingOut ? "fade-out" : ""}`}>
+              <Link to={'/notifications'} className={`noti-toast ${isFadingOut ? "fade-out" : ""}`}>
                 <div className="noti-toast-accent" />
                 <div className="noti-toast-body">
                   <div className="noti-toast-title">New notification</div>
@@ -326,7 +340,7 @@ export default function Navbar({
                     {socketPopup.payload?.message}
                   </div>
                 </div>
-              </div>
+              </Link>
             )}
           </div>
 

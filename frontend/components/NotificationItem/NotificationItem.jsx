@@ -95,7 +95,7 @@ export default function NotificationItem({ data, onDelete }) {
     }
 
     if (type === "private_message") {
-      navigate("/messages");
+      navigate(`/messages?chat=${payload.chatId}`);
       return;
     }
   };

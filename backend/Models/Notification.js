@@ -9,6 +9,7 @@ const NotificationSchema = new Schema(
       actorId : { type: Schema.Types.ObjectId, ref: "Post" },
       postId: { type: Schema.Types.ObjectId, ref: "Post" },
       commentId: { type: Schema.Types.ObjectId, ref: "Comment" },
+      chatId : { type: Schema.Types.ObjectId, ref: "DMConversation" },
       message: { type: String }
     },
     isRead: { type: Boolean, default: false },

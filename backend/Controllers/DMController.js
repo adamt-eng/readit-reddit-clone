@@ -170,6 +170,7 @@ const createDMController = ({ io, onlineUsers }) => {
           actorId: req.user.id,
           postId: null,
           commentId: null,
+          chatId: convoId
         },
       });
       return res.status(201).json(populated);
