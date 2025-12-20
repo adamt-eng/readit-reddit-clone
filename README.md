@@ -1,4 +1,4 @@
-# Readit – Full Stack Reddit Clone
+# Readit – MERN Reddit Clone
 
 Readit is a feature-rich social platform inspired by Reddit, where users can create accounts, join communities, publish posts, comment, vote, and interact with others in real-time. Built with a modern tech stack featuring real-time socket communication, AI-powered post summaries, and a fully responsive React frontend.
 
