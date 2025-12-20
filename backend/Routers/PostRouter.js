@@ -11,9 +11,7 @@ import {
   deletePost,
   getPostsByCommunity,
   getGuestFeed,
-  savePost,
-  unsavePost,
-  getSavedPosts,
+  editPost,
 } from "../Controllers/PostController.js";
 
 import {
@@ -51,6 +49,9 @@ router.get("/saved",auth,getSavedPosts);
 
 //delete post
 router.delete("/:id", auth, deletePost);
+
+//Edit post
+router.put("/:id", auth, editPost);
 
 // Must stay last
 router.get("/:postId", auth, getPostById);
