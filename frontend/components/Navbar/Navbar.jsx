@@ -158,7 +158,6 @@ export default function Navbar({
 
     const handleNotification = (notification) => {
       fetchCount();
-      fetchLatestNotis();
 
       if (isNotiMuted) return;
 
@@ -262,10 +261,11 @@ export default function Navbar({
           <div className="nav-icon-btn noti-wrapper">
             <div
               className="noti-icon-container"
-              onClick={() => {
+              onClick={async () => {
+                await fetchLatestNotis();
+                await fetchCount();
                 setShowNotiDropdown((prev) => !prev);
-                fetchLatestNotis();
-                fetchCount();
+
               }}
             >
               {!isNotiMuted ? <FaBell /> : <FaBellSlash />}
@@ -281,7 +281,7 @@ export default function Navbar({
               </button>
             </div>
 
-            {!isNotiMuted && notisCount > 0 && !showNotiDropdown&& (
+            {!isNotiMuted && notisCount > 0 && !showNotiDropdown&& location.pathname!=="/notifications"&& (
               <span className="notification-badge">{notisCount}</span>
             )}
 
@@ -317,7 +317,7 @@ export default function Navbar({
             )}
 
             {/* socket popup stays unchanged */}
-            {socketPopup && !showNotiDropdown &&(
+            {socketPopup && !showNotiDropdown &&location.pathname !== "/notifications"&&(
               <div className={`noti-toast ${isFadingOut ? "fade-out" : ""}`}>
                 <div className="noti-toast-accent" />
                 <div className="noti-toast-body">
