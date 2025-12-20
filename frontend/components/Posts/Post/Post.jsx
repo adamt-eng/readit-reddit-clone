@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./Post.css";
 import Comment from "../../Comment/Comment.jsx";
 import Vote from "../../Vote/Vote.jsx";
+import { useEffect } from "react";
 
 export default function Post({
   post,
@@ -10,6 +11,7 @@ export default function Post({
   onDownvote,
   onComment,
   onVote,
+  onEdit,
   onReply,
   isSummaryMode,
   isSummarizing,
@@ -19,6 +21,12 @@ export default function Post({
 }) 
 {
   const [commentText, setCommentText] = useState("");
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editTitle, setEditTitle] = useState(post.title || "");
+  const [editText, setEditText] = useState(post.text || "");
+  const [removeImage, setRemoveImage] = useState(false);
+
+
 
   const handleCommentSubmit = (e) => {
     e.preventDefault();
@@ -40,6 +48,15 @@ const handleUpvote = () => {
 const handleDownvote = () => {
   onDownvote?.();
 };
+
+useEffect(() => {
+  if (isEditOpen) {
+    setEditTitle(post.title || "");
+    setEditText(post.text || "");
+    setRemoveImage(false);
+  }
+}, [isEditOpen]);
+
 
 
   return (
@@ -95,6 +112,14 @@ const handleDownvote = () => {
         <button className="action-btn" onClick={handleSharePost}>
           🔗 Share
         </button>
+        {post.canEdit && (
+          <button
+            className="action-btn"
+            onClick={() => setIsEditOpen(true)}
+          >
+            ✏️ Edit
+          </button>
+        )}
 
         {isSummaryMode ? (
           <button className="action-btn" onClick={onShowOriginal}>
@@ -147,6 +172,65 @@ const handleDownvote = () => {
           </div>
         )}
       </div>
+        {isEditOpen && (
+  <div className="modal-overlay">
+    <div className="modal">
+      <h3>Edit Post</h3>
+
+      <input
+        className="modal-input"
+        value={editTitle}
+        onChange={(e) => setEditTitle(e.target.value)}
+        placeholder="Title"
+      />
+
+      <textarea
+        className="modal-textarea"
+        value={editText}
+        onChange={(e) => setEditText(e.target.value)}
+        placeholder="Post description"
+      />
+
+      {post.image && !removeImage && (
+        <div className="modal-image-preview">
+          <img src={post.image} alt="current" />
+          <button
+            className="danger-btn"
+            onClick={() => setRemoveImage(true)}
+          >
+            Remove image
+          </button>
+        </div>
+      )}
+
+      {removeImage && (
+        <div className="image-removed-note">
+          Image will be removed
+        </div>
+      )}
+
+      <div className="modal-actions">
+        <button onClick={() => setIsEditOpen(false)}>
+          Cancel
+        </button>
+        <button
+          className="primary-btn"
+          onClick={() => {
+            onEdit?.({
+              title: editTitle,
+              text: editText,
+              removeImage,
+            });
+            setIsEditOpen(false);
+          }}
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
