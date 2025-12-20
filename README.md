@@ -62,14 +62,13 @@ Readit is a feature-rich social platform inspired by Reddit, where users can cre
 
 ### Backend
 - **Runtime:** Node.js
-- **Framework:** Express 5.2
-- **Database:** MongoDB with Mongoose 9.0
+- **Framework:** Express
+- **Database:** MongoDB with Mongoose
 - **Authentication:** JWT (jsonwebtoken), bcrypt
-- **Real-Time:** Socket.io 4.8
+- **Real-Time:** Socket.io
 - **AI Integration:** HuggingFace Inference API
 - **File Handling:** Multer for image uploads
 - **Middleware:** CORS, Cookie Parser, Auth Middleware
-- **Development:** Nodemon
 
 ### Frontend
 - **Framework:** React 19
