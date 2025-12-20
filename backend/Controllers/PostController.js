@@ -259,7 +259,6 @@ export const getPersonalizedFeed = async (req, res) => {
 
     const userObjectId = new mongoose.Types.ObjectId(userId);
 
-
     const memberships = await Membership.find({
       userId: userObjectId,
     }).select("communityId");
@@ -275,6 +274,7 @@ export const getPersonalizedFeed = async (req, res) => {
     }
 
     const communityIds = memberships.map(m => m.communityId);
+
 
     let pipeline = [
       {
@@ -298,12 +298,19 @@ export const getPersonalizedFeed = async (req, res) => {
             },
           },
         },
-        { $sort: { score: -1, createdAt: -1 } }
+        { $sort: { score: -1, createdAt: -1, _id: -1 } }
       );
     }
 
     if (sort === "new") {
       pipeline.push({ $sort: { createdAt: -1, _id: -1 } });
+    }
+
+    if (sort === "best") {
+      pipeline.push(
+        { $addFields: { rand: { $rand: {} } } },
+        { $sort: { rand: 1 } }
+      );
     }
 
 
@@ -325,22 +332,25 @@ export const getPersonalizedFeed = async (req, res) => {
         },
       },
       { $unwind: "$community" },
-      { $unwind: "$author" },
+      { $unwind: "$author" }
+    );
 
+
+    const countPipeline = [
+      ...pipeline,
+      { $count: "total" }
+    ];
+
+    const countResult = await Post.aggregate(countPipeline);
+    const totalCount = countResult[0]?.total || 0;
+
+
+    pipeline.push(
       { $skip: skip },
       { $limit: limitNum }
     );
 
-    let posts = await Post.aggregate(pipeline);
-
-    if (sort === "best") {
-      posts = posts.sort(() => Math.random() - 0.5);
-    }
-
-    const totalCount = await Post.countDocuments({
-      isRemoved: false,
-      communityId: { $in: communityIds },
-    });
+    const posts = await Post.aggregate(pipeline);
 
     const hasMore = skip + posts.length < totalCount;
 
@@ -354,6 +364,7 @@ export const getPersonalizedFeed = async (req, res) => {
     res.status(500).json({ message: "Failed to load user feed" });
   }
 };
+
 
 
 export const getGuestFeed = async (req, res) => {
