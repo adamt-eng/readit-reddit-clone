@@ -692,7 +692,7 @@ export const editPost = async (req, res) => {
 export const savePost = async (req, res) => {
   try {
     const userId = req.user?.id;
-    const { postId } = req.params;
+    const postId  = req.params.id;
 
     if (!userId) {
       return res.status(401).json({ message: "Not authenticated" });
@@ -726,15 +726,12 @@ export const savePost = async (req, res) => {
 export const unsavePost = async (req, res) => {
   try {
     const userId = req.user?.id;
-    const { postId } = req.params;
+    const postId = req.params.id;
 
     if (!userId) {
       return res.status(401).json({ message: "Not authenticated" });
     }
 
-    if (!mongoose.Types.ObjectId.isValid(postId)) {
-      return res.status(400).json({ message: "Invalid post ID" });
-    }
 
     const postExists = await Post.exists({ _id: postId });
     if (!postExists) {
