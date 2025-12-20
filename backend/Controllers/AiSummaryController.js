@@ -7,7 +7,7 @@ const { Types } = mongoose;
 
 const DEFAULT_HF_MODEL = "sshleifer/distilbart-cnn-12-6";
 
-const hfToken = process.env.HF_TOKEN;
+const hfToken = process.env.HF_TOKEN ?? "You no have token!!!";
 if (!hfToken) throw new Error("HF_TOKEN is required");
 
 const hfClient = new InferenceClient(hfToken);
