@@ -80,7 +80,7 @@ export const getOrGenerateSummaryForPost = async (req, res) => {
 
     return res.status(201).json(created);
   } catch (err) {
-    console.error("AI SUMMARY ERROR:", err);
+    console.error("AI Summary Error:", err);
     return res
       .status(500)
       .json({ message: "Failed to get or generate AI summary" });
@@ -124,7 +124,7 @@ export const generateSummaryForPost = async (req, res) => {
 
     return res.status(201).json(created);
   } catch (err) {
-    console.error("AI SUMMARY GENERATE ERROR:", err);
+    console.error("AI Summary Generate Error:", err);
     return res.status(500).json({ message: "Failed to generate AI summary" });
   }
 };
