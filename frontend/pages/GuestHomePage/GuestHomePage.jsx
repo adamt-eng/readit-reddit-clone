@@ -183,7 +183,10 @@ export default function GuestHomePage({ setShowAuth }) {
       onClick={handleGuestInteraction}
       style={{ cursor: 'pointer' }}
     >
-      <LeftSidebar recentCommunity="news" />
+      <LeftSidebar 
+      recentCommunity="news"
+      showStartCommunity={false}
+       />
 
       <div className="main-feed">
         <div className="feed-controls">
