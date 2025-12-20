@@ -129,8 +129,7 @@ const handleSavePost = async () => {
       onPromptLogin?.();
     } else {
       try{
-      await axios.patch(`${import.meta.env.VITE_API_URL}/posts/save/${post.id}`,{},{withCredentials:true})
-      alert("saved");}
+      await axios.patch(`${import.meta.env.VITE_API_URL}/posts/save/${post.id}`,{},{withCredentials:true})}
       catch(err){
         console.log("error while saving ",err)
       }
