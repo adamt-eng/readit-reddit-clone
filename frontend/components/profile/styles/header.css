@@ -29,16 +29,24 @@
   color: var(--text-primary);
 }
 
+
 .profile-header h1::before {
   content: "u/";
   color: var(--text-muted);
-  font-weight: 400;
+  font-weight: 600;
+}
+.bio{
+    color: var(--text-muted);
+    margin-top: 10px;
+    font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 10px;
+
 }
 
 .karma-line {
   font-size: 14px;
   color: var(--text-muted);
-  margin: 0;
 }
 
 /* BUTTONS */

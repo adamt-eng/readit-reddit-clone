@@ -11,9 +11,7 @@ export default function ProfileHeader({ user }) {
 
       <div className="profile-info">
         <h1>{user?.username}</h1>
-        <p className="karma-line">
-          Karma: {user?.karma}
-        </p>
+        <p className="bio">{user?.bio}</p>
       </div>
     </div>
   );
