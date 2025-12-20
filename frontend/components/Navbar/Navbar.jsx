@@ -52,9 +52,6 @@ export default function Navbar({
     }
   };
 
-  function promptLogin() {
-    alert("Please login to continue");
-  }
 
   const handleSearch = () => {
     const q = searchText.trim();
@@ -293,7 +290,6 @@ export default function Navbar({
           <input
             placeholder="Please log in to to dive into the world of Readit!"
             className="nav-search"
-            onClick={promptLogin}
           />
           <div className="search-icon">
             <img src={logo} alt="reddit logo" className="nav-logo" />
