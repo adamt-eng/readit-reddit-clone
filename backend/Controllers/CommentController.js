@@ -6,11 +6,13 @@ import { createNotification } from "./NotificationController.js";
 
 export const getCommentsForPost = async (req, res) => {
   try {
-    const { postId } = req.params;
+    console.log("henaaa")
+    const postId  = req.params.postId;
 
     const comments = await Comment.find({ postId })
       .populate("authorId", "username")
       .lean();
+    console.log("comments ",comments)
 
     // Build tree
     const map = {};
@@ -19,10 +21,12 @@ export const getCommentsForPost = async (req, res) => {
     comments.forEach((c) => {
       map[c._id] = {
         ...c,
-        author: c.authorId.username,
+        author: c.authorId?.username || "[deleted]",
         replies: [],
       };
     });
+    console.log("hena3");
+    
 
     comments.forEach((c) => {
       if (c.parentId) {
@@ -42,8 +46,11 @@ export const getCommentsForPost = async (req, res) => {
 // Add comment
 export const createComment = async (req, res) => {
   try {
-    const { postId } = req.params;
+        console.log("create")
+
+    const  postId  = req.params.postId;
     const { content } = req.body;
+    console.log(content)
 
     if (!content || !content.trim()) {
       return res.status(400).json({ message: "Content is required" });
@@ -212,7 +219,7 @@ export const deleteComment = async (req, res) => {
   try {
     const userId = req.user.id;
     const  commentId  = req.params.id;
-    
+
     const rootComment = await Comment.findById(commentId);
     if (!rootComment) {
       return res.status(404).json({ message: "Comment not found" });

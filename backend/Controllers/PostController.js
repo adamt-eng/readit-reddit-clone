@@ -788,14 +788,31 @@ export async function getSavedPosts(req, res) {
       return res.status(404).json({ error: "User not found" });
     }
 
+    /* CLEAN INVALID POST IDS */
+
+    const existingPosts = await Post.find({
+      _id: { $in: user.savedPosts }
+    }).select("_id");
+
+    const existingIds = new Set(existingPosts.map(p => p._id.toString()));
+
+    const cleanedSavedPosts = user.savedPosts.filter(id =>
+      existingIds.has(id.toString())
+    );
+
+    if (cleanedSavedPosts.length !== user.savedPosts.length) {
+      user.savedPosts = cleanedSavedPosts;
+      await user.save();
+    }
+
+
     const posts = await Post.find({
-      _id: { $in: user.savedPosts },
+      _id: { $in: cleanedSavedPosts },
       isRemoved: false,
     })
       .populate("communityId", "name iconUrl")
-      .populate("authorId", "username avatarUrl")
-      .sort({ createdAt: -1 });
-
+      .populate("authorId", "username avatarUrl");
+      
     const results = posts.map((p) => ({
       _id: p._id,
       title: p.title,
