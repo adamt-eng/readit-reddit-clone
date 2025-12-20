@@ -15,6 +15,8 @@ export default function PostPage() {
   const [originalText, setOriginalText] = useState("");
   const [typingText, setTypingText] = useState("");
 
+
+
   const formatTimeAgo = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
@@ -86,9 +88,69 @@ export default function PostPage() {
     setIsSummaryMode(false);
   };
 
-  /* =======================
-     LOAD POST + COMMENTS
-  ======================= */
+  /* POST EDIT */
+const handleEditPost = async ({ title, text, removeImage }) => {
+  try {
+    const res = await axios.put(
+      `${import.meta.env.VITE_API_URL}/posts/${postId}`,
+      {
+        title,
+        content: text,
+        removeImage,
+      },
+      { withCredentials: true }
+    );
+
+    const updated = res.data;
+
+    setPost((prev) => ({
+      ...prev,
+      title: updated.title,
+      text: updated.content,
+      image: removeImage ? null : prev.image,
+    }));
+  } catch (err) {
+    console.error("Failed to edit post:", err);
+  }
+};
+
+
+  const updateRecentPosts = (post) => {
+    try {
+      const savedRecentPosts = localStorage.getItem('recentPosts');
+      let recentPosts = [];
+      
+      if (savedRecentPosts) {
+        try {
+          recentPosts = JSON.parse(savedRecentPosts);
+          if (!Array.isArray(recentPosts)) {
+            recentPosts = [];
+          }
+        } catch {
+          recentPosts = [];
+        }
+      }
+      
+      // Remove if post already exists
+      const filtered = recentPosts.filter(p => p.id !== post.id);
+      
+      // Add new post at the beginning
+      const updated = [post, ...filtered].slice(0, 5); // Keep only 5 most recent
+      
+      // Save back to localStorage
+      localStorage.setItem('recentPosts', JSON.stringify(updated));
+      
+      // Dispatch storage event to notify HomePage
+      window.dispatchEvent(new Event('storage'));
+      
+      return updated;
+    } catch (error) {
+      console.error('Error updating recent posts:', error);
+      return [];
+    }
+  };
+
+  /* LOAD POST + COMMENTS */
   useEffect(() => {
     const fetchPost = async () => {
       try {
@@ -125,6 +187,7 @@ export default function PostPage() {
           votes: data.upvoteCount - data.downvoteCount,
           commentsCount: data.commentCount,
           userVote: userVote,
+          canEdit: data.canEdit,
         });
       } catch (err) {
         console.log("Error while fetching post ", err);
@@ -348,6 +411,7 @@ export default function PostPage() {
           onComment={handleComment}
           onVote={handleCommentVote}
           onReply={handleReply}
+          onEdit={handleEditPost}
           isSummarizing={isSummarizing}
           isSummaryMode={isSummaryMode}
           onGenerateSummary={handleGenerateSummary}
