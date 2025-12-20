@@ -34,6 +34,19 @@ export default function GuestHomePage({ setShowAuth }) {
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Initialize expandedPostId from localStorage
+  const [expandedPostId] = useState(() => {
+    try {
+      const savedExpandedPostId = localStorage.getItem("expandedPostId");
+      if (savedExpandedPostId) {
+        const parsedId = JSON.parse(savedExpandedPostId);
+        return typeof parsedId === "number" ? parsedId : null;
+      }
+    } catch (error) {
+      console.error("Error loading expanded post from localStorage:", error);
+    }
+    return null;
+  });
 
   const formatTimeAgo = (dateString) => {
     if (!dateString) return "";
@@ -67,11 +80,12 @@ export default function GuestHomePage({ setShowAuth }) {
         const fetchedPosts = (res.data.posts || []).map((p) => ({
           id: p._id,
           _id: p._id,
-          community: p.community,
-          user: p.user,
+          community: p.community || "",
+          communityIcon: p.communityIcon || null, 
+          user: p.user || "",
           userAvatar: p.userAvatar || "/profile.png",
-          title: p.title,
-          content: p.content,
+          title: p.title || "",
+          content: p.content || "",
           upvotes: p.upvotes || 0,
           downvotes: p.downvotes || 0,
           voteCount: (p.upvotes || 0) - (p.downvotes || 0),
@@ -110,19 +124,45 @@ export default function GuestHomePage({ setShowAuth }) {
     } catch {}
   }, [expandedPosts]);
 
-  const toggleViewMode = () => {
+  // Save expandedPostId to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      if (expandedPostId) {
+        localStorage.setItem("expandedPostId", JSON.stringify(expandedPostId));
+      } else {
+        localStorage.removeItem("expandedPostId");
+      }
+    } catch (error) {
+      console.error("Error saving expanded post to localStorage:", error);
+    }
+  }, [expandedPostId]);
+
+  const toggleViewMode = (e) => {
+    e.stopPropagation(); // Prevent the click from bubbling up to parent
     setViewMode((v) => (v === "card" ? "compact" : "card"));
   };
 
-  const getThumbnailImage = (post) =>
-    post.image ? post.image : "/compact-image.png";
+  const getThumbnailImage = (post) => {
+    if (post.image) {
+      return `${import.meta.env.VITE_API_URL}${post.image}`;
+    }
+    return "/compact-image.png";
+  };
 
   const toggleExpand = (postId) => {
-    setExpandedPosts((prev) =>
-      prev.includes(postId)
-        ? prev.filter((id) => id !== postId)
-        : [...prev, postId]
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId ? { ...post, isExpanded: !post.isExpanded } : post
+      )
     );
+
+    setExpandedPosts((prev) => {
+      if (prev.includes(postId)) {
+        return prev.filter((id) => id !== postId);
+      } else {
+        return [...prev, postId];
+      }
+    });
   };
 
   const formatNumber = (num) =>
@@ -130,23 +170,28 @@ export default function GuestHomePage({ setShowAuth }) {
       ? (num / 1000).toFixed(1).replace(/\.0$/, "") + "k"
       : num.toString();
 
-  return (
-  <div
-    onClickCapture={(e) => {
+  const handleGuestInteraction = (e) => {
+    // Only show auth modal if clicked outside the view mode button
+    if (!e.target.closest('.view-toggle-btn')) {
       setShowAuth(true);
-      e.stopImmediatePropagation();
-      e.stopPropagation();
-    }}
-  >
-    <div className="page-container">
-      <LeftSidebar
-        recentCommunity="news"
-      />
+    }
+  };
+
+  return (
+    <div
+      className="page-container"
+      onClick={handleGuestInteraction}
+      style={{ cursor: 'pointer' }}
+    >
+      <LeftSidebar recentCommunity="news" />
 
       <div className="main-feed">
         <div className="feed-controls">
           <div className="sort-options">
-            <button className="view-toggle-btn">
+            <button 
+              className="view-toggle-btn" 
+              onClick={toggleViewMode}
+            >
               {viewMode === "card" ? "☐" : "≡"}
             </button>
           </div>
@@ -164,6 +209,18 @@ export default function GuestHomePage({ setShowAuth }) {
             formatNumber={formatNumber}
             getThumbnailImage={getThumbnailImage}
             toggleExpand={toggleExpand}
+            isGuest={true}
+            onPromptLogin={() => setShowAuth(true)}
+            // Pass the missing props that HomePage passes
+            expandedPostId={expandedPostId}
+            onHidePost={() => {}} // Empty function for guest
+            onUnhidePost={() => {}} // Empty function for guest
+            hiddenPosts={[]}
+            recentPosts={[]}
+            onClearRecentPosts={() => {}}
+            showRecentPosts={false}
+            isLoading={isLoading}
+            joinedCommunities={[]} 
           />
         )}
 
@@ -177,7 +234,7 @@ export default function GuestHomePage({ setShowAuth }) {
         {!hasMore && !isLoading && posts.length > 0 && (
           <div className="feed-end">
             <div className="feed-end-line"></div>
-            <p>You’re all caught up</p>
+            <p>You're all caught up</p>
           </div>
         )}
       </div>
@@ -195,6 +252,5 @@ export default function GuestHomePage({ setShowAuth }) {
         </p>
       </div>
     </div>
-  </div>
-);
+  );
 }
