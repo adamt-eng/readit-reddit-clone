@@ -39,9 +39,8 @@ Readit is a feature-rich social platform inspired by Reddit, where users can cre
 ### Real-Time Features (Socket.io)
 - Direct Messaging (DM) with real-time chat
 - Floating DM widget for quick access
-- Real-time notifications for activities (upvotes, comments, messages)
+- Real-time notifications page and dropdown menu for activities (upvotes, comments, messages)
 - Online user tracking
-- Live notification delivery
 
 ### Discovery
 - Full-text search across posts, users, and communities
