@@ -211,12 +211,8 @@ export const getUserComments = async (req, res) => {
 export const deleteComment = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { commentId } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(commentId)) {
-      return res.status(400).json({ message: "Invalid comment ID" });
-    }
-
+    const  commentId  = req.params.id;
+    
     const rootComment = await Comment.findById(commentId);
     if (!rootComment) {
       return res.status(404).json({ message: "Comment not found" });

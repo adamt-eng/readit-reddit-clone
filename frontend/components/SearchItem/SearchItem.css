@@ -195,3 +195,10 @@
 .sp-icon {
   margin-right: 6px;
 }
+
+/*amnimation*/
+.sp-slide-out {
+  transform: translateX(-100%);
+  opacity: 0;
+  transition: transform 0.36s ease, opacity 0.36s ease;
+}

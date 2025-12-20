@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { FaTrash } from "react-icons/fa";
 
 import axios from "axios";
@@ -38,7 +38,9 @@ export default function SearchItem({
 }) {
   const [isMember, setIsMember] = useState(member);
 
-  // COMMUNITY RESULT
+  /* ===============================
+     COMMUNITY
+  =============================== */
   if (type === "community") {
     const handleMembership = async (e) => {
       e.preventDefault();
@@ -46,8 +48,10 @@ export default function SearchItem({
       try {
         if (isMember) {
           await axios.delete(
-            `${import.meta.env.VITE_API_URL}/communities/${encodeURIComponent(data.name)}/leave`,
-            { withCredentials: true },
+            `${import.meta.env.VITE_API_URL}/communities/${encodeURIComponent(
+              data.name
+            )}/leave`,
+            { withCredentials: true }
           );
           setIsMember(false);
           if (onLeave) onLeave(data.name);
@@ -55,7 +59,7 @@ export default function SearchItem({
           await axios.post(
             `${import.meta.env.VITE_API_URL}/communities/${data.name}/join`,
             {},
-            { withCredentials: true },
+            { withCredentials: true }
           );
           setIsMember(true);
         }
@@ -70,7 +74,9 @@ export default function SearchItem({
           src={
             data.iconUrl
               ? `${import.meta.env.VITE_API_URL}${data.iconUrl}`
-              : `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(data.name)}`
+              : `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(
+                  data.name
+                )}`
           }
           alt="community icon"
           className="sc-icon"
@@ -85,7 +91,6 @@ export default function SearchItem({
           </div>
         </div>
 
-        {/* JOIN / LEAVE BUTTON */}
         {isNotSearch && isMyProfile && (
           <button
             className={`sc-join-btn ${isMember ? "leave" : "join"}`}
@@ -98,28 +103,45 @@ export default function SearchItem({
     );
   }
 
-  // post
+  /* ===============================
+     POST
+  =============================== */
   if (type === "post") {
     const timeAgo = formatTimeAgo(data.createdAt);
+    const [slidingOut, setSlidingOut] = useState(false);
+    const ref = useRef(null);
+    const SLIDE_DURATION_MS = 360;
 
-    const handleDelete = async (e) => {
+    const handleDelete = (e) => {
       e.preventDefault();
       e.stopPropagation();
-      if (onDelete) {
-          onDelete(data._id);
-        }
+      if (slidingOut) return;
 
+      setSlidingOut(true);
+
+      setTimeout(() => {
+        onDelete && onDelete(data._id);
+      }, SLIDE_DURATION_MS);
     };
 
     return (
-      <Link to={`/posts/${data._id}`} className="sp-container">
+      <Link
+        ref={ref}
+        to={`/posts/${data._id}`}
+        className={[
+          "sp-container",
+          slidingOut ? "sp-slide-out" : "",
+        ].join(" ")}
+      >
         <div className="sp-left">
           <div className="sp-meta">
             <img
               src={
                 data?.iconUrl
                   ? `${import.meta.env.VITE_API_URL}${data.iconUrl}`
-                  : `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(data.communityName)}`
+                  : `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(
+                      data.communityName
+                    )}`
               }
               alt="community icon"
               className="sp-icon"
@@ -141,9 +163,7 @@ export default function SearchItem({
         </div>
 
         {onDelete && isMyProfile && (
-          <FaTrash className="sp-delete-btn" onClick={handleDelete}>
-            Delete
-          </FaTrash>
+          <FaTrash className="sp-delete-btn" onClick={handleDelete} />
         )}
 
         {data.media?.url && (
@@ -153,7 +173,9 @@ export default function SearchItem({
     );
   }
 
-  // user
+  /* ===============================
+     USER
+  =============================== */
   if (type === "user") {
     return (
       <Link to={`/user/${data._id}`} className="su-container">
@@ -175,37 +197,53 @@ export default function SearchItem({
     );
   }
 
-  // comment
+  /* ===============================
+     COMMENT
+  =============================== */
   if (type === "comment") {
     const timeAgo = formatTimeAgo(data.createdAt);
+    const [slidingOut, setSlidingOut] = useState(false);
+    const ref = useRef(null);
+    const SLIDE_DURATION_MS = 360;
 
     const handleDelete = async (e) => {
       e.preventDefault();
       e.stopPropagation();
+      if (slidingOut) return;
 
-      try {
-        await axios.delete(
-          `${import.meta.env.VITE_API_URL}/comments/${data._id}`,
-          { withCredentials: true },
-        );
+      setSlidingOut(true);
 
-        if (onDelete) {
-          onDelete(data._id);
+      setTimeout(async () => {
+        try {
+          await axios.delete(
+            `${import.meta.env.VITE_API_URL}/comments/${data._id}`,
+            { withCredentials: true }
+          );
+          onDelete && onDelete(data._id);
+        } catch (err) {
+          console.error("Failed to delete comment:", err);
         }
-      } catch (err) {
-        console.error("Failed to delete comment:", err);
-      }
+      }, SLIDE_DURATION_MS);
     };
 
     return (
-      <Link to={`/posts/${data.postId}`} className="sp-container">
+      <Link
+        ref={ref}
+        to={`/posts/${data.postId}`}
+        className={[
+          "sp-container",
+          slidingOut ? "sp-slide-out" : "",
+        ].join(" ")}
+      >
         <div className="sp-left">
           <div className="sp-meta">
             <img
               src={
                 data?.iconUrl
                   ? `${import.meta.env.VITE_API_URL}${data.iconUrl}`
-                  : `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(data.communityName)}`
+                  : `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(
+                      data.communityName
+                    )}`
               }
               alt="community icon"
               className="sp-icon"
