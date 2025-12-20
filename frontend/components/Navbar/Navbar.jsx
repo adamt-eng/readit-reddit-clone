@@ -4,6 +4,7 @@ import {
   FaSearch,
   FaPlus,
   FaBell,
+  FaBellSlash, 
   FaUser,
   FaSignOutAlt,
   FaMoon,
@@ -32,6 +33,17 @@ export default function Navbar({
   const [searchText, setSearchText] = useState("");
   const [notisCount, setNotisCount] = useState(0);
   const [avatarBust, setAvatarBust] = useState(Date.now());
+
+  //notis
+  const [socketPopup, setSocketPopup] = useState(null);
+  const [isFadingOut, setIsFadingOut] = useState(false);
+  const [isNotiMuted, setIsNotiMuted] = useState(false);
+  const [showNotiDropdown, setShowNotiDropdown] = useState(false);
+  const [latestNotis, setLatestNotis] = useState([]);
+
+
+  const popupTimeoutRef = useRef(null);
+
   const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
@@ -76,6 +88,21 @@ export default function Navbar({
     }
   };
 
+    const fetchLatestNotis = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/notifications`,
+        { withCredentials: true }
+      );
+      setLatestNotis(res.data);
+    } catch (err) {
+      console.error("Error fetching latest notifications", err);
+    }
+  }, [user]);
+
+
   const handleOpenNotifications = async () => {
     try {
       await axios.patch(
@@ -84,6 +111,8 @@ export default function Navbar({
         { withCredentials: true },
       );
       setNotisCount(0);
+      navigate('/notifications');
+      setShowNotiDropdown(false);
     } catch (err) {
       console.error(err);
     }
@@ -117,16 +146,38 @@ export default function Navbar({
 
     socket.emit("register", user._id);
 
-    const handleNotification = () => {
+    const handleNotification = (notification) => {
       fetchCount();
+      fetchLatestNotis();
+
+      if (isNotiMuted) return;
+
+      if (popupTimeoutRef.current) {
+      clearTimeout(popupTimeoutRef.current);
+    }
+
+      // show popup
+      setSocketPopup(notification);
+      setIsFadingOut(false);
+
+      popupTimeoutRef.current = setTimeout(() => {
+        setIsFadingOut(true);
+
+        setTimeout(() => {
+          setSocketPopup(null);
+          setIsFadingOut(false);
+        }, 400);
+      }, 3600);
+
     };
+
 
     socket.on("notification", handleNotification);
 
     return () => {
       socket.off("notification", handleNotification);
     };
-  }, [location, user?._id, fetchCount, socket]);
+  }, [location, user?._id, fetchCount, socket,isNotiMuted]);
 
   const handleDropdownItemClick = (action) => {
     setShowProfileMenu(false);
@@ -196,19 +247,74 @@ export default function Navbar({
             <FaComment />
           </button>
 
-          <Link
-            onClick={() => {
-              handleOpenNotifications();
-            }}
-            to="/notifications"
-            className="nav-icon-btn"
-            title="Notifications"
-          >
-            <FaBell />
-            {location.pathname != "/notifications" && notisCount > 0 && (
+
+          {/*notis*/}
+          <div className="nav-icon-btn noti-wrapper">
+            <div
+              className="noti-icon-container"
+              onClick={() => {
+                setShowNotiDropdown((prev) => !prev);
+                fetchLatestNotis();
+              }}
+            >
+              {!isNotiMuted ? <FaBell /> : <FaBellSlash />}
+
+              <button
+                className={`noti-mute-btn ${isNotiMuted ? "muted" : ""}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsNotiMuted((prev) => !prev);
+                }}
+              >
+                {isNotiMuted ? "Muted" : "Mute"}
+              </button>
+            </div>
+
+            {!isNotiMuted && notisCount > 0 && !showNotiDropdown&& (
               <span className="notification-badge">{notisCount}</span>
             )}
-          </Link>
+
+            {showNotiDropdown && (
+              <div className="noti-dropdown">
+                <div className="noti-dropdown-header">
+                  <span>Notifications</span>
+                  <button
+                    className="noti-show-more"
+                    onClick={handleOpenNotifications}
+                  >
+                    Show more
+                  </button>
+                </div>
+
+                <div className="noti-dropdown-list">
+                  {latestNotis.length === 0 ? (
+                    <div className="noti-empty">No notifications yet</div>
+                  ) : (
+                    latestNotis.map((n) => (
+                      <div key={n._id} className="noti-dropdown-item">
+                        {n.payload?.message || "New notification"}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* socket popup stays unchanged */}
+            {socketPopup && !showNotiDropdown &&(
+              <div className={`noti-toast ${isFadingOut ? "fade-out" : ""}`}>
+                <div className="noti-toast-accent" />
+                <div className="noti-toast-body">
+                  <div className="noti-toast-title">New notification</div>
+                  <div className="noti-toast-message">
+                    {socketPopup.payload?.message}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+
 
           <div className="profile-menu-container" ref={profileMenuRef}>
             <button className="profile-btn" onClick={toggleProfileMenu}>
