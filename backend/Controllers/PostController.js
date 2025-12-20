@@ -218,7 +218,7 @@ export const getPostById = async (req, res) => {
     }
 
     let userVote = 0;
-    let canEdit = false; // ✅ DECLARED HERE
+    let canEdit = false;
 
     if (req.user?.id) {
       const userId = req.user.id;
@@ -234,7 +234,7 @@ export const getPostById = async (req, res) => {
     res.json({
       ...post.toObject(),
       userVote,
-      canEdit, // ✅ NOW DEFINED
+      canEdit,
     });
   } catch (err) {
     console.error("Error fetching post", err);
