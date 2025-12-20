@@ -96,6 +96,11 @@ export default function Navbar({
         `${import.meta.env.VITE_API_URL}/notifications`,
         { withCredentials: true }
       );
+      await axios.patch(
+        `${import.meta.env.VITE_API_URL}/notifications/read-all`,
+        {},
+        { withCredentials: true },
+      );
       setLatestNotis(res.data);
     } catch (err) {
       console.error("Error fetching latest notifications", err);
@@ -132,6 +137,11 @@ export default function Navbar({
       console.log("Error fetching count:", err);
     }
   }, [user]);
+
+
+  useEffect(()=>{
+      setShowNotiDropdown(false);
+  },[location.pathname])
 
 
   // Fetch initial count
@@ -255,6 +265,7 @@ export default function Navbar({
               onClick={() => {
                 setShowNotiDropdown((prev) => !prev);
                 fetchLatestNotis();
+                fetchCount();
               }}
             >
               {!isNotiMuted ? <FaBell /> : <FaBellSlash />}
@@ -274,7 +285,7 @@ export default function Navbar({
               <span className="notification-badge">{notisCount}</span>
             )}
 
-            {showNotiDropdown && (
+            {showNotiDropdown && location.pathname !=="/notifications"&&(
               <div className="noti-dropdown">
                 <div className="noti-dropdown-header">
                   <span>Notifications</span>
@@ -292,7 +303,12 @@ export default function Navbar({
                   ) : (
                     latestNotis.map((n) => (
                       <div key={n._id} className="noti-dropdown-item">
-                        {n.payload?.message || "New notification"}
+                        <div className="noti-item-message">
+                          {n.payload?.message || "New notification"}
+                        </div>
+                        <div className="noti-item-time">
+                          {n.timeAgoFormatted || ""}
+                        </div>
                       </div>
                     ))
                   )}
