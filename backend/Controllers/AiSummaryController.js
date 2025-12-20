@@ -5,21 +5,27 @@ import { InferenceClient } from "@huggingface/inference";
 
 const { Types } = mongoose;
 
-const hfToken = process.env.HF_TOKEN ?? "nooooooooo";
+const DEFAULT_HF_MODEL = "sshleifer/distilbart-cnn-12-6";
+
+const hfToken = process.env.HF_TOKEN;
 if (!hfToken) throw new Error("HF_TOKEN is required");
 
 const hfClient = new InferenceClient(hfToken);
 
-async function callHfSummarize(input, model = "facebook/bart-large-cnn") {
-  const output = await hfClient.summarization({ model, inputs: input });
+async function callHfSummarize(input, model = DEFAULT_HF_MODEL) {
+  const output = await hfClient.summarization({
+    model,
+    inputs: input,
+    parameters: {
+      max_length: 200,
+      min_length: 60,
+    },
+  });
 
-  if (typeof output === "string")
-    return { summary: output.trim(), modelName: model };
-
-  const item = Array.isArray(output) ? output[0] || {} : output;
+  const item = Array.isArray(output) ? output[0] : output;
 
   return {
-    summary: (item.summary_text || item.generated_text || "").trim(),
+    summary: (item.summary_text || "").trim(),
     modelName: model,
   };
 }
@@ -27,8 +33,6 @@ async function callHfSummarize(input, model = "facebook/bart-large-cnn") {
 async function summarizePost(post, { hfModel }) {
   const title = post.title || "Untitled";
   const content = (post.text || "").slice(0, 4000);
-
-
   const input = `${title}\n\n${content}`;
 
   const hf = await callHfSummarize(input, hfModel);
@@ -47,10 +51,11 @@ export const getOrGenerateSummaryForPost = async (req, res) => {
   try {
     const { postId } = req.params;
     const hfModel =
-      req.query?.hfModel || req.body?.hfModel || "facebook/bart-large-cnn";
+      req.query?.hfModel || req.body?.hfModel || DEFAULT_HF_MODEL;
 
-    if (!Types.ObjectId.isValid(postId))
+    if (!Types.ObjectId.isValid(postId)) {
       return res.status(400).json({ message: "Invalid or missing postId" });
+    }
 
     const existing = await AiSummary.findOne({ postId })
       .populate("generatedBy", "username avatarUrl")
@@ -59,7 +64,9 @@ export const getOrGenerateSummaryForPost = async (req, res) => {
     if (existing) return res.json(existing);
 
     const post = await Post.findById(postId).select("title text authorId");
-    if (!post) return res.status(404).json({ message: "Post not found" });
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
 
     const { summaryText, modelMeta } = await summarizePost(post, { hfModel });
 
@@ -83,13 +90,16 @@ export const getOrGenerateSummaryForPost = async (req, res) => {
 export const generateSummaryForPost = async (req, res) => {
   try {
     const { postId } = req.params;
-    const hfModel = req.body?.hfModel || "facebook/bart-large-cnn";
+    const hfModel = req.body?.hfModel || DEFAULT_HF_MODEL;
 
-    if (!Types.ObjectId.isValid(postId))
+    if (!Types.ObjectId.isValid(postId)) {
       return res.status(400).json({ message: "Invalid or missing postId" });
+    }
 
-    const post = await Post.findById(postId).select("title content authorId");
-    if (!post) return res.status(404).json({ message: "Post not found" });
+    const post = await Post.findById(postId).select("title text authorId");
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
 
     const existing = await AiSummary.findOne({ postId });
 
@@ -100,7 +110,6 @@ export const generateSummaryForPost = async (req, res) => {
       existing.generatedBy = post.authorId;
       existing.modelMeta = modelMeta;
       existing.createdAt = new Date();
-
       await existing.save();
       return res.json(existing);
     }
