@@ -15,6 +15,7 @@ export default function Post({
   onReply,
   isSummaryMode,
   isSummarizing,
+  summaryText,
   onGenerateSummary,
   onShowOriginal,
   typingText,
@@ -92,6 +93,8 @@ useEffect(() => {
         <div className="post-body">
           {isSummarizing && typingText
             ? typingText
+            : isSummaryMode
+            ? summaryText
             : post.text}
         </div>
 
@@ -122,18 +125,29 @@ useEffect(() => {
         )}
 
         {isSummaryMode ? (
-          <button className="action-btn" onClick={onShowOriginal}>
-            🔄 Show Original
-          </button>
+          <>
+            <button className="action-btn" onClick={onShowOriginal}>
+              📄 Show Original
+            </button>
+
+            <button
+              className="action-btn"
+              onClick={() => onGenerateSummary(true)}
+              disabled={isSummarizing}
+            >
+              {isSummarizing ? "↺ Regenerating..." : "↻ Regenerate"}
+            </button>
+          </>
         ) : (
           <button
             className="action-btn"
-            onClick={onGenerateSummary}
+            onClick={() => onGenerateSummary(true)}
             disabled={isSummarizing}
           >
             {isSummarizing ? "↺ Summarizing..." : "✦ Summary"}
           </button>
         )}
+
         
       </div>
 
@@ -221,6 +235,7 @@ useEffect(() => {
               text: editText,
               removeImage,
             });
+            onShowOriginal?.();
             setIsEditOpen(false);
           }}
         >
