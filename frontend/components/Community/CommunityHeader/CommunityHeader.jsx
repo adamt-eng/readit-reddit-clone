@@ -74,9 +74,9 @@ function CommunityHeader({ community, isMember, setIsMember }) {
         </div>
 
         <div className="buttonGroup">
-          <button className="createPostBtn" onClick={handleCreatePost}>
+          {isMember &&(<button className="createPostBtn" onClick={handleCreatePost}>
             + Create Post
-          </button>
+          </button>)}
 
           <button
             className="joinBtn"
