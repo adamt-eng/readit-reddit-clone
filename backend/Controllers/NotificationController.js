@@ -71,7 +71,7 @@ export async function createNotification({ userId, type, payload }) {
   if (!userId || userId.toString() === payload.actorId?.toString()) return;
 
   const finalPayload = await buildNotificationData(type, payload);
-  const downTime = new Date(Date.now() - 5 * 1000);
+  const downTime = new Date(Date.now() - 1 * 1000);
 
   const query = {
     userId,
