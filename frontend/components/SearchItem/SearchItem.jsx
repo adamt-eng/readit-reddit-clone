@@ -54,6 +54,7 @@ export default function SearchItem({
             { withCredentials: true }
           );
           setIsMember(false);
+          data.memberCount = (data.memberCount || 1) - 1;
           if (onLeave) onLeave(data.name);
         } else {
           await axios.post(
@@ -62,6 +63,7 @@ export default function SearchItem({
             { withCredentials: true }
           );
           setIsMember(true);
+          data.memberCount = (data.memberCount || 1) + 1;
         }
       } catch (err) {
         console.log("Failed to join/leave community ", err);
