@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 const ThemeContext = createContext({
   theme: "light",
-  toggleTheme: () => {},
+  toggleTheme: () => { },
 });
 
 const THEME_KEY = "theme";
@@ -18,9 +18,7 @@ function getInitialTheme() {
     return { theme: saved, isUserOverride: true };
   }
 
-  const prefersDark = window.matchMedia(
-    "(prefers-color-scheme: dark)"
-  ).matches;
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
   return { theme: prefersDark ? "dark" : "light", isUserOverride: false };
 }
