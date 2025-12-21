@@ -74,7 +74,9 @@ useEffect(() => {
             }
             alt={`r/${post.community}`}
         />
-        <span className="post-community">r/{post.community}</span>
+        <Link className="post-community" to={`/community/${encodeURIComponent(post.community)}`}>
+          r/{post.community}
+        </Link>
         <span className="dot">•</span>
         <Link className="post-author" to={`/user/${post.authorId}`}>
           Posted by u/{post.author}
