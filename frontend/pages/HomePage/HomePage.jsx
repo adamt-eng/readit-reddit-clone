@@ -602,9 +602,11 @@ const HomePage = () => {
             </div>
           )}
 
-          {!isLoadingPosts &&
+          {(!isLoadingPosts &&
           joinedCommunities.length === 0 &&
-          !isPopular ? (
+          !isPopular) || (!isLoadingPosts &&
+          page === 1 && posts.length === 0 &&
+          !isPopular)  ? (
             <EmptyFeedState></EmptyFeedState>
           ) : isLoadingPosts && page === 1 ? (
             <div className="sr-loading">
@@ -643,10 +645,10 @@ const HomePage = () => {
             </div>
           )}
 
-          {!hasMore && !isLoadingPosts && (
+          {!hasMore && !isLoadingPosts && joinedCommunities.length > 0 && (
             <div className="feed-end">
               <div className="feed-end-line"></div>
-              <p>You're all caught up</p>
+              {!(page ===1 && posts.length === 0)?<p>You're all caught up</p>:<p>Maybe the communities you joined aren't active enough!</p>}
             </div>
           )}
         </div>

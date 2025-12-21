@@ -86,7 +86,7 @@ export const login = async (req, res) => {
     console.log(user.password);
     
     if (!isHashed) {
-      console.log("⚠️ Plaintext password detected. Auto-hashing now...");
+      console.log("Plaintext password detected. Auto-hashing now...");
 
       if (!user.password) {
         return res.status(500).json({
