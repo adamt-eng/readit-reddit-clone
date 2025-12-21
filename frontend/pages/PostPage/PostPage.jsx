@@ -180,6 +180,7 @@ const handleEditPost = async ({ title, text, removeImage }) => {
           community: data.communityId?.name,
           communityIcon: data.communityId?.iconUrl,
           author: data.authorId?.username,
+          authorId: data.authorId?._id,
           timeAgo: new Date(data.createdAt).toLocaleDateString(),
           title: data.title,
           text: data.content,

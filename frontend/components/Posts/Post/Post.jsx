@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import "./Post.css";
 import Comment from "../../Comment/Comment.jsx";
 import Vote from "../../Vote/Vote.jsx";
@@ -75,7 +76,9 @@ useEffect(() => {
         />
         <span className="post-community">r/{post.community}</span>
         <span className="dot">•</span>
-        <span className="post-author">Posted by u/{post.author}</span>
+        <Link className="post-author" to={`/user/${post.authorId}`}>
+          Posted by u/{post.author}
+        </Link>
         <span className="dot">•</span>
         <span className="post-time">{post.timeAgo}</span>
       </div>
