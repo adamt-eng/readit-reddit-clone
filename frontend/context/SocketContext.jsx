@@ -17,7 +17,7 @@ export function SocketProvider({ children }) {
 
     try {
       const apiUrl = import.meta.env.VITE_API_URL;
-      
+
       const newSocket = io(apiUrl, {
         withCredentials: true,
         reconnection: true,
@@ -54,9 +54,7 @@ export function SocketProvider({ children }) {
   }, []);
 
   return (
-    <SocketContext.Provider value={socket}>
-      {children}
-    </SocketContext.Provider>
+    <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
   );
 }
 
