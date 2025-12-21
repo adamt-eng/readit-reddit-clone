@@ -16,7 +16,7 @@ export default function Login({ onLogin, inModal, switchMode }) {
     setError("");
 
     try {
-      console.log("Logging in");
+      console.log("Logging in..");
 
       await axios.post(
         `${import.meta.env.VITE_API_URL}/authentication/login`,
