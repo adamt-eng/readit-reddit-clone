@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState, useRef } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import { useSocket } from "../../context/SocketContext";
 import profileFallback from "../../assets/profile.png";
@@ -90,7 +91,7 @@ export default function FloatingDM({ isOpen, onClose, user }) {
   // debounce search
   useEffect(() => {
     if (!isOpen) return;
-    
+
     const q = searchQuery.trim();
     if (!q) {
       setSearchResults([]);
@@ -101,7 +102,7 @@ export default function FloatingDM({ isOpen, onClose, user }) {
       try {
         const res = await axios.get(
           `${import.meta.env.VITE_API_URL}/users/search?q=${encodeURIComponent(q)}&limit=30`,
-          { withCredentials: true }
+          { withCredentials: true },
         );
         const users = res.data && res.data.results ? res.data.results : [];
         const existingUserIds = conversations.map((c) => {
@@ -109,7 +110,10 @@ export default function FloatingDM({ isOpen, onClose, user }) {
           return other;
         });
         setSearchResults(
-          users.filter((u) => u.username != user?.username && !existingUserIds.includes(u._id))
+          users.filter(
+            (u) =>
+              u.username != user?.username && !existingUserIds.includes(u._id),
+          ),
         );
       } catch (err) {
         console.error("User search failed:", err);
@@ -156,7 +160,7 @@ export default function FloatingDM({ isOpen, onClose, user }) {
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/dm/messages`,
         body,
-        { withCredentials: true }
+        { withCredentials: true },
       );
       setMessages((m) => [...m, res.data]);
       setInput("");
@@ -255,56 +259,61 @@ export default function FloatingDM({ isOpen, onClose, user }) {
                 const filtered = conversations.filter((c) => {
                   if (!searchQuery.trim()) return true;
                   const other = otherParticipant(c);
-                  return other?.username?.toLowerCase().includes(searchQuery.toLowerCase());
+                  return other?.username
+                    ?.toLowerCase()
+                    .includes(searchQuery.toLowerCase());
                 });
                 return filtered.length === 0 ? (
                   <div className="floating-dm-empty">
-                    <p>{searchQuery.trim() ? "No matching chats" : "No conversations yet"}</p>
+                    <p>
+                      {searchQuery.trim()
+                        ? "No matching chats"
+                        : "No conversations yet"}
+                    </p>
                   </div>
                 ) : (
                   filtered.map((c) => {
-                  const other = otherParticipant(c);
-                  const lastMessage = c.lastMessage;
-                  const lastMessagePreview = lastMessage
-                    ? lastMessage.content || lastMessage.text
-                    : "No messages yet";
-                  const lastMessageTime = lastMessage
-                    ? formatTime(lastMessage.createdAt)
-                    : "";
+                    const other = otherParticipant(c);
+                    const lastMessage = c.lastMessage;
+                    const lastMessagePreview = lastMessage
+                      ? lastMessage.content || lastMessage.text
+                      : "No messages yet";
+                    const lastMessageTime = lastMessage
+                      ? formatTime(lastMessage.createdAt)
+                      : "";
 
-                  return (
-                    <div
-                      key={c._id}
-                      className={`floating-dm-conversation ${
-                        selected?._id === c._id ? "active" : ""
-                      }`}
-                      onClick={() => openConversation(c)}
-                    >
-                      <img
-                        src={resolveAvatar(other?.avatarUrl)}
-                        alt={other?.username}
-                        className="floating-dm-avatar"
-                      />
-                      <div className="floating-dm-conv-info">
-                        <h4>{other?.username || "Unknown"}</h4>
-                        <p className="floating-dm-last-msg">
-                          {lastMessagePreview}
-                          {lastMessageTime && (
-                            <span
-                              style={{
-                                marginLeft: "8px",
-                                fontSize: "11px",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              {lastMessageTime}
-                            </span>
-                          )}
-                        </p>
+                    return (
+                      <div
+                        key={c._id}
+                        className={`floating-dm-conversation ${selected?._id === c._id ? "active" : ""
+                          }`}
+                        onClick={() => openConversation(c)}
+                      >
+                        <img
+                          src={resolveAvatar(other?.avatarUrl)}
+                          alt={other?.username}
+                          className="floating-dm-avatar"
+                        />
+                        <div className="floating-dm-conv-info">
+                          <h4>{other?.username || "Unknown"}</h4>
+                          <p className="floating-dm-last-msg">
+                            {lastMessagePreview}
+                            {lastMessageTime && (
+                              <span
+                                style={{
+                                  marginLeft: "8px",
+                                  fontSize: "11px",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {lastMessageTime}
+                              </span>
+                            )}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })
+                    );
+                  })
                 );
               })()}
             </div>
@@ -319,11 +328,13 @@ export default function FloatingDM({ isOpen, onClose, user }) {
             ) : (
               <>
                 <div className="floating-dm-chat-header">
-                  <img
-                    src={resolveAvatar(otherParticipant(selected)?.avatarUrl)}
-                    alt="avatar"
-                    className="floating-dm-avatar-sm"
-                  />
+                  <Link to={`/user/${otherParticipant(selected)?._id}`}>
+                    <img
+                      src={resolveAvatar(otherParticipant(selected)?.avatarUrl)}
+                      alt="avatar"
+                      className="floating-dm-avatar-sm"
+                    />
+                  </Link>
                   <h3>{otherParticipant(selected)?.username}</h3>
                 </div>
 
@@ -337,7 +348,9 @@ export default function FloatingDM({ isOpen, onClose, user }) {
                         style={{
                           display: "flex",
                           flexDirection:
-                            m.senderId?._id === user?._id ? "row-reverse" : "row",
+                            m.senderId?._id === user?._id
+                              ? "row-reverse"
+                              : "row",
                           alignItems: "flex-end",
                           gap: "6px",
                           marginBottom: "10px",
@@ -358,16 +371,19 @@ export default function FloatingDM({ isOpen, onClose, user }) {
                           style={{
                             display: "flex",
                             flexDirection:
-                              m.senderId?._id === user?._id ? "row-reverse" : "row",
+                              m.senderId?._id === user?._id
+                                ? "row-reverse"
+                                : "row",
                             alignItems: "center",
                             gap: "4px",
                             minWidth: 0,
                           }}
                         >
                           <div
-                            className={`floating-dm-message-bubble ${
-                              m.senderId?._id === user?._id ? "sent" : "received"
-                            }`}
+                            className={`floating-dm-message-bubble ${m.senderId?._id === user?._id
+                              ? "sent"
+                              : "received"
+                              }`}
                           >
                             {m.content || m.text}
                           </div>
