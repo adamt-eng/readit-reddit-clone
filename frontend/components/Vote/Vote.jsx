@@ -8,7 +8,7 @@ export default function Vote({
   onUpvote,
   onDownvote,
   orientation = "horizontal",
-  itemId
+  itemId,
 }) {
   const [currentVote, setCurrentVote] = useState(userVote ?? 0);
   const [isLoading, setIsLoading] = useState(false);
@@ -17,8 +17,6 @@ export default function Vote({
   useEffect(() => {
     setCurrentVote(userVote ?? 0);
   }, [userVote, itemId]);
-
-
 
   const handleUpvote = async () => {
     if (isLoading) return;
@@ -44,15 +42,23 @@ export default function Vote({
     <div
       className={`vote-section ${currentVote === 1 ? "upvoted" : ""} ${currentVote === -1 ? "downvoted" : ""} ${orientation}`}
     >
-      <button className="vote-btn upvote" onClick={handleUpvote} title="Upvote" disabled={isLoading}>
+      <button
+        className="vote-btn upvote"
+        onClick={handleUpvote}
+        title="Upvote"
+        disabled={isLoading}
+      >
         ▲
       </button>
 
-      <span className="vote-count">
-        {voteCount}
-      </span>
+      <span className="vote-count">{voteCount}</span>
 
-      <button className="vote-btn downvote" onClick={handleDownvote} title="Downvote" disabled={isLoading}>
+      <button
+        className="vote-btn downvote"
+        onClick={handleDownvote}
+        title="Downvote"
+        disabled={isLoading}
+      >
         ▼
       </button>
     </div>
