@@ -212,7 +212,6 @@ const HomePage = () => {
           type: p.type || "text",
         }));
 
-        // load votes - IMPROVED VOTING LOGIC FROM FIRST CODE
         let voteMap = {};
         try {
           const { data: votesData } = await axios.get(
@@ -221,8 +220,7 @@ const HomePage = () => {
           );
           voteMap = votesData.posts || {};
         } catch {
-          /* empty */
-        }
+          console.error("Failed to fetch vote state");}
 
         // Update posts with votes BEFORE setting state
         const postsWithVotes = fetchedPosts.map((post) => ({

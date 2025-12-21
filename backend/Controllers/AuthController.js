@@ -20,15 +20,11 @@ export const signup = async (req, res) => {
     if (existingUserName)
       return res.status(400).json({ message: "Username already in use" });
 
-    // Check email
+    // Check userName
     const existingEmail = await User.findOne({ email });
     if (existingEmail)
       return res.status(400).json({ message: "Email already in use" });
 
-    // Check username
-    const existingUsername = await User.findOne({ username });
-    if (existingUsername)
-      return res.status(400).json({ message: "Username already taken" });
 
     const hashed = await bcrypt.hash(password, process.env.HASHING);
     console.log(hashed)
@@ -98,7 +94,7 @@ export const login = async (req, res) => {
         });
       }
 
-      const hashed = bcrypt.hash(user.password, process.env.HASHING);
+      const hashed = await bcrypt.hash(user.password, process.env.HASHING);
       user.password = hashed;
       await user.save();
     }
