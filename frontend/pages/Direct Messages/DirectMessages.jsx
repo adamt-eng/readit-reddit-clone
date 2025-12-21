@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState, useRef } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import axios from "axios";
 import { FaPaperPlane } from "react-icons/fa";
 import { useSocket } from "../../context/SocketContext";
@@ -56,7 +56,7 @@ export default function DirectMessages() {
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
     if (diffDays < 7) return `${diffDays}d ago`;
-    
+
     return date.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
@@ -84,7 +84,7 @@ export default function DirectMessages() {
 
   useEffect(() => {
     if (!socket || !currentUser || !currentUser._id) return;
-    
+
     socket.emit("register", currentUser._id);
 
     socket.on("dm:new_message", (payload) => {
@@ -123,7 +123,7 @@ export default function DirectMessages() {
       setMessages([]);
     }
   }
-  
+
   // Open specific chat from URL parameter
   useEffect(() => {
     const chatId = searchParams.get("chat");
@@ -212,197 +212,224 @@ export default function DirectMessages() {
 
   return (
     <div style={{ display: "flex" }}>
-      <LeftSidebar/>
+      <LeftSidebar />
       <div className={"chat-layout"}>
         <div className="chat-sidebar">
-        <div className="chat-sidebar-header">
-          <div>Chats</div>
-          <div className="chat-new-form">
-            <input
-              className="chat-new-input"
-              placeholder="Search username"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button
-              type="button"
-              className="chat-new-btn"
-              onClick={() => {
-                if (searchResults.length)
-                  createConversationWithUser(searchResults[0]);
-              }}
-            >
-              +
-            </button>
-            {searchResults.length > 0 && (
-              <div className="chat-search-dropdown">
-                {searchResults.map((u) => (
+          <div className="chat-sidebar-header">
+            <div>Chats</div>
+            <div className="chat-new-form">
+              <input
+                className="chat-new-input"
+                placeholder="Search username"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button
+                type="button"
+                className="chat-new-btn"
+                onClick={() => {
+                  if (searchResults.length)
+                    createConversationWithUser(searchResults[0]);
+                }}
+              >
+                +
+              </button>
+              {searchResults.length > 0 && (
+                <div className="chat-search-dropdown">
+                  {searchResults.map((u) => (
+                    <div
+                      key={u._id}
+                      className="chat-search-item"
+                      onClick={() => createConversationWithUser(u)}
+                    >
+                      <img
+                        src={resolveAvatar(u.avatarUrl)}
+                        className="chat-avatar"
+                        alt="av"
+                      />
+                      <div style={{ marginLeft: 8 }}>
+                        <div style={{ fontWeight: 700 }}>{u.username}</div>
+                        <div
+                          style={{ fontSize: 12, color: "var(--dm-subtext)" }}
+                        >
+                          {u.karma ? `${u.karma} karma` : ""}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <input className="chat-search" placeholder="Search chats" />
+
+          <div className="chat-list">
+            {conversations.map((c) => {
+              const other = otherParticipant(c);
+              const lastMessage = c.lastMessage;
+              const lastMessagePreview = lastMessage
+                ? lastMessage.content || lastMessage.text
+                : "No messages yet";
+              const lastMessageTime = lastMessage
+                ? formatTime(lastMessage.createdAt)
+                : "";
+
+              return (
+                <div
+                  key={c._id}
+                  className={`chat-list-item ${selected?._id === c._id ? "active" : ""}`}
+                  onClick={() => openConversation(c)}
+                >
+                  <img
+                    src={resolveAvatar(other?.avatarUrl)}
+                    className="chat-avatar"
+                    alt="av"
+                  />
+                  <div className="chat-list-text">
+                    <div className="chat-list-name">
+                      {other?.username || "Unknown"}
+                    </div>
+                    <div className="chat-list-last">
+                      <span
+                        style={{
+                          color: "var(--dm-subtext)",
+                          fontSize: "13px",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                          flex: 1,
+                        }}
+                      >
+                        {lastMessagePreview}
+                      </span>
+                      {lastMessageTime && (
+                        <span
+                          style={{
+                            color: "var(--dm-subtext)",
+                            fontSize: "12px",
+                            marginLeft: "8px",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {lastMessageTime}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="chat-window">
+          {!selected ? (
+            <div className="chat-empty">Select a chat to start messaging</div>
+          ) : (
+            <>
+              <div
+                className="chat-window-header"
+                style={{ display: "flex", alignItems: "center", gap: "12px" }}
+              >
+                <Link to={`/user${otherParticipant(selected)?._id}`}>
+                  <img
+                    src={resolveAvatar(otherParticipant(selected)?.avatarUrl)}
+                    className="chat-avatar"
+                    alt="av"
+                    style={{
+                      width: "24px",
+                      height: "24px",
+                      borderRadius: "50%",
+                      flexShrink: 0,
+                    }}
+                  />
+                </Link>
+                {otherParticipant(selected)?.username}
+              </div>
+
+              <div className="chat-messages" ref={scrollRef}>
+                {messages.map((m, i) => (
                   <div
-                    key={u._id}
-                    className="chat-search-item"
-                    onClick={() => createConversationWithUser(u)}
+                    key={i}
+                    style={{
+                      display: "flex",
+                      flexDirection:
+                        m.senderId?._id === currentUser?._id
+                          ? "row-reverse"
+                          : "row",
+                      alignItems: "flex-end",
+                      gap: "8px",
+                      marginBottom: "12px",
+                    }}
                   >
                     <img
-                      src={resolveAvatar(u.avatarUrl)}
+                      src={resolveAvatar(m.senderId?.avatarUrl)}
                       className="chat-avatar"
                       alt="av"
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "50%",
+                        flexShrink: 0,
+                      }}
                     />
-                    <div style={{ marginLeft: 8 }}>
-                      <div style={{ fontWeight: 700 }}>{u.username}</div>
-                      <div style={{ fontSize: 12, color: "var(--dm-subtext)" }}>
-                        {u.karma ? `${u.karma} karma` : ""}
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection:
+                          m.senderId?._id === currentUser?._id
+                            ? "row-reverse"
+                            : "row",
+                        alignItems: "center",
+                        gap: "6px",
+                        minWidth: 0,
+                        marginTop: "4px",
+                      }}
+                    >
+                      <div
+                        className={`chat-message ${m.senderId?._id === currentUser?._id ? "sent" : "received"}`}
+                      >
+                        {m.content || m.text}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "11px",
+                          color: "var(--dm-subtext)",
+                          whiteSpace: "nowrap",
+                          marginBottom: "2px",
+                        }}
+                      >
+                        {formatDetailedTime(m.createdAt)}
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-            )}
-          </div>
-        </div>
 
-        <input className="chat-search" placeholder="Search chats" />
-
-        <div className="chat-list">
-          {conversations.map((c) => {
-            const other = otherParticipant(c);
-            const lastMessage = c.lastMessage;
-            const lastMessagePreview = lastMessage
-              ? lastMessage.content || lastMessage.text
-              : "No messages yet";
-            const lastMessageTime = lastMessage
-              ? formatTime(lastMessage.createdAt)
-              : "";
-
-            return (
-              <div
-                key={c._id}
-                className={`chat-list-item ${selected?._id === c._id ? "active" : ""}`}
-                onClick={() => openConversation(c)}
-              >
-                <img
-                  src={resolveAvatar(other?.avatarUrl)}
-                  className="chat-avatar"
-                  alt="av"
-                />
-                <div className="chat-list-text">
-                  <div className="chat-list-name">
-                    {other?.username || "Unknown"}
-                  </div>
-                  <div className="chat-list-last">
-                    <span
-                      style={{
-                        color: "var(--dm-subtext)",
-                        fontSize: "13px",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                        flex: 1,
-                      }}
-                    >
-                      {lastMessagePreview}
-                    </span>
-                    {lastMessageTime && (
-                      <span
-                        style={{
-                          color: "var(--dm-subtext)",
-                          fontSize: "12px",
-                          marginLeft: "8px",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {lastMessageTime}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="chat-window">
-        {!selected ? (
-          <div className="chat-empty">Select a chat to start messaging</div>
-        ) : (
-          <>
-            <div className="chat-window-header" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <img
-                src={resolveAvatar(otherParticipant(selected)?.avatarUrl)}
-                className="chat-avatar"
-                alt="av"
-                style={{ width: "24px", height: "24px", borderRadius: "50%", flexShrink: 0 }}
-              />
-              {otherParticipant(selected)?.username}
-            </div>
-
-            <div className="chat-messages" ref={scrollRef}>
-              {messages.map((m, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: "flex",
-                    flexDirection: m.senderId?._id === currentUser?._id ? "row-reverse" : "row",
-                    alignItems: "flex-end",
-                    gap: "8px",
-                    marginBottom: "12px",
+              <div className="chat-input-bar">
+                <input
+                  id="chat-message-input"
+                  name="message"
+                  className="chat-input"
+                  placeholder="Message"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSend();
                   }}
+                />
+                <button
+                  className="chat-send-btn"
+                  onClick={handleSend}
+                  disabled={!input.trim()}
                 >
-                  <img
-                    src={resolveAvatar(m.senderId?.avatarUrl)}
-                    className="chat-avatar"
-                    alt="av"
-                    style={{ width: "28px", height: "28px", borderRadius: "50%", flexShrink: 0 }}
-                  />
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: m.senderId?._id === currentUser?._id ? "row-reverse" : "row",
-                      alignItems: "center",
-                      gap: "6px",
-                      minWidth: 0,
-                      marginTop: "4px",
-                    }}
-                  >
-                    <div
-                      className={`chat-message ${m.senderId?._id === currentUser?._id ? "sent" : "received"}`}
-                    >
-                      {m.content || m.text}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "11px",
-                        color: "var(--dm-subtext)",
-                        whiteSpace: "nowrap",
-                        marginBottom: "2px",
-                      }}
-                    >
-                      {formatDetailedTime(m.createdAt)}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="chat-input-bar">
-              <input
-                id="chat-message-input"
-                name="message"
-                className="chat-input"
-                placeholder="Message"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSend();
-                }}
-              />
-              <button className="chat-send-btn" onClick={handleSend} disabled={!input.trim()}>
-                <FaPaperPlane />
-              </button>
-            </div>
-          </>
-        )}
-      </div>
+                  <FaPaperPlane />
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
