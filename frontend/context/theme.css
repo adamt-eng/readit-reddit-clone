@@ -3,20 +3,25 @@
 /* Light */
 :root {
   /* backgrounds */
-  --bg-page: #dae0e6;        /* Reddit page gray */
-  --bg-surface: #ffffff;    /* Cards, navbar */
+  --bg-page: #dae0e6;
+  /* Reddit page gray */
+  --bg-surface: #ffffff;
+  /* Cards, navbar */
   --bg-elevated: #ffffff;
 
   /* text */
-  --text-primary: #1a1a1b;   /* Reddit primary text */
+  --text-primary: #1a1a1b;
+  /* Reddit primary text */
   --text-secondary: #787c7e;
   --text-muted: #a4a7a8;
 
   /* borders */
-  --border-default: #edeff1; /* Reddit separators */
+  --border-default: #edeff1;
+  /* Reddit separators */
 
   /* accents */
-  --accent: #ff4500;        /* Reddit Orange */
+  --accent: #ff4500;
+  /* Reddit Orange */
   --accent-hover: #ff5714;
 
   /* states */
@@ -24,7 +29,7 @@
   --downvote: #7193ff;
 
   /* misc */
-  --shadow-sm: 0 1px 2px rgba(0,0,0,.08);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .08);
 
   /* search */
   --search-bg: #f6f7f8;
@@ -56,7 +61,7 @@
   --downvote: #7193ff;
 
   /* misc */
-  --shadow-sm: 0 1px 2px rgba(0,0,0,.6);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .6);
 
   /* search */
   --search-bg: #272729;
